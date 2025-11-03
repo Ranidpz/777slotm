@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>777 Slot Machine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="slot-machine">
+        <div class="reel-container">
+            <div class="reel" id="reel1">
+                <div class="symbol">🍒</div>
+                <div class="symbol">🍋</div>
+                <div class="symbol">🍊</div>
+                <div class="symbol">🍉</div>
+                <div class="symbol">🍇</div>
+                <div class="symbol">⭐</div>
+                <div class="symbol">💎</div>
+                <div class="symbol">7️⃣</div>
+            </div>
+        </div>
+        
+        <div class="reel-container">
+            <div class="reel" id="reel2">
+                <div class="symbol">🍒</div>
+                <div class="symbol">🍋</div>
+                <div class="symbol">🍊</div>
+                <div class="symbol">🍉</div>
+                <div class="symbol">🍇</div>
+                <div class="symbol">⭐</div>
+                <div class="symbol">💎</div>
+                <div class="symbol">7️⃣</div>
+            </div>
+        </div>
+        
+        <div class="reel-container">
+            <div class="reel" id="reel3">
+                <div class="symbol">🍒</div>
+                <div class="symbol">🍋</div>
+                <div class="symbol">🍊</div>
+                <div class="symbol">🍉</div>
+                <div class="symbol">🍇</div>
+                <div class="symbol">⭐</div>
+                <div class="symbol">💎</div>
+                <div class="symbol">7️⃣</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-overlay" class="hidden"></div>
+
+    <div id="settings-screen" class="hidden">
+        <div class="settings-content">
+            <h2>הגדרות</h2>
+            
+            <div class="setting-group">
+                <h3>סוג המשחק</h3>
+                <label>
+                    <input type="radio" name="game-mode" value="automatic" checked>
+                    <span>רגיל (עצירה אוטומטית)</span>
+                </label>
+                <label>
+                    <input type="radio" name="game-mode" value="manual">
+                    <span>ידני (עצור כל גלגל בנפרד)</span>
+                </label>
+            </div>
+
+            <div class="setting-group">
+                <h3>תמונות מותאמות אישית</h3>
+                <div class="image-upload">
+                    <label>
+                        <span>תמונה 1:</span>
+                        <input type="file" id="image1" accept="image/*">
+                    </label>
+                    <label>
+                        <span>תמונה 2:</span>
+                        <input type="file" id="image2" accept="image/*">
+                    </label>
+                    <label>
+                        <span>תמונה 3:</span>
+                        <input type="file" id="image3" accept="image/*">
+                    </label>
+                </div>
+                <button id="reset-images">איפוס לסמלים ברירת מחדל</button>
+            </div>
+
+            <button id="close-settings">סגור</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
