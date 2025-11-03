@@ -13,30 +13,36 @@ body {
     justify-content: center;
     align-items: center;
     font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
 }
 
 #slot-machine {
     display: flex;
-    gap: 20px;
-    width: 100%;
-    height: 100%;
-    padding: 40px;
+    gap: 0;
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
 }
 
 .reel-container {
     flex: 1;
-    height: 90%;
+    height: 100vh;
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    border-radius: 30px;
-    box-shadow: 
-        0 0 40px rgba(0, 0, 0, 0.5),
-        inset 0 0 30px rgba(255, 255, 255, 0.1),
-        0 0 80px rgba(102, 126, 234, 0.3);
+    border-radius: 0;
+    box-shadow: none;
     overflow: hidden;
     position: relative;
-    border: 5px solid #ffd700;
+    border: none;
+    border-right: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.reel-container:last-child {
+    border-right: none;
 }
 
 .reel-container::before {
@@ -45,11 +51,11 @@ body {
     top: 50%;
     left: 0;
     right: 0;
-    height: 35%;
+    height: 33.33%;
     transform: translateY(-50%);
-    background: rgba(255, 215, 0, 0.1);
-    border-top: 4px solid rgba(255, 215, 0, 0.5);
-    border-bottom: 4px solid rgba(255, 215, 0, 0.5);
+    background: rgba(255, 215, 0, 0.05);
+    border-top: 3px solid rgba(255, 215, 0, 0.4);
+    border-bottom: 3px solid rgba(255, 215, 0, 0.4);
     pointer-events: none;
     z-index: 10;
 }
@@ -68,12 +74,29 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 15vmin;
+    font-size: clamp(60px, 12vmin, 200px);
     background: linear-gradient(180deg, #2d3561 0%, #1f2544 100%);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     text-shadow: 
         0 0 20px rgba(255, 215, 0, 0.5),
         0 0 40px rgba(255, 215, 0, 0.3);
+}
+
+/* רספונסיבי למובייל */
+@media (max-width: 768px) {
+    .symbol {
+        font-size: clamp(40px, 15vw, 120px);
+    }
+    
+    .reel-container {
+        border-right: 1px solid rgba(255, 215, 0, 0.3);
+    }
+}
+
+@media (max-width: 480px) {
+    .symbol {
+        font-size: clamp(30px, 18vw, 100px);
+    }
 }
 
 .symbol.custom-image {
@@ -147,7 +170,29 @@ body {
     box-shadow: 0 0 50px rgba(102, 126, 234, 0.5);
     max-width: 600px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     color: white;
+}
+
+/* רספונסיבי להגדרות */
+@media (max-width: 768px) {
+    .settings-content {
+        padding: 30px 20px;
+        max-height: 85vh;
+    }
+    
+    .settings-content h2 {
+        font-size: 2em;
+    }
+    
+    .setting-group h3 {
+        font-size: 1.3em;
+    }
+    
+    .setting-group label {
+        font-size: 1em;
+    }
 }
 
 .settings-content h2 {

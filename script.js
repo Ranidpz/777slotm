@@ -180,23 +180,28 @@ function checkWin() {
     }
 }
 
+// פונקציה להפעלת המכונה
+function triggerSpin() {
+    if (gameState.mode === 'automatic') {
+        startSpin();
+    } else if (gameState.mode === 'manual') {
+        if (!gameState.isSpinning) {
+            startSpin();
+        } else {
+            // עצור את הגלגל הבא
+            if (gameState.currentReel < 3 && !gameState.manualStops[gameState.currentReel]) {
+                stopReel(gameState.currentReel);
+                gameState.currentReel++;
+            }
+        }
+    }
+}
+
 // טיפול במקלדת
 document.addEventListener('keydown', (e) => {
     // Enter - התחל סיבוב
     if (e.key === 'Enter') {
-        if (gameState.mode === 'automatic') {
-            startSpin();
-        } else if (gameState.mode === 'manual') {
-            if (!gameState.isSpinning) {
-                startSpin();
-            } else {
-                // עצור את הגלגל הבא
-                if (gameState.currentReel < 3 && !gameState.manualStops[gameState.currentReel]) {
-                    stopReel(gameState.currentReel);
-                    gameState.currentReel++;
-                }
-            }
-        }
+        triggerSpin();
     }
     
     // ד או S - פתח הגדרות
@@ -211,6 +216,27 @@ document.addEventListener('keydown', (e) => {
         settingsScreen.classList.add('hidden');
     }
 });
+
+// טיפול בלחיצת עכבר ונגיעה במסך
+const slotMachine = document.getElementById('slot-machine');
+
+slotMachine.addEventListener('click', (e) => {
+    // אל תפעיל אם לוחצים על מסך ההגדרות
+    if (!settingsScreen.classList.contains('hidden')) {
+        return;
+    }
+    triggerSpin();
+});
+
+// תמיכה במסך מגע
+slotMachine.addEventListener('touchstart', (e) => {
+    // אל תפעיל אם לוחצים על מסך ההגדרות
+    if (!settingsScreen.classList.contains('hidden')) {
+        return;
+    }
+    e.preventDefault(); // מנע התנהגות ברירת מחדל
+    triggerSpin();
+}, { passive: false });
 
 // הגדרות
 document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
@@ -255,6 +281,6 @@ initSounds();
 initReels();
 
 console.log('🎰 777 Slot Machine Ready!');
-console.log('Press ENTER to spin!');
+console.log('Press ENTER, Click or Touch to spin!');
 console.log('Press ד or S for settings');
 
