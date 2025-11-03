@@ -67,6 +67,16 @@
             </div>
 
             <div class="setting-group">
+                <h3>תדירות זכיות</h3>
+                <p class="setting-description">קבע כל כמה נסיונות תהיה זכייה מובטחת (0 = רנדומלי לגמרי)</p>
+                <div class="slider-container">
+                    <input type="range" id="win-frequency" min="0" max="20" value="3" step="1">
+                    <span id="win-frequency-value">3</span>
+                </div>
+                <p class="setting-note">ערך נוכחי: זכייה כל <span id="win-frequency-text">3</span> נסיונות</p>
+            </div>
+
+            <div class="setting-group">
                 <h3>תמונות מותאמות אישית</h3>
                 <div class="image-upload">
                     <label>

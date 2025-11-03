@@ -38,26 +38,11 @@ body {
     overflow: hidden;
     position: relative;
     border: none;
-    border-right: 2px solid rgba(255, 215, 0, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .reel-container:last-child {
     border-right: none;
-}
-
-.reel-container::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 33.33%;
-    transform: translateY(-50%);
-    background: rgba(255, 215, 0, 0.05);
-    border-top: 3px solid rgba(255, 215, 0, 0.4);
-    border-bottom: 3px solid rgba(255, 215, 0, 0.4);
-    pointer-events: none;
-    z-index: 10;
 }
 
 .reel {
@@ -70,26 +55,23 @@ body {
 }
 
 .symbol {
-    height: 33.33vh;
+    height: 33.333333vh;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: clamp(60px, 12vmin, 200px);
     background: linear-gradient(180deg, #2d3561 0%, #1f2544 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     text-shadow: 
-        0 0 20px rgba(255, 215, 0, 0.5),
-        0 0 40px rgba(255, 215, 0, 0.3);
+        0 0 20px rgba(255, 215, 0, 0.6),
+        0 0 40px rgba(255, 215, 0, 0.4),
+        0 0 60px rgba(255, 215, 0, 0.2);
 }
 
 /* רספונסיבי למובייל */
 @media (max-width: 768px) {
     .symbol {
         font-size: clamp(40px, 15vw, 120px);
-    }
-    
-    .reel-container {
-        border-right: 1px solid rgba(255, 215, 0, 0.3);
     }
 }
 
@@ -108,16 +90,16 @@ body {
 
 /* אנימציית סיבוב */
 @keyframes spin {
-    from {
+    0% {
         transform: translateY(0);
     }
-    to {
-        transform: translateY(-100%);
+    100% {
+        transform: translateY(-266.666666vh);
     }
 }
 
 .reel.spinning {
-    animation: spin 0.1s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
 /* אפקט זכיה */
@@ -219,6 +201,64 @@ body {
     margin-bottom: 10px;
     font-size: 1.2em;
     cursor: pointer;
+}
+
+.setting-description {
+    font-size: 0.95em;
+    color: #ccc;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.setting-note {
+    font-size: 0.9em;
+    color: #ffd700;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.slider-container input[type="range"] {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: #ffd700;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.slider-container input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: #ffd700;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.slider-container span {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ffd700;
+    min-width: 40px;
+    text-align: center;
 }
 
 .setting-group input[type="radio"] {

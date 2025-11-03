@@ -5,7 +5,10 @@ const gameState = {
     customSymbols: [null, null, null],
     defaultSymbols: ['🍒', '🍋', '🍊', '🍉', '🍇', '⭐', '💎', '7️⃣'],
     manualStops: [false, false, false],
-    currentReel: 0
+    currentReel: 0,
+    spinsCount: 0,
+    winFrequency: 3, // זכייה כל כמה נסיונות (0 = רנדומלי לגמרי)
+    lastWinAt: 0
 };
 
 // אלמנטים
@@ -86,9 +89,9 @@ function initReels() {
             ? [gameState.customSymbols[index]] 
             : gameState.defaultSymbols;
         
-        // צור לולאה ארוכה של סמלים
+        // צור לולאה ארוכה של סמלים - 100 סמלים לאנימציה חלקה
         let symbolsHTML = '';
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 100; i++) {
             const symbol = symbols[i % symbols.length];
             if (gameState.customSymbols[index]) {
                 symbolsHTML += `<div class="symbol custom-image" style="background-image: url(${symbol})"></div>`;
@@ -97,6 +100,9 @@ function initReels() {
             }
         }
         reel.innerHTML = symbolsHTML;
+        
+        // הצב את הגליל במרכז
+        reel.style.transform = 'translateY(0)';
     });
 }
 
@@ -107,43 +113,93 @@ function startSpin() {
     gameState.isSpinning = true;
     gameState.manualStops = [false, false, false];
     gameState.currentReel = 0;
+    gameState.spinsCount++;
     
     sounds.spin.play();
+    
+    // קבע אם זה צריך להיות סיבוב זוכה
+    const shouldWin = determineWin();
     
     // התחל סיבוב כל הגלילים
     reels.forEach(reel => {
         reel.classList.add('spinning');
+        reel.style.transition = 'none';
         reel.style.transform = 'translateY(0)';
     });
     
     if (gameState.mode === 'automatic') {
         // במצב אוטומטי - עצור את הגלילים אחד אחד
-        setTimeout(() => stopReel(0), 3000);
-        setTimeout(() => stopReel(1), 4000);
-        setTimeout(() => stopReel(2), 5000);
+        setTimeout(() => stopReel(0, shouldWin), 3000);
+        setTimeout(() => stopReel(1, shouldWin), 4000);
+        setTimeout(() => stopReel(2, shouldWin), 5000);
     }
 }
 
+// קבע אם זה צריך להיות סיבוב זוכה
+function determineWin() {
+    if (gameState.winFrequency === 0) {
+        // רנדומלי לגמרי
+        return Math.random() < 0.1; // 10% סיכוי לזכייה
+    }
+    
+    // בדוק אם הגיע הזמן לזכייה מובטחת
+    const spinsSinceLastWin = gameState.spinsCount - gameState.lastWinAt;
+    if (spinsSinceLastWin >= gameState.winFrequency) {
+        return true;
+    }
+    
+    // יש גם סיכוי רנדומלי קטן לזכות לפני זה
+    return Math.random() < 0.05; // 5% סיכוי
+}
+
 // עצור גלגל ספציפי
-function stopReel(reelIndex) {
+function stopReel(reelIndex, shouldWin = false) {
     const reel = reels[reelIndex];
     reel.classList.remove('spinning');
     
-    // בחר עמדה אקראית
-    const symbolHeight = reel.querySelector('.symbol').offsetHeight;
-    const totalSymbols = reel.querySelectorAll('.symbol').length;
-    const randomIndex = Math.floor(Math.random() * 8); // 8 סמלים שונים
-    const centerOffset = symbolHeight * 1.5; // מרכז את הסמבול
-    const position = -(randomIndex * symbolHeight) + centerOffset;
+    const symbolHeight = window.innerHeight / 3; // גובה מדויק של סמל אחד
+    let targetSymbolIndex;
     
-    reel.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    if (shouldWin) {
+        // אם צריך לזכות - בחר סמל משותף
+        if (reelIndex === 0) {
+            // הגלגל הראשון קובע את הסמל הזוכה
+            gameState.winningSymbol = Math.floor(Math.random() * 8);
+            targetSymbolIndex = gameState.winningSymbol;
+        } else {
+            // שאר הגלילים יתאימו
+            targetSymbolIndex = gameState.winningSymbol;
+        }
+    } else {
+        // בחר סמל אקראי
+        targetSymbolIndex = Math.floor(Math.random() * 8);
+        
+        // אם זה לא גלגל ראשון, ודא שזה לא יהיה אותו סמל (למנוע זכיות לא מתוכננות)
+        if (reelIndex > 0 && gameState.firstSymbol !== undefined) {
+            while (targetSymbolIndex === gameState.firstSymbol && Math.random() > 0.1) {
+                targetSymbolIndex = Math.floor(Math.random() * 8);
+            }
+        }
+    }
+    
+    // שמור את הסמל הראשון
+    if (reelIndex === 0) {
+        gameState.firstSymbol = targetSymbolIndex;
+    }
+    
+    // חשב את המיקום המדויק כך שהסמל יהיה ממורכז במסך
+    // נעצור בסמל שנמצא בטווח 10-20 כדי לוודא שיש מספיק סמלים מסביב
+    const basePosition = 10 + targetSymbolIndex;
+    const position = -(basePosition * symbolHeight) + symbolHeight; // +symbolHeight כדי למרכז
+    
+    reel.style.transition = 'transform 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.98)';
     reel.style.transform = `translateY(${position}px)`;
     
     gameState.manualStops[reelIndex] = true;
     
     // בדוק אם כל הגלילים נעצרו
     if (gameState.manualStops.every(stopped => stopped)) {
-        setTimeout(() => checkWin(), 500);
+        setTimeout(() => checkWin(), 600);
     }
 }
 
@@ -151,14 +207,16 @@ function stopReel(reelIndex) {
 function checkWin() {
     gameState.isSpinning = false;
     
-    // קבל את הסמלים המוצגים
+    const symbolHeight = window.innerHeight / 3;
+    
+    // קבל את הסמלים המרכזיים המוצגים
     const displayedSymbols = reels.map(reel => {
         const transform = reel.style.transform;
         const translateY = parseFloat(transform.match(/-?\d+\.?\d*/)?.[0] || 0);
-        const symbolHeight = reel.querySelector('.symbol').offsetHeight;
-        const index = Math.round(Math.abs(translateY - symbolHeight * 1.5) / symbolHeight);
-        return reel.querySelectorAll('.symbol')[index]?.textContent || 
-               reel.querySelectorAll('.symbol')[index]?.style.backgroundImage;
+        // חשב איזה סמל נמצא במרכז המסך
+        const centerIndex = Math.round((Math.abs(translateY) - symbolHeight) / symbolHeight);
+        const symbolElement = reel.querySelectorAll('.symbol')[centerIndex];
+        return symbolElement?.textContent || symbolElement?.style.backgroundImage;
     });
     
     // בדוק אם כל הסמלים זהים
@@ -167,6 +225,7 @@ function checkWin() {
                   displayedSymbols[1] === displayedSymbols[2];
     
     if (isWin) {
+        gameState.lastWinAt = gameState.spinsCount;
         sounds.win.play();
         winOverlay.classList.remove('hidden');
         winOverlay.classList.add('flashing');
@@ -178,6 +237,10 @@ function checkWin() {
     } else {
         sounds.lose.play();
     }
+    
+    // נקה את הסמל הראשון
+    delete gameState.firstSymbol;
+    delete gameState.winningSymbol;
 }
 
 // פונקציה להפעלת המכונה
@@ -186,11 +249,27 @@ function triggerSpin() {
         startSpin();
     } else if (gameState.mode === 'manual') {
         if (!gameState.isSpinning) {
-            startSpin();
+            // התחל סיבוב ידני
+            gameState.isSpinning = true;
+            gameState.manualStops = [false, false, false];
+            gameState.currentReel = 0;
+            gameState.spinsCount++;
+            
+            sounds.spin.play();
+            
+            // קבע אם זה צריך להיות סיבוב זוכה
+            gameState.shouldWinManual = determineWin();
+            
+            // התחל סיבוב כל הגלילים
+            reels.forEach(reel => {
+                reel.classList.add('spinning');
+                reel.style.transition = 'none';
+                reel.style.transform = 'translateY(0)';
+            });
         } else {
             // עצור את הגלגל הבא
             if (gameState.currentReel < 3 && !gameState.manualStops[gameState.currentReel]) {
-                stopReel(gameState.currentReel);
+                stopReel(gameState.currentReel, gameState.shouldWinManual);
                 gameState.currentReel++;
             }
         }
@@ -243,6 +322,25 @@ document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         gameState.mode = e.target.value;
     });
+});
+
+// סליידר תדירות זכיות
+const winFrequencySlider = document.getElementById('win-frequency');
+const winFrequencyValue = document.getElementById('win-frequency-value');
+const winFrequencyText = document.getElementById('win-frequency-text');
+
+winFrequencySlider.addEventListener('input', (e) => {
+    const value = parseInt(e.target.value);
+    gameState.winFrequency = value;
+    winFrequencyValue.textContent = value;
+    
+    if (value === 0) {
+        winFrequencyText.textContent = 'רנדומלי לגמרי';
+        document.querySelector('.setting-note').textContent = 'ערך נוכחי: רנדומלי לגמרי (ללא זכיות מובטחות)';
+    } else {
+        winFrequencyText.textContent = value;
+        document.querySelector('.setting-note').textContent = `ערך נוכחי: זכייה כל ${value} נסיונות`;
+    }
 });
 
 document.getElementById('close-settings').addEventListener('click', () => {
