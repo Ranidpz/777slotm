@@ -1016,3 +1016,65 @@ button:active {
     transform: scale(1.1);
 }
 
+/* Color Picker Styles */
+.color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.color-picker-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+#color-preview {
+    width: 60px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.color-picker-label:hover #color-preview {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.color-picker-label span {
+    color: #fff;
+    font-family: 'Assistant', sans-serif;
+    font-size: 0.9em;
+}
+
+#background-color-input {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: #fff;
+    font-family: 'Assistant', sans-serif;
+    width: 100px;
+}
+
+#reset-background-color {
+    padding: 8px 15px;
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid #ffd700;
+    border-radius: 5px;
+    color: #ffd700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Assistant', sans-serif;
+}
+
+#reset-background-color:hover {
+    background: rgba(255, 215, 0, 0.3);
+    transform: scale(1.05);
+}
+

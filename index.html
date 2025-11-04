@@ -112,12 +112,15 @@
             </div>
 
             <div class="setting-group">
-                <h3>צבע רקע</h3>
-                <p class="setting-description">בחר צבע רקע למשחק או הזן קוד צבע</p>
+                <h3>צבע רקע התאים</h3>
+                <p class="setting-description">בחר צבע רקע לתאי המשחק</p>
                 <div class="color-picker-container">
-                    <div class="color-preview" id="color-preview"></div>
-                    <input type="color" id="background-color-picker" value="#667eea">
-                    <input type="text" id="background-color-input" placeholder="#667eea" maxlength="7">
+                    <label for="background-color-picker" class="color-picker-label">
+                        <div class="color-preview" id="color-preview"></div>
+                        <span>לחץ לבחירת צבע</span>
+                    </label>
+                    <input type="color" id="background-color-picker" value="#1a1a2e" hidden>
+                    <input type="text" id="background-color-input" placeholder="#1a1a2e" maxlength="7">
                     <button id="reset-background-color" class="small-btn">איפוס</button>
                 </div>
             </div>

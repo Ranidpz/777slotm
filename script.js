@@ -719,16 +719,21 @@ function loadBackgroundColor() {
     }
 }
 
-// החל צבע רקע על המסך
+// החל צבע רקע על התאים
 function applyBackgroundColor(color) {
     // יצירת גרדיאנט מהצבע שנבחר
-    const lightenedColor = lightenColor(color, 20);
-    document.body.style.background = `linear-gradient(135deg, ${color} 0%, ${lightenedColor} 100%)`;
-    
+    const darkenedColor = darkenColor(color, 20);
+
+    // החל על כל התאים (reel-container)
+    const reelContainers = document.querySelectorAll('.reel-container');
+    reelContainers.forEach(container => {
+        container.style.background = `linear-gradient(180deg, ${color} 0%, ${darkenedColor} 100%)`;
+    });
+
     // עדכן את ה-preview
     const colorPreview = document.getElementById('color-preview');
     if (colorPreview) {
-        colorPreview.style.background = `linear-gradient(135deg, ${color} 0%, ${lightenedColor} 100%)`;
+        colorPreview.style.background = `linear-gradient(180deg, ${color} 0%, ${darkenedColor} 100%)`;
     }
 }
 
@@ -748,7 +753,19 @@ function lightenColor(color, percent) {
     const r = Math.min(255, ((num >> 16) + Math.round(255 * (percent / 100))));
     const g = Math.min(255, (((num >> 8) & 0x00FF) + Math.round(255 * (percent / 100))));
     const b = Math.min(255, ((num & 0x0000FF) + Math.round(255 * (percent / 100))));
-    
+
+    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+}
+
+// פונקציה להכהות צבע
+function darkenColor(color, percent) {
+    // המר צבע hex ל-RGB
+    const num = parseInt(color.replace("#", ""), 16);
+    const factor = 1 - (percent / 100);
+    const r = Math.max(0, Math.round((num >> 16) * factor));
+    const g = Math.max(0, Math.round(((num >> 8) & 0x00FF) * factor));
+    const b = Math.max(0, Math.round((num & 0x0000FF) * factor));
+
     return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
 }
 
