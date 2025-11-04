@@ -8,10 +8,8 @@ const gameState = {
     currentReel: 0,
     spinsCount: 0,
     winFrequency: 3, // זכייה כל כמה נסיונות (0 = רנדומלי לגמרי)
-    lastWinAt: 0,
     totalSymbols: 9, // מספר כולל של סמלים במשחק
-    winCycleIndex: 0, // מיקום במחזור הזכיות (0, 1, 2)
-    winsCount: 0 // כמה זכיות היו עד עכשיו
+    spinsSinceLastWin: 0 // כמה סיבובים עברו מהזכייה האחרונה
 };
 
 // אלמנטים
@@ -194,24 +192,23 @@ function startSpin() {
 
 // קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם פשוט ומובטח
 function determineWin() {
+    // עדכן את הספירה מהזכייה האחרונה
+    gameState.spinsSinceLastWin++;
+
     if (gameState.winFrequency === 0) {
         // רנדומלי לגמרי
         return Math.random() < 0.1; // 10% סיכוי לזכייה
     }
 
-    // אם זה 1, כל סיבוב מנצח
-    if (gameState.winFrequency === 1) {
-        console.log(`🎯 זכייה מובטחת - תדירות מוגדרת ל-1!`);
-        return true;
-    }
+    // בדיקה פשוטה: האם הגענו למספר הסיבובים הנדרש?
+    const shouldWin = gameState.spinsSinceLastWin >= gameState.winFrequency;
 
-    // חישוב פשוט: כל X סיבובים בדיוק - זכייה
-    // שימוש במודולו אבל בדיקה של היתרה שנשארת
-    const shouldWin = (gameState.spinsCount % gameState.winFrequency) === 0;
+    console.log(`🎰 סיבוב מספר ${gameState.spinsCount}`);
+    console.log(`📊 ${gameState.spinsSinceLastWin} סיבובים מהזכייה האחרונה`);
+    console.log(`🎯 זכייה כל ${gameState.winFrequency} סיבובים`);
+    console.log(`${shouldWin ? '✅ זכייה!' : '⏳ עוד ' + (gameState.winFrequency - gameState.spinsSinceLastWin) + ' סיבובים לזכייה'}`);
 
-    console.log(`🎰 נסיון ${gameState.spinsCount}, תדירות: כל ${gameState.winFrequency} נסיונות`);
-    console.log(`${shouldWin ? '🎯 זכייה!' : '⏳ לא זכייה'} (מודולו: ${gameState.spinsCount % gameState.winFrequency})`);
-
+    // אם זוכים, נאפס את הספירה (יקרה ב-checkWin)
     return shouldWin;
 }
 
@@ -325,25 +322,23 @@ function checkWin() {
                   displayedSymbols[1] === displayedSymbols[2];
     
     if (isWin) {
-        gameState.lastWinAt = gameState.spinsCount;
-        gameState.winsCount++;
-        
-        // עדכן את המחזור - 0→1→2→0
-        gameState.winCycleIndex = (gameState.winCycleIndex + 1) % 3;
-        
-        console.log(`🎉 ניצחון מספר ${gameState.winsCount}! המחזור הבא: ${gameState.winCycleIndex + 1}/3`);
-        console.log('הסמל הזוכה:', displayedSymbols[0].substring(0, 50) + '...');
-        
+        // אפס את הספירה מהזכייה האחרונה
+        gameState.spinsSinceLastWin = 0;
+
+        console.log(`🎉 ניצחון! הסמל הזוכה: ${displayedSymbols[0]}`);
+        console.log('🔄 אופסה ספירת הסיבובים לזכייה הבאה');
+
         sounds.win.play();
         winOverlay.classList.remove('hidden');
         winOverlay.classList.add('flashing');
-        
+
         setTimeout(() => {
             winOverlay.classList.remove('flashing');
             winOverlay.classList.add('hidden');
         }, 1500);
     } else {
         sounds.lose.play();
+        console.log(`❌ לא זכייה. ${gameState.spinsSinceLastWin} סיבובים מהזכייה האחרונה`);
     }
     
     // נקה את הסמל הראשון
