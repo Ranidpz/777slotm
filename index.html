@@ -54,6 +54,9 @@
 
     <div id="win-overlay" class="hidden"></div>
 
+    <!-- Settings Button -->
+    <button id="settings-button" class="settings-btn" title="הגדרות">⚙️</button>
+
     <div id="settings-screen" class="hidden">
         <div class="settings-content">
             <h2>הגדרות</h2>
@@ -68,6 +71,15 @@
                     <input type="radio" name="game-mode" value="manual">
                     <span>ידני (עצור כל גלגל בנפרד)</span>
                 </label>
+            </div>
+
+            <div class="setting-group">
+                <h3>צלילים</h3>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="sound-enabled" checked>
+                    <span>הפעל צלילים במשחק</span>
+                </label>
+                <p class="setting-description">צלילי סיבוב, זכייה והפסד</p>
             </div>
 
             <div class="setting-group">
@@ -168,18 +180,19 @@
             <div class="tutorial-section">
                 <h3>איך לשחק?</h3>
                 <ul>
-                    <li>🖱️ <strong>לחצו על המסך</strong> להתחלת ההגרלה</li>
+                    <li>🖱️ <strong>געו במסך עם היד או עם העכבר</strong> כדי לסובב את הגלגל</li>
+                    <li>🎰 <strong>לחצו על הבאזר</strong> לסובב את הגלגל</li>
                     <li>⌨️ <strong>לחצו Enter</strong> גם כן להתחלת ההגרלה</li>
-                    <li>📱 <strong>געו במסך</strong> במכשירים ניידים</li>
                 </ul>
             </div>
             <div class="tutorial-section">
                 <h3>הגדרות</h3>
                 <ul>
-                    <li>⚙️ <strong>לחצו על מקש S או ד</strong> לפתיחת ההגדרות</li>
+                    <li>⚙️ <strong>להגדרות לחצו על האות S במקלדת</strong> או על כפתור ההגדרות שבצד הבאזר</li>
                     <li>🎯 <strong>תדירות זכיות</strong> - קבעו כל כמה סיבובים תזכו</li>
                     <li>🖼️ <strong>תמונות מותאמות</strong> - העלו תמונות משלכם</li>
                     <li>🎮 <strong>מצב משחק</strong> - אוטומטי או ידני</li>
+                    <li>🔊 <strong>צלילים</strong> - הפעילו או כבו צלילים</li>
                 </ul>
             </div>
             <button id="tutorial-close">בואו נתחיל!</button>

@@ -9,7 +9,8 @@ const gameState = {
     spinsCount: 0,
     winFrequency: 3, // זכייה כל כמה נסיונות (0 = רנדומלי לגמרי)
     totalSymbols: 9, // מספר כולל של סמלים במשחק
-    spinsSinceLastWin: 0 // כמה סיבובים עברו מהזכייה האחרונה
+    spinsSinceLastWin: 0, // כמה סיבובים עברו מהזכייה האחרונה
+    soundEnabled: true // האם צלילים מופעלים
 };
 
 // אלמנטים
@@ -30,10 +31,46 @@ const sounds = {
 
 // יצירת אובייקטי אודיו
 function initSounds() {
-    // נוצור צלילים סינתטיים עד שהמשתמש יעלה קבצי סאונד
-    sounds.spin = createSyntheticSound('spin');
-    sounds.win = createSyntheticSound('win');
-    sounds.lose = createSyntheticSound('lose');
+    // נטען את קבצי הסאונד האמיתיים
+    try {
+        sounds.spin = new Audio('sounds/prize-wheel.mp3');
+        sounds.win = new Audio('sounds/Win.mp3');
+        sounds.lose = new Audio('sounds/Buzzer1.mp3');
+
+        // הגדרת ווליום
+        sounds.spin.volume = 0.5;
+        sounds.win.volume = 0.7;
+        sounds.lose.volume = 0.5;
+    } catch (e) {
+        console.log('⚠️ לא ניתן לטעון קבצי סאונד, משתמש בצלילים סינתטיים');
+        // אם הטעינה נכשלה, נשתמש בצלילים סינתטיים
+        sounds.spin = createSyntheticSound('spin');
+        sounds.win = createSyntheticSound('win');
+        sounds.lose = createSyntheticSound('lose');
+    }
+}
+
+// פונקציה להפעלת צליל בבטחה
+function playSound(soundName) {
+    if (!gameState.soundEnabled) return;
+
+    try {
+        const sound = sounds[soundName];
+        if (sound && sound.play) {
+            // אם זה אובייקט Audio רגיל
+            if (sound instanceof Audio) {
+                sound.currentTime = 0; // אתחל מההתחלה
+                sound.play().catch(e => {
+                    console.log(`לא ניתן להפעיל צליל ${soundName}:`, e);
+                });
+            } else {
+                // צליל סינתטי
+                sound.play();
+            }
+        }
+    } catch (e) {
+        console.log(`שגיאה בהפעלת צליל ${soundName}:`, e);
+    }
 }
 
 // יצירת צליל סינתטי
@@ -154,7 +191,7 @@ function startSpin() {
     gameState.currentReel = 0;
     gameState.spinsCount++;
     
-    sounds.spin.play();
+    playSound('spin');
     
     // קבע אם זה צריך להיות סיבוב זוכה
     const shouldWin = determineWin();
@@ -340,7 +377,7 @@ function checkWin() {
         console.log(`🎉 ניצחון! כל 3 הסמלים זהים: ${displayedSymbols[0]}`);
         console.log('🔄 אופסה ספירת הסיבובים לזכייה הבאה');
 
-        sounds.win.play();
+        playSound('win');
         winOverlay.classList.remove('hidden');
         winOverlay.classList.add('flashing');
 
@@ -349,7 +386,7 @@ function checkWin() {
             winOverlay.classList.add('hidden');
         }, 1500);
     } else {
-        sounds.lose.play();
+        playSound('lose');
         console.log(`❌ לא זכייה. הסמלים: [${displayedSymbols[0]}] [${displayedSymbols[1]}] [${displayedSymbols[2]}]`);
         console.log(`📊 ${gameState.spinsSinceLastWin} סיבובים מהזכייה האחרונה`);
     }
@@ -371,7 +408,7 @@ function triggerSpin() {
             gameState.currentReel = 0;
             gameState.spinsCount++;
             
-            sounds.spin.play();
+            playSound('spin');
             
             // קבע אם זה צריך להיות סיבוב זוכה
             gameState.shouldWinManual = determineWin();
@@ -478,6 +515,33 @@ winFrequencySlider.addEventListener('input', (e) => {
 document.getElementById('close-settings').addEventListener('click', () => {
     settingsScreen.classList.add('hidden');
 });
+
+// כפתור הגדרות חדש
+const settingsButton = document.getElementById('settings-button');
+if (settingsButton) {
+    settingsButton.addEventListener('click', () => {
+        if (!gameState.isSpinning) {
+            settingsScreen.classList.remove('hidden');
+        }
+    });
+}
+
+// טיפול בהפעלת/כיבוי צלילים
+const soundCheckbox = document.getElementById('sound-enabled');
+if (soundCheckbox) {
+    // טען את ההגדרה השמורה
+    const savedSoundSetting = localStorage.getItem('soundEnabled');
+    if (savedSoundSetting !== null) {
+        gameState.soundEnabled = savedSoundSetting === 'true';
+        soundCheckbox.checked = gameState.soundEnabled;
+    }
+
+    soundCheckbox.addEventListener('change', (e) => {
+        gameState.soundEnabled = e.target.checked;
+        localStorage.setItem('soundEnabled', gameState.soundEnabled);
+        console.log('🔊 צלילים:', gameState.soundEnabled ? 'מופעלים' : 'כבויים');
+    });
+}
 
 // העלאת תמונות עם תצוגה מקדימה
 function handleImageUpload(fileInput, index) {
