@@ -293,17 +293,26 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
 // בדוק זכיה
 function checkWin() {
     gameState.isSpinning = false;
-    
+
     const symbolHeight = window.innerHeight / 3;
-    
-    // קבל את הסמלים המרכזיים המוצגים
-    const displayedSymbols = reels.map(reel => {
+
+    // קבל את הסמלים המרכזיים המוצגים - שורה אמצעית בלבד
+    const displayedSymbols = reels.map((reel, index) => {
         const transform = reel.style.transform;
         const translateY = parseFloat(transform.match(/-?\d+\.?\d*/)?.[0] || 0);
+
         // חשב איזה סמל נמצא במרכז המסך
-        const centerIndex = Math.round((Math.abs(translateY) - symbolHeight) / symbolHeight);
-        const symbolElement = reel.querySelectorAll('.symbol')[centerIndex];
-        
+        // המיקום הנוכחי חלקי גובה הסמל, ועוד 1 כי הסמל המרכזי נמצא במיקום השני
+        const offset = Math.abs(translateY) / symbolHeight;
+        const centerIndex = Math.round(offset) + 1;
+
+        // קבל את כל הסמלים בגליל
+        const allSymbols = reel.querySelectorAll('.symbol');
+        const symbolElement = allSymbols[centerIndex];
+
+        // Debug - הצג מה נמצא בכל מיקום
+        console.log(`גליל ${index + 1}: translateY=${translateY}, offset=${offset}, centerIndex=${centerIndex}`);
+
         // בדוק אם זה סמל תמונה או טקסט
         if (symbolElement?.classList.contains('custom-image')) {
             // תמונה - החזר את ה-URL מה-background-image
@@ -316,16 +325,19 @@ function checkWin() {
         }
     });
     
+    // הצג את הסמלים שנבדקים
+    console.log('🎰 סמלים במרכז:', displayedSymbols);
+
     // בדוק אם כל הסמלים זהים
-    const isWin = displayedSymbols[0] && 
-                  displayedSymbols[0] === displayedSymbols[1] && 
+    const isWin = displayedSymbols[0] &&
+                  displayedSymbols[0] === displayedSymbols[1] &&
                   displayedSymbols[1] === displayedSymbols[2];
-    
+
     if (isWin) {
         // אפס את הספירה מהזכייה האחרונה
         gameState.spinsSinceLastWin = 0;
 
-        console.log(`🎉 ניצחון! הסמל הזוכה: ${displayedSymbols[0]}`);
+        console.log(`🎉 ניצחון! כל 3 הסמלים זהים: ${displayedSymbols[0]}`);
         console.log('🔄 אופסה ספירת הסיבובים לזכייה הבאה');
 
         sounds.win.play();
@@ -338,7 +350,8 @@ function checkWin() {
         }, 1500);
     } else {
         sounds.lose.play();
-        console.log(`❌ לא זכייה. ${gameState.spinsSinceLastWin} סיבובים מהזכייה האחרונה`);
+        console.log(`❌ לא זכייה. הסמלים: [${displayedSymbols[0]}] [${displayedSymbols[1]}] [${displayedSymbols[2]}]`);
+        console.log(`📊 ${gameState.spinsSinceLastWin} סיבובים מהזכייה האחרונה`);
     }
     
     // נקה את הסמל הראשון
