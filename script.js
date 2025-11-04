@@ -181,26 +181,23 @@ function initReels() {
         allSymbols = [...gameState.defaultSymbols];
     }
     
-    reels.forEach((reel) => {
-        // צור לולאה ארוכה של סמלים - 100 סמלים לאנימציה חלקה
-        // כל גליל יקבל ערבוב רנדומלי של הסמלים
+    // צור מערך בסיסי של סמלים שיהיה זהה לכל הגלילים
+    const baseSymbols = [];
+    for (let i = 0; i < 100; i++) {
+        const symbolIndex = i % allSymbols.length;
+        baseSymbols.push(allSymbols[symbolIndex]);
+    }
+    
+    reels.forEach((reel, reelIndex) => {
         let symbolsHTML = '';
         
-        // צור מערך מעורבב של סמלים לכל גליל
-        const shuffledSymbols = [];
-        for (let i = 0; i < 100; i++) {
-            // הוסף סמלים בסדר אקראי
-            if (i < allSymbols.length) {
-                shuffledSymbols.push(allSymbols[i]);
-            } else {
-                // אחרי הסיבוב הראשון, ערבב רנדומלית
-                const randomIndex = Math.floor(Math.random() * allSymbols.length);
-                shuffledSymbols.push(allSymbols[randomIndex]);
-            }
-        }
+        // כל גליל מתחיל מהיסט שונה כדי שייראה אחרת, אבל הסדר זהה
+        const offset = reelIndex * 2; // כל גליל מוסט ב-2 סמלים
         
-        // בנה את ה-HTML
-        shuffledSymbols.forEach(symbol => {
+        for (let i = 0; i < 100; i++) {
+            const symbolIndex = (i + offset) % baseSymbols.length;
+            const symbol = baseSymbols[symbolIndex];
+            
             // בדוק אם זה URL של תמונה (מתחיל ב-data: או http)
             const isImage = typeof symbol === 'string' && (symbol.startsWith('data:') || symbol.startsWith('http'));
             
@@ -209,7 +206,7 @@ function initReels() {
             } else {
                 symbolsHTML += `<div class="symbol">${symbol}</div>`;
             }
-        });
+        }
         
         reel.innerHTML = symbolsHTML;
         
@@ -266,20 +263,33 @@ function startSpin() {
     }
 }
 
-// קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם פשוט מאוד
+// קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם משופר
 function determineWin() {
     if (gameState.winFrequency === 0) {
         // רנדומלי לגמרי
-        return Math.random() < 0.15; // 15% סיכוי לזכייה
+        const randomWin = Math.random() < 0.2; // 20% סיכוי לזכייה
+        console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב רנדומלי)`);
+        console.log(`${randomWin ? '✅ זכייה רנדומלית!' : '⏳ סיבוב רגיל'}`);
+        return randomWin;
     }
 
-    // אלגוריתם פשוט: זכייה בכל סיבוב X-י
-    // אם winFrequency = 3, אז זכייה בסיבוב 3, 6, 9, 12...
-    const shouldWin = (gameState.spinsCount % gameState.winFrequency) === 0;
+    // זכייה מובטחת כל X סיבובים
+    const guaranteedWin = (gameState.spinsCount % gameState.winFrequency) === 0;
+    
+    // בנוסף, תמיד יש סיכוי רנדומלי קטן לזכות (10%)
+    const randomBonus = Math.random() < 0.1;
+    
+    const shouldWin = guaranteedWin || randomBonus;
 
     console.log(`🎰 סיבוב מספר: ${gameState.spinsCount}`);
     console.log(`📊 תדירות זכייה: כל ${gameState.winFrequency} סיבובים`);
-    console.log(`${shouldWin ? '✅ זכייה מובטחת!' : `⏳ סיבוב רגיל`}`);
+    if (guaranteedWin) {
+        console.log('✅ זכייה מובטחת לפי תדירות!');
+    } else if (randomBonus) {
+        console.log('🎲 זכייה בונוס רנדומלית!');
+    } else {
+        console.log('⏳ סיבוב רגיל');
+    }
 
     return shouldWin;
 }
@@ -290,24 +300,38 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
     const symbolHeight = window.innerHeight / 3;
     const numSymbols = gameState.totalSymbols || 9;
     
-    // קבע את הסמל היעד
+    // קבע את הסמל היעד - זה האינדקס בתוך מערך הסמלים (0-8)
     let targetSymbolIndex;
+    
     if (shouldWin) {
+        // במצב זכייה - כל הגלילים צריכים לעצור על אותו סמל
         if (reelIndex === 0) {
+            // הגליל הראשון בוחר סמל רנדומלי
             gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
             targetSymbolIndex = gameState.winningSymbol;
+            console.log(`🎯 גליל 1 נבחר לעצור על סמל מספר: ${targetSymbolIndex}`);
         } else {
+            // שאר הגלילים עוצרים על אותו סמל
             targetSymbolIndex = gameState.winningSymbol;
+            console.log(`🎯 גליל ${reelIndex + 1} יעצור על סמל מספר: ${targetSymbolIndex}`);
         }
     } else {
+        // במצב רגיל - נסה למנוע זכייה מקרית
         targetSymbolIndex = Math.floor(Math.random() * numSymbols);
+        
+        // אם זה לא הגליל הראשון, נסה למנוע התאמה (90% מהזמן)
         if (reelIndex > 0 && gameState.firstSymbol !== undefined) {
-            while (targetSymbolIndex === gameState.firstSymbol && Math.random() > 0.1) {
+            let attempts = 0;
+            while (targetSymbolIndex === gameState.firstSymbol && attempts < 10 && Math.random() > 0.1) {
                 targetSymbolIndex = Math.floor(Math.random() * numSymbols);
+                attempts++;
             }
         }
+        
+        console.log(`⏳ גליל ${reelIndex + 1} יעצור על סמל מספר: ${targetSymbolIndex}`);
     }
     
+    // שמור את הסמל הראשון לצורך מניעת זכיות מקריות
     if (reelIndex === 0) {
         gameState.firstSymbol = targetSymbolIndex;
     }
@@ -320,13 +344,34 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
     const matrix = new DOMMatrix(currentTransform);
     const currentY = matrix.m42 || 0;
     
-    // חשב את המיקום היעד - בחר סמל באמצע מערך הסמלים
-    const basePosition = 20; // סמל מספר 20 מתוך 100
-    const finalSymbolPosition = basePosition + targetSymbolIndex;
+    // חשב את המיקום היעד - תוך התחשבות בהיסט של הגליל
+    const reelOffset = reelIndex * 2; // כל גליל מתחיל עם היסט של 2 סמלים
+    const basePosition = 30; // מיקום בסיסי באמצע מערך הסמלים (מתוך 100)
+    
+    // כל גליל נוצר כך: symbol[i] = allSymbols[(i + reelOffset) % numSymbols]
+    // אז כדי למצוא את המיקום שבו נמצא targetSymbolIndex:
+    // (i + reelOffset) % numSymbols = targetSymbolIndex
+    // i = (targetSymbolIndex - reelOffset + numSymbols) % numSymbols + k*numSymbols
+    
+    // נמצא את המופע הקרוב ביותר ל-basePosition
+    const targetPosition = (targetSymbolIndex - reelOffset + numSymbols) % numSymbols;
+    
+    // מצא את המופע של הסמל הזה שהכי קרוב ל-basePosition
+    const cycleNumber = Math.floor(basePosition / numSymbols);
+    let symbolPosition = cycleNumber * numSymbols + targetPosition;
+    
+    // אם זה מחוץ לטווח, קח את המחזור הקודם או הבא
+    if (symbolPosition < 0) {
+        symbolPosition += numSymbols;
+    } else if (symbolPosition >= 100) {
+        symbolPosition -= numSymbols;
+    }
+    
+    console.log(`📍 גליל ${reelIndex + 1}: targetSymbol=${targetSymbolIndex}, offset=${reelOffset}, targetPos=${targetPosition}, finalPos=${symbolPosition}`);
     
     // המיקום הסופי כדי שהסמל יהיה ממורכז במסך
     // צריך שהסמל יהיה בגובה של שליש אחד מהמסך (במרכז)
-    const finalY = -(finalSymbolPosition * symbolHeight) + symbolHeight;
+    const finalY = -(symbolPosition * symbolHeight) + symbolHeight;
     
     // כמה עוד לסובב - 2-3 סיבובים מלאים
     const extraSpins = Math.floor(Math.random() * 2 + 2);
