@@ -2,13 +2,16 @@
 const gameState = {
     mode: 'automatic', // automatic או manual
     isSpinning: false,
-    customSymbols: [null, null, null],
-    defaultSymbols: ['🍒', '🍋', '🍊', '🍉', '🍇', '⭐', '💎', '7️⃣'],
+    customSymbols: [null, null, null, null, null, null, null, null, null], // 9 תמונות
+    defaultSymbols: ['🍒', '🍋', '🍊', '🍉', '🍇', '⭐', '💎', '7️⃣', '🎰'],
     manualStops: [false, false, false],
     currentReel: 0,
     spinsCount: 0,
     winFrequency: 3, // זכייה כל כמה נסיונות (0 = רנדומלי לגמרי)
-    lastWinAt: 0
+    lastWinAt: 0,
+    totalSymbols: 9, // מספר כולל של סמלים במשחק
+    winCycleIndex: 0, // מיקום במחזור הזכיות (0, 1, 2)
+    winsCount: 0 // כמה זכיות היו עד עכשיו
 };
 
 // אלמנטים
@@ -84,26 +87,64 @@ function createSyntheticSound(type) {
 
 // אתחול הגלילים
 function initReels() {
-    reels.forEach((reel, index) => {
-        const symbols = gameState.customSymbols[index] 
-            ? [gameState.customSymbols[index]] 
-            : gameState.defaultSymbols;
+    // איסוף כל התמונות המותאמות
+    const uploadedImages = gameState.customSymbols.filter(img => img !== null);
+    
+    // יצירת מערך סמלים משולב
+    let allSymbols;
+    if (uploadedImages.length > 0) {
+        // אם יש תמונות מותאמות, השתמש בהן
+        allSymbols = [...uploadedImages];
         
+        // אם יש פחות מ-9 תמונות, הוסף סמלים דיפולטיים להשלמה
+        if (allSymbols.length < 9) {
+            const neededSymbols = 9 - allSymbols.length;
+            const remainingSymbols = gameState.defaultSymbols.slice(0, neededSymbols);
+            allSymbols = [...allSymbols, ...remainingSymbols];
+        }
+    } else {
+        // אם אין תמונות מותאמות, השתמש בסמלים הדיפולטיים
+        allSymbols = [...gameState.defaultSymbols];
+    }
+    
+    reels.forEach((reel) => {
         // צור לולאה ארוכה של סמלים - 100 סמלים לאנימציה חלקה
+        // כל גליל יקבל ערבוב רנדומלי של הסמלים
         let symbolsHTML = '';
+        
+        // צור מערך מעורבב של סמלים לכל גליל
+        const shuffledSymbols = [];
         for (let i = 0; i < 100; i++) {
-            const symbol = symbols[i % symbols.length];
-            if (gameState.customSymbols[index]) {
-                symbolsHTML += `<div class="symbol custom-image" style="background-image: url(${symbol})"></div>`;
+            // הוסף סמלים בסדר אקראי
+            if (i < allSymbols.length) {
+                shuffledSymbols.push(allSymbols[i]);
+            } else {
+                // אחרי הסיבוב הראשון, ערבב רנדומלית
+                const randomIndex = Math.floor(Math.random() * allSymbols.length);
+                shuffledSymbols.push(allSymbols[randomIndex]);
+            }
+        }
+        
+        // בנה את ה-HTML
+        shuffledSymbols.forEach(symbol => {
+            // בדוק אם זה URL של תמונה (מתחיל ב-data: או http)
+            const isImage = typeof symbol === 'string' && (symbol.startsWith('data:') || symbol.startsWith('http'));
+            
+            if (isImage) {
+                symbolsHTML += `<div class="symbol custom-image" style="background-image: url('${symbol}')"></div>`;
             } else {
                 symbolsHTML += `<div class="symbol">${symbol}</div>`;
             }
-        }
+        });
+        
         reel.innerHTML = symbolsHTML;
         
         // הצב את הגליל במרכז
         reel.style.transform = 'translateY(0)';
     });
+    
+    // עדכן את מספר הסמלים הזמינים למשחק
+    gameState.totalSymbols = allSymbols.length;
 }
 
 // התחל סיבוב
@@ -120,86 +161,140 @@ function startSpin() {
     // קבע אם זה צריך להיות סיבוב זוכה
     const shouldWin = determineWin();
     
-    // התחל סיבוב כל הגלילים
-    reels.forEach(reel => {
-        reel.classList.add('spinning');
+    // התחל סיבוב כל הגלילים **יחד** עם kick מיידי
+    reels.forEach((reel) => {
+        reel.classList.remove('spinning');
         reel.style.transition = 'none';
         reel.style.transform = 'translateY(0)';
     });
     
+    // kick מיידי - תנו לגלילים קצת תאוצה ראשונית
+    setTimeout(() => {
+        reels.forEach(reel => {
+            reel.style.transition = 'transform 0.1s ease-out';
+            reel.style.transform = 'translateY(-50px)';
+        });
+    }, 10);
+    
+    // ואז הוסף את מחלקת הסיבוב המלא
+    setTimeout(() => {
+        reels.forEach(reel => {
+            reel.style.transition = 'none';
+            reel.classList.add('spinning');
+        });
+    }, 120);
+    
     if (gameState.mode === 'automatic') {
-        // במצב אוטומטי - עצור את הגלילים אחד אחד
-        setTimeout(() => stopReel(0, shouldWin), 3000);
-        setTimeout(() => stopReel(1, shouldWin), 4000);
-        setTimeout(() => stopReel(2, shouldWin), 5000);
+        // במצב אוטומטי - עצור את הגלילים אחד אחד עם האטה טבעית
+        setTimeout(() => stopReelSmooth(0, shouldWin), 2000);
+        setTimeout(() => stopReelSmooth(1, shouldWin), 3000);
+        setTimeout(() => stopReelSmooth(2, shouldWin), 4000);
     }
 }
 
-// קבע אם זה צריך להיות סיבוב זוכה
+// קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם מחזורי מובטח
 function determineWin() {
     if (gameState.winFrequency === 0) {
         // רנדומלי לגמרי
         return Math.random() < 0.1; // 10% סיכוי לזכייה
     }
     
-    // בדוק אם הגיע הזמן לזכייה מובטחת
     const spinsSinceLastWin = gameState.spinsCount - gameState.lastWinAt;
-    if (spinsSinceLastWin >= gameState.winFrequency) {
+    
+    // חישוב מחזור: אם בחר 3, אז 3→4→5→3→4→5...
+    // winCycleIndex: 0, 1, 2 (מתחלף אחרי כל זכייה)
+    const baseFrequency = gameState.winFrequency;
+    const cycleAddition = gameState.winCycleIndex; // 0, 1, או 2
+    const currentTargetSpins = baseFrequency + cycleAddition;
+    
+    console.log(`🔄 מחזור ${gameState.winCycleIndex + 1}/3: יעד=${currentTargetSpins} נסיונות (בסיס: ${baseFrequency})`);
+    console.log(`📊 נסיון ${spinsSinceLastWin} מתוך ${currentTargetSpins}`);
+    
+    // זכייה מובטחת **בדיוק** כשמגיעים ליעד
+    if (spinsSinceLastWin >= currentTargetSpins) {
+        console.log(`🎰 ניצחון! (${spinsSinceLastWin} נסיונות, יעד: ${currentTargetSpins})`);
         return true;
     }
     
-    // יש גם סיכוי רנדומלי קטן לזכות לפני זה
-    return Math.random() < 0.05; // 5% סיכוי
+    console.log(`⏳ עוד ${currentTargetSpins - spinsSinceLastWin} נסיונות לזכייה`);
+    return false;
 }
 
-// עצור גלגל ספציפי
-function stopReel(reelIndex, shouldWin = false) {
+// עצור גלגל בצורה חלקה וטבעית
+function stopReelSmooth(reelIndex, shouldWin = false) {
     const reel = reels[reelIndex];
-    reel.classList.remove('spinning');
+    const symbolHeight = window.innerHeight / 3;
+    const numSymbols = gameState.totalSymbols || 9;
     
-    const symbolHeight = window.innerHeight / 3; // גובה מדויק של סמל אחד
+    // קבע את הסמל היעד
     let targetSymbolIndex;
-    
     if (shouldWin) {
-        // אם צריך לזכות - בחר סמל משותף
         if (reelIndex === 0) {
-            // הגלגל הראשון קובע את הסמל הזוכה
-            gameState.winningSymbol = Math.floor(Math.random() * 8);
+            gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
             targetSymbolIndex = gameState.winningSymbol;
         } else {
-            // שאר הגלילים יתאימו
             targetSymbolIndex = gameState.winningSymbol;
         }
     } else {
-        // בחר סמל אקראי
-        targetSymbolIndex = Math.floor(Math.random() * 8);
-        
-        // אם זה לא גלגל ראשון, ודא שזה לא יהיה אותו סמל (למנוע זכיות לא מתוכננות)
+        targetSymbolIndex = Math.floor(Math.random() * numSymbols);
         if (reelIndex > 0 && gameState.firstSymbol !== undefined) {
             while (targetSymbolIndex === gameState.firstSymbol && Math.random() > 0.1) {
-                targetSymbolIndex = Math.floor(Math.random() * 8);
+                targetSymbolIndex = Math.floor(Math.random() * numSymbols);
             }
         }
     }
     
-    // שמור את הסמל הראשון
     if (reelIndex === 0) {
         gameState.firstSymbol = targetSymbolIndex;
     }
     
-    // חשב את המיקום המדויק כך שהסמל יהיה ממורכז במסך
-    // נעצור בסמל שנמצא בטווח 10-20 כדי לוודא שיש מספיק סמלים מסביב
-    const basePosition = 10 + targetSymbolIndex;
-    const position = -(basePosition * symbolHeight) + symbolHeight; // +symbolHeight כדי למרכז
+    // עצור את האנימציה האינסופית
+    reel.classList.remove('spinning');
     
-    reel.style.transition = 'transform 0.8s cubic-bezier(0.17, 0.67, 0.35, 0.98)';
-    reel.style.transform = `translateY(${position}px)`;
+    // קבל את המיקום הנוכחי
+    const currentTransform = window.getComputedStyle(reel).transform;
+    const matrix = new DOMMatrix(currentTransform);
+    const currentY = matrix.m42 || 0;
+    
+    // חשב את המיקום היעד - בחר סמל באמצע מערך הסמלים
+    const basePosition = 20; // סמל מספר 20 מתוך 100
+    const finalSymbolPosition = basePosition + targetSymbolIndex;
+    
+    // המיקום הסופי כדי שהסמל יהיה ממורכז במסך
+    // צריך שהסמל יהיה בגובה של שליש אחד מהמסך (במרכז)
+    const finalY = -(finalSymbolPosition * symbolHeight) + symbolHeight;
+    
+    // כמה עוד לסובב - 2-3 סיבובים מלאים
+    const extraSpins = Math.floor(Math.random() * 2 + 2);
+    const fullSpins = extraSpins * numSymbols * symbolHeight;
+    
+    // חשב את המרחק הכולל שצריך לעבור
+    const totalDistance = Math.abs(currentY) + fullSpins;
+    const absoluteFinalY = -totalDistance + (totalDistance % (numSymbols * symbolHeight)) + finalY;
+    
+    // קבע את המיקום הנוכחי בדיוק
+    reel.style.transition = 'none';
+    reel.style.transform = `translateY(${currentY}px)`;
+    
+    // אחרי רגע קצר, התחל את ההאטה למיקום הסופי
+    setTimeout(() => {
+        // שלב 1: האטה והגעה למיקום (עובר קצת מעבר)
+        const overshoot = symbolHeight * 0.3; // עובר 30% מסמל אחד
+        reel.style.transition = 'transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        reel.style.transform = `translateY(${finalY - overshoot}px)`;
+        
+        // שלב 2: bounce אחורה למיקום המדויק
+        setTimeout(() => {
+            reel.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            reel.style.transform = `translateY(${finalY}px)`;
+        }, 1500);
+    }, 50);
     
     gameState.manualStops[reelIndex] = true;
     
     // בדוק אם כל הגלילים נעצרו
     if (gameState.manualStops.every(stopped => stopped)) {
-        setTimeout(() => checkWin(), 600);
+        setTimeout(() => checkWin(), 2000);
     }
 }
 
@@ -216,7 +311,17 @@ function checkWin() {
         // חשב איזה סמל נמצא במרכז המסך
         const centerIndex = Math.round((Math.abs(translateY) - symbolHeight) / symbolHeight);
         const symbolElement = reel.querySelectorAll('.symbol')[centerIndex];
-        return symbolElement?.textContent || symbolElement?.style.backgroundImage;
+        
+        // בדוק אם זה סמל תמונה או טקסט
+        if (symbolElement?.classList.contains('custom-image')) {
+            // תמונה - החזר את ה-URL מה-background-image
+            const bgImage = symbolElement.style.backgroundImage;
+            // נקה מ-url() ומ-quotes
+            return bgImage.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
+        } else {
+            // סמל טקסט רגיל
+            return symbolElement?.textContent;
+        }
     });
     
     // בדוק אם כל הסמלים זהים
@@ -226,6 +331,14 @@ function checkWin() {
     
     if (isWin) {
         gameState.lastWinAt = gameState.spinsCount;
+        gameState.winsCount++;
+        
+        // עדכן את המחזור - 0→1→2→0
+        gameState.winCycleIndex = (gameState.winCycleIndex + 1) % 3;
+        
+        console.log(`🎉 ניצחון מספר ${gameState.winsCount}! המחזור הבא: ${gameState.winCycleIndex + 1}/3`);
+        console.log('הסמל הזוכה:', displayedSymbols[0].substring(0, 50) + '...');
+        
         sounds.win.play();
         winOverlay.classList.remove('hidden');
         winOverlay.classList.add('flashing');
@@ -260,16 +373,32 @@ function triggerSpin() {
             // קבע אם זה צריך להיות סיבוב זוכה
             gameState.shouldWinManual = determineWin();
             
-            // התחל סיבוב כל הגלילים
-            reels.forEach(reel => {
-                reel.classList.add('spinning');
+            // התחל סיבוב כל הגלילים **יחד** עם kick מיידי
+            reels.forEach((reel) => {
+                reel.classList.remove('spinning');
                 reel.style.transition = 'none';
                 reel.style.transform = 'translateY(0)';
             });
+            
+            // kick מיידי
+            setTimeout(() => {
+                reels.forEach(reel => {
+                    reel.style.transition = 'transform 0.1s ease-out';
+                    reel.style.transform = 'translateY(-50px)';
+                });
+            }, 10);
+            
+            // הוסף את מחלקת הסיבוב המלא
+            setTimeout(() => {
+                reels.forEach(reel => {
+                    reel.style.transition = 'none';
+                    reel.classList.add('spinning');
+                });
+            }, 120);
         } else {
-            // עצור את הגלגל הבא
+            // עצור את הגלגל הבא עם האטה חלקה
             if (gameState.currentReel < 3 && !gameState.manualStops[gameState.currentReel]) {
-                stopReel(gameState.currentReel, gameState.shouldWinManual);
+                stopReelSmooth(gameState.currentReel, gameState.shouldWinManual);
                 gameState.currentReel++;
             }
         }
@@ -347,38 +476,155 @@ document.getElementById('close-settings').addEventListener('click', () => {
     settingsScreen.classList.add('hidden');
 });
 
-// העלאת תמונות
+// העלאת תמונות עם תצוגה מקדימה
 function handleImageUpload(fileInput, index) {
+    const previewElement = document.getElementById(`preview${index + 1}`);
+    
+    // טיפול בהעלאה רגילה
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                gameState.customSymbols[index] = event.target.result;
-                initReels();
-            };
-            reader.readAsDataURL(file);
+        if (file && file.type.startsWith('image/')) {
+            loadImage(file, index, previewElement);
+        }
+    });
+    
+    // תמיכה ב-Drag & Drop
+    previewElement.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        previewElement.style.borderColor = '#ffed4e';
+        previewElement.style.background = 'rgba(255, 215, 0, 0.1)';
+    });
+    
+    previewElement.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        previewElement.style.borderColor = '';
+        previewElement.style.background = '';
+    });
+    
+    previewElement.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        previewElement.style.borderColor = '';
+        previewElement.style.background = '';
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            loadImage(file, index, previewElement);
         }
     });
 }
 
-handleImageUpload(document.getElementById('image1'), 0);
-handleImageUpload(document.getElementById('image2'), 1);
-handleImageUpload(document.getElementById('image3'), 2);
+// פונקציה לטעינת תמונה
+function loadImage(file, index, previewElement) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const imageData = event.target.result;
+        gameState.customSymbols[index] = imageData;
+        
+        // עדכן תצוגה מקדימה
+        previewElement.style.backgroundImage = `url('${imageData}')`;
+        previewElement.classList.add('has-image');
+        
+        // שמור ב-localStorage
+        saveImagesToStorage();
+        
+        // אתחל מחדש את הגלילים
+        initReels();
+    };
+    reader.readAsDataURL(file);
+}
 
+// הוסף מאזין לכל 9 שדות העלאה
+for (let i = 0; i < 9; i++) {
+    const fileInput = document.getElementById(`image${i + 1}`);
+    if (fileInput) {
+        handleImageUpload(fileInput, i);
+    }
+}
+
+// איפוס תמונות
 document.getElementById('reset-images').addEventListener('click', () => {
-    gameState.customSymbols = [null, null, null];
-    document.getElementById('image1').value = '';
-    document.getElementById('image2').value = '';
-    document.getElementById('image3').value = '';
+    gameState.customSymbols = [null, null, null, null, null, null, null, null, null];
+    
+    // מחק מ-localStorage
+    clearImagesFromStorage();
+    
+    // נקה את כל השדות והתצוגות המקדימות
+    for (let i = 1; i <= 9; i++) {
+        const fileInput = document.getElementById(`image${i}`);
+        const preview = document.getElementById(`preview${i}`);
+        
+        if (fileInput) fileInput.value = '';
+        if (preview) {
+            preview.style.backgroundImage = '';
+            preview.classList.remove('has-image');
+            
+            // החזר את האייקון והטקסט
+            if (!preview.querySelector('.preview-icon')) {
+                preview.innerHTML = '<span class="preview-icon">📷</span><span class="preview-text">הוסף תמונה</span>';
+            }
+        }
+    }
+    
     initReels();
 });
 
+// טען תמונות מ-localStorage
+function loadImagesFromStorage() {
+    try {
+        const savedImages = localStorage.getItem('slotMachineImages');
+        if (savedImages) {
+            const images = JSON.parse(savedImages);
+            gameState.customSymbols = images;
+            
+            // עדכן תצוגה מקדימה
+            images.forEach((img, index) => {
+                if (img) {
+                    const preview = document.getElementById(`preview${index + 1}`);
+                    if (preview) {
+                        preview.style.backgroundImage = `url('${img}')`;
+                        preview.classList.add('has-image');
+                    }
+                }
+            });
+            
+            console.log('✅ תמונות נטענו מהזיכרון');
+        }
+    } catch (e) {
+        console.error('❌ שגיאה בטעינת תמונות:', e);
+    }
+}
+
+// שמור תמונות ב-localStorage
+function saveImagesToStorage() {
+    try {
+        localStorage.setItem('slotMachineImages', JSON.stringify(gameState.customSymbols));
+        console.log('💾 תמונות נשמרו בזיכרון');
+    } catch (e) {
+        console.error('❌ שגיאה בשמירת תמונות:', e);
+    }
+}
+
+// מחק תמונות מ-localStorage
+function clearImagesFromStorage() {
+    try {
+        localStorage.removeItem('slotMachineImages');
+        console.log('🗑️ תמונות נמחקו מהזיכרון');
+    } catch (e) {
+        console.error('❌ שגיאה במחיקת תמונות:', e);
+    }
+}
+
 // אתחול
 initSounds();
+loadImagesFromStorage(); // טען תמונות שמורות
 initReels();
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
 console.log('Press ד or S for settings');
+
+
 

@@ -86,20 +86,54 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     font-size: 0;
+    padding: 5%;
 }
 
-/* אנימציית סיבוב */
+/* אנימציית סיבוב - מהירות מלאה מהתחלה */
 @keyframes spin {
     0% {
         transform: translateY(0);
     }
     100% {
-        transform: translateY(-266.666666vh);
+        transform: translateY(-300vh);
     }
 }
 
 .reel.spinning {
     animation: spin 0.8s linear infinite;
+    /* מהירות קבועה וחזקה - כולם מסתובבים באותו קצב מלא */
+}
+
+/* אפקט blur דינמי - חזק יותר במהירות גבוהה */
+.reel.spinning .symbol {
+    filter: blur(2px);
+    opacity: 0.95;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.reel:not(.spinning) .symbol {
+    filter: blur(0);
+    opacity: 1;
+    transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+/* אפקט מיוחד לגלילים בזמן סיבוב */
+.reel.spinning::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.1) 0%,
+        transparent 20%,
+        transparent 80%,
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
 }
 
 /* אפקט זכיה */
@@ -147,14 +181,33 @@ body {
 
 .settings-content {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    padding: 40px;
+    padding: 30px;
     border-radius: 20px;
     box-shadow: 0 0 50px rgba(102, 126, 234, 0.5);
-    max-width: 600px;
-    width: 90%;
+    max-width: 700px;
+    width: 95%;
     max-height: 90vh;
     overflow-y: auto;
     color: white;
+}
+
+/* סקרולבר מעוצב */
+.settings-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.5);
+    border-radius: 10px;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.7);
 }
 
 /* רספונסיבי להגדרות */
@@ -268,35 +321,97 @@ body {
     cursor: pointer;
 }
 
-.image-upload label {
+/* גריד העלאת תמונות - מינימליסטי */
+.image-upload-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .image-upload-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .image-upload-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+}
+
+.image-upload-item {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.image-upload-item:hover {
+    transform: translateY(-2px);
+}
+
+.image-upload-item:active {
+    transform: translateY(0);
+}
+
+.image-preview {
+    width: 100%;
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px dashed rgba(255, 215, 0, 0.4);
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
 }
 
-.image-upload span {
-    margin-bottom: 5px;
-    font-size: 1.1em;
+.image-preview:hover {
+    border-color: #ffd700;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
 }
 
-.image-upload input[type="file"] {
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid #ffd700;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
+.image-preview.has-image {
+    border-style: solid;
+    border-color: #ffd700;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.image-upload input[type="file"]::file-selector-button {
-    background: #ffd700;
-    color: #1a1a2e;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-left: 10px;
+.preview-icon {
+    font-size: 1.8em;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.image-preview:hover .preview-icon {
+    opacity: 1;
+}
+
+.image-preview .preview-text {
+    color: rgba(255, 215, 0, 0.7);
+    font-size: 0.7em;
+    font-weight: 500;
+    text-align: center;
+    pointer-events: none;
+}
+
+.image-preview.has-image .preview-text,
+.image-preview.has-image .preview-icon {
+    display: none;
+}
+
+/* הסתר את input הקובץ */
+.image-upload-item input[type="file"] {
+    display: none;
 }
 
 button {
