@@ -54,9 +54,6 @@
 
     <div id="win-overlay" class="hidden"></div>
 
-    <!-- Settings Button -->
-    <button id="settings-button" class="settings-btn" title="הגדרות">⚙️</button>
-
     <div id="settings-screen" class="hidden">
         <div class="settings-content">
             <h2>הגדרות</h2>
@@ -80,6 +77,28 @@
                     <span>הפעל צלילים במשחק</span>
                 </label>
                 <p class="setting-description">צלילי סיבוב, זכייה והפסד</p>
+
+                <div class="sound-uploads">
+                    <h4>צלילים מותאמים אישית</h4>
+
+                    <div class="sound-upload-item">
+                        <label for="sound-spin">צליל סיבוב:</label>
+                        <input type="file" id="sound-spin" accept="audio/*">
+                        <button class="reset-sound" data-sound="spin">🔄</button>
+                    </div>
+
+                    <div class="sound-upload-item">
+                        <label for="sound-win">צליל זכייה:</label>
+                        <input type="file" id="sound-win" accept="audio/*">
+                        <button class="reset-sound" data-sound="win">🔄</button>
+                    </div>
+
+                    <div class="sound-upload-item">
+                        <label for="sound-lose">צליל הפסד:</label>
+                        <input type="file" id="sound-lose" accept="audio/*">
+                        <button class="reset-sound" data-sound="lose">🔄</button>
+                    </div>
+                </div>
             </div>
 
             <div class="setting-group">
@@ -90,6 +109,17 @@
                     <span id="win-frequency-value">3</span>
                 </div>
                 <p class="setting-note">ערך נוכחי: זכייה כל <span id="win-frequency-text">3</span> נסיונות</p>
+            </div>
+
+            <div class="setting-group">
+                <h3>צבע רקע</h3>
+                <p class="setting-description">בחר צבע רקע למשחק או הזן קוד צבע</p>
+                <div class="color-picker-container">
+                    <div class="color-preview" id="color-preview"></div>
+                    <input type="color" id="background-color-picker" value="#667eea">
+                    <input type="text" id="background-color-input" placeholder="#667eea" maxlength="7">
+                    <button id="reset-background-color" class="small-btn">איפוס</button>
+                </div>
             </div>
 
             <div class="setting-group">
@@ -195,7 +225,11 @@
                     <li>🔊 <strong>צלילים</strong> - הפעילו או כבו צלילים</li>
                 </ul>
             </div>
-            <button id="tutorial-close">בואו נתחיל!</button>
+
+            <div class="tutorial-buttons">
+                <button id="tutorial-close">בואו נתחיל!</button>
+                <button id="tutorial-settings">⚙️ הגדרות</button>
+            </div>
 
             <!-- Powered by Playzone -->
             <div class="tutorial-powered-by">

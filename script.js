@@ -9,8 +9,13 @@ const gameState = {
     spinsCount: 0,
     winFrequency: 3, // זכייה כל כמה נסיונות (0 = רנדומלי לגמרי)
     totalSymbols: 9, // מספר כולל של סמלים במשחק
-    spinsSinceLastWin: 0, // כמה סיבובים עברו מהזכייה האחרונה
-    soundEnabled: true // האם צלילים מופעלים
+    soundEnabled: true, // האם צלילים מופעלים
+    backgroundColor: '#667eea', // צבע הרקע ברירת מחדל
+    customSounds: { // צלילים מותאמים אישית
+        spin: null,
+        win: null,
+        lose: null
+    }
 };
 
 // אלמנטים
@@ -31,11 +36,22 @@ const sounds = {
 
 // יצירת אובייקטי אודיו
 function initSounds() {
-    // נטען את קבצי הסאונד האמיתיים
+    // טען צלילים מותאמים אישית מ-localStorage
+    loadCustomSounds();
+
+    // נטען את קבצי הסאונד - מותאמים או ברירת מחדל
     try {
-        sounds.spin = new Audio('sounds/prize-wheel.mp3');
-        sounds.win = new Audio('sounds/Win.mp3');
-        sounds.lose = new Audio('sounds/Buzzer1.mp3');
+        sounds.spin = gameState.customSounds.spin ?
+            new Audio(gameState.customSounds.spin) :
+            new Audio('sounds/prize-wheel.mp3');
+
+        sounds.win = gameState.customSounds.win ?
+            new Audio(gameState.customSounds.win) :
+            new Audio('sounds/Win.mp3');
+
+        sounds.lose = gameState.customSounds.lose ?
+            new Audio(gameState.customSounds.lose) :
+            new Audio('sounds/Buzzer1.mp3');
 
         // הגדרת ווליום
         sounds.spin.volume = 0.5;
@@ -47,6 +63,29 @@ function initSounds() {
         sounds.spin = createSyntheticSound('spin');
         sounds.win = createSyntheticSound('win');
         sounds.lose = createSyntheticSound('lose');
+    }
+}
+
+// טען צלילים מותאמים מ-localStorage
+function loadCustomSounds() {
+    try {
+        const savedSounds = localStorage.getItem('customSounds');
+        if (savedSounds) {
+            gameState.customSounds = JSON.parse(savedSounds);
+            console.log('🔊 צלילים מותאמים נטענו');
+        }
+    } catch (e) {
+        console.error('שגיאה בטעינת צלילים מותאמים:', e);
+    }
+}
+
+// שמור צלילים מותאמים ב-localStorage
+function saveCustomSounds() {
+    try {
+        localStorage.setItem('customSounds', JSON.stringify(gameState.customSounds));
+        console.log('💾 צלילים מותאמים נשמרו');
+    } catch (e) {
+        console.error('שגיאה בשמירת צלילים מותאמים:', e);
     }
 }
 
@@ -227,25 +266,22 @@ function startSpin() {
     }
 }
 
-// קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם פשוט ומובטח
+// קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם פשוט מאוד
 function determineWin() {
-    // עדכן את הספירה מהזכייה האחרונה
-    gameState.spinsSinceLastWin++;
-
     if (gameState.winFrequency === 0) {
         // רנדומלי לגמרי
-        return Math.random() < 0.1; // 10% סיכוי לזכייה
+        return Math.random() < 0.15; // 15% סיכוי לזכייה
     }
 
-    // בדיקה פשוטה: האם הגענו למספר הסיבובים הנדרש?
-    const shouldWin = gameState.spinsSinceLastWin >= gameState.winFrequency;
+    // ספירה פשוטה: כל X סיבובים - זכייה
+    // נתחיל מ-1 כדי שהסיבוב הראשון יהיה 1 ולא 0
+    const currentSpin = (gameState.spinsCount % gameState.winFrequency) || gameState.winFrequency;
+    const shouldWin = currentSpin === gameState.winFrequency;
 
-    console.log(`🎰 סיבוב מספר ${gameState.spinsCount}`);
-    console.log(`📊 ${gameState.spinsSinceLastWin} סיבובים מהזכייה האחרונה`);
-    console.log(`🎯 זכייה כל ${gameState.winFrequency} סיבובים`);
-    console.log(`${shouldWin ? '✅ זכייה!' : '⏳ עוד ' + (gameState.winFrequency - gameState.spinsSinceLastWin) + ' סיבובים לזכייה'}`);
+    console.log(`🎰 סיבוב כללי: ${gameState.spinsCount}`);
+    console.log(`📊 סיבוב במחזור: ${currentSpin} מתוך ${gameState.winFrequency}`);
+    console.log(`${shouldWin ? '✅ זכייה מובטחת!' : `⏳ עוד ${gameState.winFrequency - currentSpin} סיבובים לזכייה`}`);
 
-    // אם זוכים, נאפס את הספירה (יקרה ב-checkWin)
     return shouldWin;
 }
 
@@ -371,11 +407,7 @@ function checkWin() {
                   displayedSymbols[1] === displayedSymbols[2];
 
     if (isWin) {
-        // אפס את הספירה מהזכייה האחרונה
-        gameState.spinsSinceLastWin = 0;
-
         console.log(`🎉 ניצחון! כל 3 הסמלים זהים: ${displayedSymbols[0]}`);
-        console.log('🔄 אופסה ספירת הסיבובים לזכייה הבאה');
 
         playSound('win');
         winOverlay.classList.remove('hidden');
@@ -388,7 +420,6 @@ function checkWin() {
     } else {
         playSound('lose');
         console.log(`❌ לא זכייה. הסמלים: [${displayedSymbols[0]}] [${displayedSymbols[1]}] [${displayedSymbols[2]}]`);
-        console.log(`📊 ${gameState.spinsSinceLastWin} סיבובים מהזכייה האחרונה`);
     }
     
     // נקה את הסמל הראשון
@@ -667,6 +698,148 @@ function loadImagesFromStorage() {
     }
 }
 
+// === ניהול צבע רקע ===
+
+// טען צבע רקע מ-localStorage
+function loadBackgroundColor() {
+    try {
+        const savedColor = localStorage.getItem('backgroundColor');
+        if (savedColor) {
+            gameState.backgroundColor = savedColor;
+            applyBackgroundColor(savedColor);
+            updateColorPicker(savedColor);
+            console.log('✅ צבע רקע נטען:', savedColor);
+        } else {
+            // אם אין צבע שמור, השתמש בברירת מחדל
+            applyBackgroundColor(gameState.backgroundColor);
+            updateColorPicker(gameState.backgroundColor);
+        }
+    } catch (e) {
+        console.error('❌ שגיאה בטעינת צבע רקע:', e);
+    }
+}
+
+// החל צבע רקע על המסך
+function applyBackgroundColor(color) {
+    // יצירת גרדיאנט מהצבע שנבחר
+    const lightenedColor = lightenColor(color, 20);
+    document.body.style.background = `linear-gradient(135deg, ${color} 0%, ${lightenedColor} 100%)`;
+    
+    // עדכן את ה-preview
+    const colorPreview = document.getElementById('color-preview');
+    if (colorPreview) {
+        colorPreview.style.background = `linear-gradient(135deg, ${color} 0%, ${lightenedColor} 100%)`;
+    }
+}
+
+// עדכן את ה-color picker וה-input
+function updateColorPicker(color) {
+    const colorPicker = document.getElementById('background-color-picker');
+    const colorInput = document.getElementById('background-color-input');
+    
+    if (colorPicker) colorPicker.value = color;
+    if (colorInput) colorInput.value = color;
+}
+
+// פונקציה להבהרת צבע
+function lightenColor(color, percent) {
+    // המר צבע hex ל-RGB
+    const num = parseInt(color.replace("#", ""), 16);
+    const r = Math.min(255, ((num >> 16) + Math.round(255 * (percent / 100))));
+    const g = Math.min(255, (((num >> 8) & 0x00FF) + Math.round(255 * (percent / 100))));
+    const b = Math.min(255, ((num & 0x0000FF) + Math.round(255 * (percent / 100))));
+    
+    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+}
+
+// בדוק אם זה קוד צבע תקין
+function isValidColor(color) {
+    // בדיקה פשוטה: hex color
+    const hexPattern = /^#[0-9A-F]{6}$/i;
+    return hexPattern.test(color);
+}
+
+// שמור צבע רקע
+function saveBackgroundColor(color) {
+    try {
+        localStorage.setItem('backgroundColor', color);
+        gameState.backgroundColor = color;
+        console.log('💾 צבע רקע נשמר:', color);
+    } catch (e) {
+        console.error('❌ שגיאה בשמירת צבע רקע:', e);
+    }
+}
+
+// אתחול אירועים לבחירת צבע
+function initColorPicker() {
+    const colorPicker = document.getElementById('background-color-picker');
+    const colorInput = document.getElementById('background-color-input');
+    const colorPreview = document.getElementById('color-preview');
+    const resetBtn = document.getElementById('reset-background-color');
+    
+    // color picker
+    if (colorPicker) {
+        colorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            applyBackgroundColor(color);
+            updateColorPicker(color);
+            saveBackgroundColor(color);
+        });
+    }
+    
+    // קלט ידני של צבע
+    if (colorInput) {
+        colorInput.addEventListener('input', (e) => {
+            let color = e.target.value.trim();
+            
+            // אם לא מתחיל ב-#, הוסף אותו
+            if (color && !color.startsWith('#')) {
+                color = '#' + color;
+                colorInput.value = color;
+            }
+            
+            // אם זה צבע תקין, עדכן
+            if (isValidColor(color)) {
+                applyBackgroundColor(color);
+                updateColorPicker(color);
+                saveBackgroundColor(color);
+                colorInput.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+            } else if (color.length >= 7) {
+                // צבע לא תקין
+                colorInput.style.borderColor = '#ff6b6b';
+            }
+        });
+        
+        // כשיוצאים מהשדה
+        colorInput.addEventListener('blur', (e) => {
+            const color = e.target.value.trim();
+            if (!isValidColor(color)) {
+                // אם לא תקין, חזור לצבע השמור
+                colorInput.value = gameState.backgroundColor;
+                colorInput.style.borderColor = 'rgba(255, 215, 0, 0.3)';
+            }
+        });
+    }
+    
+    // לחיצה על ה-preview פותחת את ה-color picker
+    if (colorPreview) {
+        colorPreview.addEventListener('click', () => {
+            if (colorPicker) colorPicker.click();
+        });
+    }
+    
+    // כפתור איפוס
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            const defaultColor = '#667eea';
+            applyBackgroundColor(defaultColor);
+            updateColorPicker(defaultColor);
+            saveBackgroundColor(defaultColor);
+            console.log('🔄 צבע רקע אופס לברירת מחדל');
+        });
+    }
+}
+
 // שמור תמונות ב-localStorage
 function saveImagesToStorage() {
     try {
@@ -691,6 +864,7 @@ function clearImagesFromStorage() {
 function manageTutorial() {
     const tutorialModal = document.getElementById('tutorial-modal');
     const tutorialClose = document.getElementById('tutorial-close');
+    const tutorialSettings = document.getElementById('tutorial-settings');
 
     // בדוק אם המדריך כבר הוצג
     const tutorialSeen = localStorage.getItem('tutorialSeen');
@@ -701,11 +875,22 @@ function manageTutorial() {
     }
 
     // כפתור סגירת המדריך
-    tutorialClose.addEventListener('click', () => {
-        tutorialModal.style.display = 'none';
-        // שמור שהמדריך הוצג
-        localStorage.setItem('tutorialSeen', 'true');
-    });
+    if (tutorialClose) {
+        tutorialClose.addEventListener('click', () => {
+            tutorialModal.style.display = 'none';
+            // שמור שהמדריך הוצג
+            localStorage.setItem('tutorialSeen', 'true');
+        });
+    }
+
+    // כפתור הגדרות במודל
+    if (tutorialSettings) {
+        tutorialSettings.addEventListener('click', () => {
+            tutorialModal.style.display = 'none';
+            localStorage.setItem('tutorialSeen', 'true');
+            settingsScreen.classList.remove('hidden');
+        });
+    }
 
     // סגור עם ESC
     document.addEventListener('keydown', (e) => {
@@ -716,12 +901,90 @@ function manageTutorial() {
     });
 }
 
+// פונקציות לטיפול בצלילים מותאמים
+function setupCustomSoundUpload() {
+    // העלאת צליל סיבוב
+    const spinInput = document.getElementById('sound-spin');
+    if (spinInput) {
+        spinInput.addEventListener('change', (e) => {
+            handleSoundUpload(e.target.files[0], 'spin');
+        });
+    }
+
+    // העלאת צליל זכייה
+    const winInput = document.getElementById('sound-win');
+    if (winInput) {
+        winInput.addEventListener('change', (e) => {
+            handleSoundUpload(e.target.files[0], 'win');
+        });
+    }
+
+    // העלאת צליל הפסד
+    const loseInput = document.getElementById('sound-lose');
+    if (loseInput) {
+        loseInput.addEventListener('change', (e) => {
+            handleSoundUpload(e.target.files[0], 'lose');
+        });
+    }
+
+    // כפתורי איפוס
+    document.querySelectorAll('.reset-sound').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const soundType = e.target.dataset.sound;
+            resetSound(soundType);
+        });
+    });
+}
+
+// טיפול בהעלאת צליל
+function handleSoundUpload(file, soundType) {
+    if (!file || !file.type.startsWith('audio/')) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        gameState.customSounds[soundType] = event.target.result;
+        saveCustomSounds();
+
+        // עדכן את הצליל הנוכחי
+        sounds[soundType] = new Audio(event.target.result);
+        sounds[soundType].volume = soundType === 'win' ? 0.7 : 0.5;
+
+        console.log(`🔊 צליל ${soundType} עודכן`);
+    };
+    reader.readAsDataURL(file);
+}
+
+// איפוס צליל לברירת מחדל
+function resetSound(soundType) {
+    gameState.customSounds[soundType] = null;
+    saveCustomSounds();
+
+    // החזר לצליל ברירת המחדל
+    const defaultSounds = {
+        spin: 'sounds/prize-wheel.mp3',
+        win: 'sounds/Win.mp3',
+        lose: 'sounds/Buzzer1.mp3'
+    };
+
+    sounds[soundType] = new Audio(defaultSounds[soundType]);
+    sounds[soundType].volume = soundType === 'win' ? 0.7 : 0.5;
+
+    // נקה את השדה
+    const input = document.getElementById(`sound-${soundType}`);
+    if (input) input.value = '';
+
+    console.log(`🔄 צליל ${soundType} אופס לברירת מחדל`);
+}
+
 
 // אתחול
 initSounds();
 loadImagesFromStorage(); // טען תמונות שמורות
+loadBackgroundColor(); // טען צבע רקע שמור
+initColorPicker(); // אתחל color picker
 initReels();
 manageTutorial(); // נהל את המדריך
+setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
