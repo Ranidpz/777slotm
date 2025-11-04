@@ -192,32 +192,27 @@ function startSpin() {
     }
 }
 
-// קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם מחזורי מובטח
+// קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם פשוט ומובטח
 function determineWin() {
     if (gameState.winFrequency === 0) {
         // רנדומלי לגמרי
         return Math.random() < 0.1; // 10% סיכוי לזכייה
     }
-    
-    const spinsSinceLastWin = gameState.spinsCount - gameState.lastWinAt;
-    
-    // חישוב מחזור: אם בחר 3, אז 3→4→5→3→4→5...
-    // winCycleIndex: 0, 1, 2 (מתחלף אחרי כל זכייה)
-    const baseFrequency = gameState.winFrequency;
-    const cycleAddition = gameState.winCycleIndex; // 0, 1, או 2
-    const currentTargetSpins = baseFrequency + cycleAddition;
-    
-    console.log(`🔄 מחזור ${gameState.winCycleIndex + 1}/3: יעד=${currentTargetSpins} נסיונות (בסיס: ${baseFrequency})`);
-    console.log(`📊 נסיון ${spinsSinceLastWin} מתוך ${currentTargetSpins}`);
-    
-    // זכייה מובטחת **בדיוק** כשמגיעים ליעד
-    if (spinsSinceLastWin >= currentTargetSpins) {
-        console.log(`🎰 ניצחון! (${spinsSinceLastWin} נסיונות, יעד: ${currentTargetSpins})`);
+
+    // אם זה 1, כל סיבוב מנצח
+    if (gameState.winFrequency === 1) {
+        console.log(`🎯 זכייה מובטחת - תדירות מוגדרת ל-1!`);
         return true;
     }
-    
-    console.log(`⏳ עוד ${currentTargetSpins - spinsSinceLastWin} נסיונות לזכייה`);
-    return false;
+
+    // חישוב פשוט: כל X סיבובים בדיוק - זכייה
+    // שימוש במודולו אבל בדיקה של היתרה שנשארת
+    const shouldWin = (gameState.spinsCount % gameState.winFrequency) === 0;
+
+    console.log(`🎰 נסיון ${gameState.spinsCount}, תדירות: כל ${gameState.winFrequency} נסיונות`);
+    console.log(`${shouldWin ? '🎯 זכייה!' : '⏳ לא זכייה'} (מודולו: ${gameState.spinsCount % gameState.winFrequency})`);
+
+    return shouldWin;
 }
 
 // עצור גלגל בצורה חלקה וטבעית
@@ -547,27 +542,30 @@ for (let i = 0; i < 9; i++) {
 // איפוס תמונות
 document.getElementById('reset-images').addEventListener('click', () => {
     gameState.customSymbols = [null, null, null, null, null, null, null, null, null];
-    
+
     // מחק מ-localStorage
     clearImagesFromStorage();
-    
+
+    // איפוס גם את המדריך
+    localStorage.removeItem('tutorialSeen');
+
     // נקה את כל השדות והתצוגות המקדימות
     for (let i = 1; i <= 9; i++) {
         const fileInput = document.getElementById(`image${i}`);
         const preview = document.getElementById(`preview${i}`);
-        
+
         if (fileInput) fileInput.value = '';
         if (preview) {
             preview.style.backgroundImage = '';
             preview.classList.remove('has-image');
-            
+
             // החזר את האייקון והטקסט
             if (!preview.querySelector('.preview-icon')) {
                 preview.innerHTML = '<span class="preview-icon">📷</span><span class="preview-text">הוסף תמונה</span>';
             }
         }
     }
-    
+
     initReels();
 });
 
@@ -617,10 +615,41 @@ function clearImagesFromStorage() {
     }
 }
 
+// פונקציה לניהול המדריך
+function manageTutorial() {
+    const tutorialModal = document.getElementById('tutorial-modal');
+    const tutorialClose = document.getElementById('tutorial-close');
+
+    // בדוק אם המדריך כבר הוצג
+    const tutorialSeen = localStorage.getItem('tutorialSeen');
+
+    if (!tutorialSeen) {
+        // הצג את המדריך
+        tutorialModal.style.display = 'flex';
+    }
+
+    // כפתור סגירת המדריך
+    tutorialClose.addEventListener('click', () => {
+        tutorialModal.style.display = 'none';
+        // שמור שהמדריך הוצג
+        localStorage.setItem('tutorialSeen', 'true');
+    });
+
+    // סגור עם ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && tutorialModal.style.display === 'flex') {
+            tutorialModal.style.display = 'none';
+            localStorage.setItem('tutorialSeen', 'true');
+        }
+    });
+}
+
+
 // אתחול
 initSounds();
 loadImagesFromStorage(); // טען תמונות שמורות
 initReels();
+manageTutorial(); // נהל את המדריך
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');

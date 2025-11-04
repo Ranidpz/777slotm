@@ -12,7 +12,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Assistant', 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     cursor: pointer;
@@ -236,6 +236,8 @@ body {
     margin-bottom: 30px;
     color: #ffd700;
     text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    font-family: 'Assistant', sans-serif;
+    font-weight: 700;
 }
 
 .setting-group {
@@ -246,6 +248,8 @@ body {
     font-size: 1.5em;
     margin-bottom: 15px;
     color: #ffd700;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 600;
 }
 
 .setting-group label {
@@ -254,6 +258,7 @@ body {
     margin-bottom: 10px;
     font-size: 1.2em;
     cursor: pointer;
+    font-family: 'Assistant', sans-serif;
 }
 
 .setting-description {
@@ -261,12 +266,14 @@ body {
     color: #ccc;
     margin-bottom: 15px;
     line-height: 1.4;
+    font-family: 'Assistant', sans-serif;
 }
 
 .setting-note {
     font-size: 0.9em;
     color: #ffd700;
     margin-top: 10px;
+    font-family: 'Assistant', sans-serif;
     font-weight: bold;
 }
 
@@ -444,5 +451,135 @@ button:active {
 #reset-images {
     margin-top: 10px;
     width: 100%;
+}
+
+/* Tutorial Modal Styles */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.tutorial-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.5s ease-out;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.tutorial-content h2 {
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 32px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-family: 'Assistant', sans-serif;
+    font-weight: 700;
+}
+
+.tutorial-section {
+    margin-bottom: 25px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.tutorial-section h3 {
+    color: #ffd700;
+    margin-bottom: 15px;
+    font-size: 22px;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 600;
+}
+
+.tutorial-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.tutorial-section li {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 16px;
+    line-height: 1.6;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 400;
+}
+
+.tutorial-section strong {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+#tutorial-close {
+    display: block;
+    margin: 30px auto 0;
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+    font-family: 'Assistant', sans-serif;
+}
+
+#tutorial-close:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(245, 87, 108, 0.6);
+}
+
+/* Powered by Playzone */
+.powered-by {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Assistant', sans-serif;
+}
+
+.powered-by span {
+    margin-left: 5px;
+}
+
+.powered-by a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    margin-right: 5px;
+}
+
+.powered-by a:hover {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
