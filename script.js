@@ -273,14 +273,13 @@ function determineWin() {
         return Math.random() < 0.15; // 15% סיכוי לזכייה
     }
 
-    // ספירה פשוטה: כל X סיבובים - זכייה
-    // נתחיל מ-1 כדי שהסיבוב הראשון יהיה 1 ולא 0
-    const currentSpin = (gameState.spinsCount % gameState.winFrequency) || gameState.winFrequency;
-    const shouldWin = currentSpin === gameState.winFrequency;
+    // אלגוריתם פשוט: זכייה בכל סיבוב X-י
+    // אם winFrequency = 3, אז זכייה בסיבוב 3, 6, 9, 12...
+    const shouldWin = (gameState.spinsCount % gameState.winFrequency) === 0;
 
-    console.log(`🎰 סיבוב כללי: ${gameState.spinsCount}`);
-    console.log(`📊 סיבוב במחזור: ${currentSpin} מתוך ${gameState.winFrequency}`);
-    console.log(`${shouldWin ? '✅ זכייה מובטחת!' : `⏳ עוד ${gameState.winFrequency - currentSpin} סיבובים לזכייה`}`);
+    console.log(`🎰 סיבוב מספר: ${gameState.spinsCount}`);
+    console.log(`📊 תדירות זכייה: כל ${gameState.winFrequency} סיבובים`);
+    console.log(`${shouldWin ? '✅ זכייה מובטחת!' : `⏳ סיבוב רגיל`}`);
 
     return shouldWin;
 }
@@ -486,7 +485,7 @@ document.addEventListener('keydown', (e) => {
     // ד או S - פתח הגדרות
     if (e.key === 'ד' || e.key === 's' || e.key === 'S') {
         if (!gameState.isSpinning) {
-            settingsScreen.classList.remove('hidden');
+            openSettings();
         }
     }
     
@@ -543,16 +542,86 @@ winFrequencySlider.addEventListener('input', (e) => {
     }
 });
 
-document.getElementById('close-settings').addEventListener('click', () => {
+// יצירת עותק של ההגדרות הנוכחיות בפתיחת מסך ההגדרות
+let tempSettings = {
+    winFrequency: gameState.winFrequency,
+    soundEnabled: gameState.soundEnabled,
+    mode: gameState.mode,
+    backgroundColor: gameState.backgroundColor
+};
+
+// שמירת הגדרות
+document.getElementById('save-settings').addEventListener('click', () => {
+    // שמור את כל ההגדרות ב-localStorage
+    localStorage.setItem('winFrequency', gameState.winFrequency);
+    localStorage.setItem('soundEnabled', gameState.soundEnabled);
+    localStorage.setItem('gameMode', gameState.mode);
+
+    if (gameState.backgroundColor) {
+        localStorage.setItem('backgroundColor', gameState.backgroundColor);
+    }
+
+    // שמור גם את הצלילים המותאמים
+    saveCustomSounds();
+
+    console.log('✅ ההגדרות נשמרו בהצלחה!');
+
+    // סגור את מסך ההגדרות
     settingsScreen.classList.add('hidden');
 });
+
+// סגירה בלי שמירה
+document.getElementById('close-settings').addEventListener('click', () => {
+    // החזר את ההגדרות הקודמות
+    gameState.winFrequency = tempSettings.winFrequency;
+    gameState.soundEnabled = tempSettings.soundEnabled;
+    gameState.mode = tempSettings.mode;
+
+    // עדכן את האלמנטים בממשק
+    const winFreqSlider = document.getElementById('win-frequency');
+    const winFreqValue = document.getElementById('win-frequency-value');
+    const winFreqText = document.getElementById('win-frequency-text');
+    const soundCheckbox = document.getElementById('sound-enabled');
+
+    if (winFreqSlider) winFreqSlider.value = gameState.winFrequency;
+    if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
+    if (winFreqText) winFreqText.textContent = gameState.winFrequency;
+    if (soundCheckbox) soundCheckbox.checked = gameState.soundEnabled;
+
+    // עדכן את הרדיו של מצב המשחק
+    document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
+        radio.checked = radio.value === gameState.mode;
+    });
+
+    // החזר צבע רקע אם שונה
+    if (tempSettings.backgroundColor) {
+        applyBackgroundColor(tempSettings.backgroundColor);
+        updateColorPicker(tempSettings.backgroundColor);
+    }
+
+    console.log('❌ ההגדרות לא נשמרו - חזרה להגדרות הקודמות');
+
+    // סגור את מסך ההגדרות
+    settingsScreen.classList.add('hidden');
+});
+
+// כשפותחים את ההגדרות, שמור את המצב הנוכחי
+function openSettings() {
+    tempSettings = {
+        winFrequency: gameState.winFrequency,
+        soundEnabled: gameState.soundEnabled,
+        mode: gameState.mode,
+        backgroundColor: gameState.backgroundColor
+    };
+    settingsScreen.classList.remove('hidden');
+}
 
 // כפתור הגדרות חדש
 const settingsButton = document.getElementById('settings-button');
 if (settingsButton) {
     settingsButton.addEventListener('click', () => {
         if (!gameState.isSpinning) {
-            settingsScreen.classList.remove('hidden');
+            openSettings();
         }
     });
 }
@@ -905,7 +974,7 @@ function manageTutorial() {
         tutorialSettings.addEventListener('click', () => {
             tutorialModal.style.display = 'none';
             localStorage.setItem('tutorialSeen', 'true');
-            settingsScreen.classList.remove('hidden');
+            openSettings();
         });
     }
 
@@ -994,7 +1063,33 @@ function resetSound(soundType) {
 }
 
 
+// טען הגדרות מ-localStorage
+function loadSettings() {
+    // טען תדירות זכיות
+    const savedWinFreq = localStorage.getItem('winFrequency');
+    if (savedWinFreq !== null) {
+        gameState.winFrequency = parseInt(savedWinFreq);
+        const winFreqSlider = document.getElementById('win-frequency');
+        const winFreqValue = document.getElementById('win-frequency-value');
+        const winFreqText = document.getElementById('win-frequency-text');
+
+        if (winFreqSlider) winFreqSlider.value = gameState.winFrequency;
+        if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
+        if (winFreqText) winFreqText.textContent = gameState.winFrequency;
+    }
+
+    // טען מצב משחק
+    const savedMode = localStorage.getItem('gameMode');
+    if (savedMode) {
+        gameState.mode = savedMode;
+        document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
+            radio.checked = radio.value === savedMode;
+        });
+    }
+}
+
 // אתחול
+loadSettings(); // טען הגדרות שמורות
 initSounds();
 loadImagesFromStorage(); // טען תמונות שמורות
 loadBackgroundColor(); // טען צבע רקע שמור

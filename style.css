@@ -1076,3 +1076,49 @@ button:active {
     transform: scale(1.05);
 }
 
+/* Settings Buttons Container */
+.settings-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.save-btn {
+    padding: 15px 35px;
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    font-family: 'Assistant', sans-serif;
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+}
+
+.close-btn {
+    padding: 15px 35px;
+    background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+    font-family: 'Assistant', sans-serif;
+}
+
+.close-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.5);
+}
+
