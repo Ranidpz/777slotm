@@ -460,23 +460,42 @@ button:active {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.95);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 10000;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(20px) saturate(180%);
 }
 
 .tutorial-content {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 40px;
-    border-radius: 20px;
+    background: #0a0a0a;
+    background-image:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #151515 100%);
+    padding: 45px;
+    border-radius: 25px;
     max-width: 600px;
     width: 90%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.7);
     animation: slideIn 0.5s ease-out;
-    border: 2px solid rgba(255, 215, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.tutorial-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+    pointer-events: none;
 }
 
 .tutorial-content h2 {
@@ -491,9 +510,11 @@ button:active {
 
 .tutorial-section {
     margin-bottom: 25px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
 }
 
 .tutorial-section h3 {
@@ -525,23 +546,30 @@ button:active {
 
 #tutorial-close {
     display: block;
-    margin: 30px auto 0;
-    padding: 15px 40px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
+    margin: 35px auto 0;
+    padding: 18px 50px;
+    background: #ffd700;
+    color: #0a0a0a;
     border: none;
     border-radius: 50px;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+    box-shadow:
+        0 8px 25px rgba(255, 215, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
     font-family: 'Assistant', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 #tutorial-close:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(245, 87, 108, 0.6);
+    box-shadow:
+        0 12px 35px rgba(255, 215, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background: #ffdb4d;
 }
 
 /* Powered by Playzone */
@@ -572,10 +600,43 @@ button:active {
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
 }
 
+/* Tutorial Powered by Playzone */
+.tutorial-powered-by {
+    margin-top: 35px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.3);
+    font-family: 'Assistant', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.tutorial-powered-by span {
+    margin-left: 5px;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.tutorial-powered-by a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    margin-right: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tutorial-powered-by a:hover {
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: scale(0.8) translateY(-50px);
+        transform: scale(0.9) translateY(-30px);
     }
     to {
         opacity: 1;
