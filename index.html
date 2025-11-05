@@ -112,6 +112,15 @@
             </div>
 
             <div class="setting-group">
+                <h3>מצב זכייה מובטחת</h3>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="guaranteed-win-mode">
+                    <span>הפעל מצב זכייה מובטחת</span>
+                </label>
+                <p class="setting-description">במצב זה תמיד יהיה זכייה, והפרס ייבחר בהתאם למלאי שהוגדר</p>
+            </div>
+
+            <div class="setting-group">
                 <h3>צבע רקע התאים</h3>
                 <p class="setting-description">בחר צבע רקע לתאי המשחק</p>
                 <div class="color-picker-container">
@@ -126,72 +135,126 @@
             </div>
 
             <div class="setting-group">
-                <h3>תמונות מותאמות אישית</h3>
-                <p class="setting-description">לחץ או גרור תמונה לתיבה (עד 9 תמונות)</p>
+                <h3>תמונות מותאמות אישית ומלאי פרסים</h3>
+                <p class="setting-description">לחץ או גרור תמונה לתיבה ורשום את כמות המלאי לכל פרס</p>
                 <div class="image-upload-grid">
-                    <label class="image-upload-item" for="image1">
-                        <div class="image-preview" id="preview1">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    <div class="image-upload-item">
+                        <label for="image1">
+                            <div class="image-preview" id="preview1">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image1" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory1">מלאי:</label>
+                            <input type="number" id="inventory1" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image1" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image2">
-                        <div class="image-preview" id="preview2">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image2">
+                            <div class="image-preview" id="preview2">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image2" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory2">מלאי:</label>
+                            <input type="number" id="inventory2" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image2" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image3">
-                        <div class="image-preview" id="preview3">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image3">
+                            <div class="image-preview" id="preview3">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image3" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory3">מלאי:</label>
+                            <input type="number" id="inventory3" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image3" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image4">
-                        <div class="image-preview" id="preview4">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image4">
+                            <div class="image-preview" id="preview4">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image4" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory4">מלאי:</label>
+                            <input type="number" id="inventory4" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image4" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image5">
-                        <div class="image-preview" id="preview5">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image5">
+                            <div class="image-preview" id="preview5">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image5" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory5">מלאי:</label>
+                            <input type="number" id="inventory5" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image5" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image6">
-                        <div class="image-preview" id="preview6">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image6">
+                            <div class="image-preview" id="preview6">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image6" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory6">מלאי:</label>
+                            <input type="number" id="inventory6" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image6" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image7">
-                        <div class="image-preview" id="preview7">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image7">
+                            <div class="image-preview" id="preview7">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image7" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory7">מלאי:</label>
+                            <input type="number" id="inventory7" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image7" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image8">
-                        <div class="image-preview" id="preview8">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image8">
+                            <div class="image-preview" id="preview8">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image8" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory8">מלאי:</label>
+                            <input type="number" id="inventory8" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image8" accept="image/*" hidden>
-                    </label>
-                    <label class="image-upload-item" for="image9">
-                        <div class="image-preview" id="preview9">
-                            <span class="preview-icon">📷</span>
-                            <span class="preview-text">הוסף תמונה</span>
+                    </div>
+                    <div class="image-upload-item">
+                        <label for="image9">
+                            <div class="image-preview" id="preview9">
+                                <span class="preview-icon">📷</span>
+                                <span class="preview-text">הוסף תמונה</span>
+                            </div>
+                            <input type="file" id="image9" accept="image/*" hidden>
+                        </label>
+                        <div class="inventory-input-wrapper">
+                            <label for="inventory9">מלאי:</label>
+                            <input type="number" id="inventory9" min="0" value="0" class="inventory-input">
                         </div>
-                        <input type="file" id="image9" accept="image/*" hidden>
-                    </label>
+                    </div>
                 </div>
                 <button id="reset-images">איפוס לסמלים ברירת מחדל</button>
             </div>

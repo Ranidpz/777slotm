@@ -473,15 +473,20 @@ body {
 }
 
 .image-upload-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.image-upload-item label {
     cursor: pointer;
     transition: transform 0.2s ease;
 }
 
-.image-upload-item:hover {
+.image-upload-item label:hover {
     transform: translateY(-2px);
 }
 
-.image-upload-item:active {
+.image-upload-item label:active {
     transform: translateY(0);
 }
 
@@ -541,6 +546,66 @@ body {
 /* הסתר את input הקובץ */
 .image-upload-item input[type="file"] {
     display: none;
+}
+
+/* שדה מלאי */
+.inventory-input-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.inventory-input-wrapper label {
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.inventory-input {
+    width: 60px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.95em;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.inventory-input:focus {
+    outline: none;
+    border-color: rgba(255, 215, 0, 0.6);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.inventory-input:hover {
+    border-color: rgba(255, 215, 0, 0.5);
+}
+
+/* עיצוב למובייל */
+@media (max-width: 768px) {
+    .inventory-input-wrapper {
+        padding: 6px;
+        gap: 6px;
+    }
+
+    .inventory-input {
+        width: 50px;
+        padding: 4px 8px;
+        font-size: 0.85em;
+    }
+
+    .inventory-input-wrapper label {
+        font-size: 0.8em;
+    }
 }
 
 button {

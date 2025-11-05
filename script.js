@@ -15,7 +15,9 @@ const gameState = {
         spin: null,
         win: null,
         lose: null
-    }
+    },
+    guaranteedWinMode: false, // מצב זכייה מובטחת
+    inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0] // מלאי לכל אחד מ-9 הסמלים
 };
 
 // אלמנטים
@@ -265,6 +267,20 @@ function startSpin() {
 
 // קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם משופר
 function determineWin() {
+    // אם מצב זכייה מובטחת פעיל
+    if (gameState.guaranteedWinMode) {
+        // בדוק אם יש מלאי זמין
+        const hasInventory = gameState.inventory.some(count => count > 0);
+        if (hasInventory) {
+            console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב זכייה מובטחת)`);
+            console.log('✅ זכייה מובטחת! (יש מלאי זמין)');
+            return true;
+        } else {
+            console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב זכייה מובטחת)`);
+            console.log('⚠️ אין מלאי זמין! חזרה למצב רגיל');
+        }
+    }
+
     if (gameState.winFrequency === 0) {
         // רנדומלי לגמרי
         const randomWin = Math.random() < 0.2; // 20% סיכוי לזכייה
@@ -275,10 +291,10 @@ function determineWin() {
 
     // זכייה מובטחת כל X סיבובים
     const guaranteedWin = (gameState.spinsCount % gameState.winFrequency) === 0;
-    
+
     // בנוסף, תמיד יש סיכוי רנדומלי קטן לזכות (10%)
     const randomBonus = Math.random() < 0.1;
-    
+
     const shouldWin = guaranteedWin || randomBonus;
 
     console.log(`🎰 סיבוב מספר: ${gameState.spinsCount}`);
@@ -299,17 +315,39 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
     const reel = reels[reelIndex];
     const symbolHeight = window.innerHeight / 3;
     const numSymbols = gameState.totalSymbols || 9;
-    
+
     // קבע את הסמל היעד - זה האינדקס בתוך מערך הסמלים (0-8)
     let targetSymbolIndex;
-    
+
     if (shouldWin) {
         // במצב זכייה - כל הגלילים צריכים לעצור על אותו סמל
         if (reelIndex === 0) {
-            // הגליל הראשון בוחר סמל רנדומלי
-            gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
+            // הגליל הראשון בוחר סמל - בהתאם למצב
+            if (gameState.guaranteedWinMode) {
+                // במצב זכייה מובטחת - בחר רק מסמלים עם מלאי
+                const availableSymbols = [];
+                for (let i = 0; i < gameState.inventory.length; i++) {
+                    if (gameState.inventory[i] > 0) {
+                        availableSymbols.push(i);
+                    }
+                }
+
+                if (availableSymbols.length > 0) {
+                    // בחר סמל אקראי מרשימת הסמלים הזמינים
+                    const randomIndex = Math.floor(Math.random() * availableSymbols.length);
+                    gameState.winningSymbol = availableSymbols[randomIndex];
+                    console.log(`🎯 גליל 1 נבחר לעצור על סמל מספר: ${gameState.winningSymbol} (מלאי: ${gameState.inventory[gameState.winningSymbol]})`);
+                } else {
+                    // אין מלאי - אל תזכה
+                    gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
+                    console.log('⚠️ אין מלאי זמין - זכייה בוטלה');
+                }
+            } else {
+                // מצב רגיל - בחר סמל רנדומלי
+                gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
+                console.log(`🎯 גליל 1 נבחר לעצור על סמל מספר: ${gameState.winningSymbol}`);
+            }
             targetSymbolIndex = gameState.winningSymbol;
-            console.log(`🎯 גליל 1 נבחר לעצור על סמל מספר: ${targetSymbolIndex}`);
         } else {
             // שאר הגלילים עוצרים על אותו סמל
             targetSymbolIndex = gameState.winningSymbol;
@@ -453,6 +491,21 @@ function checkWin() {
     if (isWin) {
         console.log(`🎉 ניצחון! כל 3 הסמלים זהים: ${displayedSymbols[0]}`);
 
+        // אם במצב זכייה מובטחת, הפחת מהמלאי
+        if (gameState.guaranteedWinMode && gameState.winningSymbol !== undefined) {
+            const symbolIndex = gameState.winningSymbol;
+            if (gameState.inventory[symbolIndex] > 0) {
+                gameState.inventory[symbolIndex]--;
+                console.log(`📦 מלאי סמל ${symbolIndex} הופחת ל-${gameState.inventory[symbolIndex]}`);
+
+                // שמור את המלאי המעודכן
+                saveInventory();
+
+                // עדכן את תצוגת המלאי בממשק (אם פתוח)
+                updateInventoryDisplay();
+            }
+        }
+
         playSound('win');
         winOverlay.classList.remove('hidden');
         winOverlay.classList.add('flashing');
@@ -465,7 +518,7 @@ function checkWin() {
         playSound('lose');
         console.log(`❌ לא זכייה. הסמלים: [${displayedSymbols[0]}] [${displayedSymbols[1]}] [${displayedSymbols[2]}]`);
     }
-    
+
     // נקה את הסמל הראשון
     delete gameState.firstSymbol;
     delete gameState.winningSymbol;
@@ -592,7 +645,9 @@ let tempSettings = {
     winFrequency: gameState.winFrequency,
     soundEnabled: gameState.soundEnabled,
     mode: gameState.mode,
-    backgroundColor: gameState.backgroundColor
+    backgroundColor: gameState.backgroundColor,
+    guaranteedWinMode: gameState.guaranteedWinMode,
+    inventory: [...gameState.inventory]
 };
 
 // שמירת הגדרות
@@ -601,6 +656,7 @@ document.getElementById('save-settings').addEventListener('click', () => {
     localStorage.setItem('winFrequency', gameState.winFrequency);
     localStorage.setItem('soundEnabled', gameState.soundEnabled);
     localStorage.setItem('gameMode', gameState.mode);
+    localStorage.setItem('guaranteedWinMode', gameState.guaranteedWinMode);
 
     if (gameState.backgroundColor) {
         localStorage.setItem('backgroundColor', gameState.backgroundColor);
@@ -608,6 +664,9 @@ document.getElementById('save-settings').addEventListener('click', () => {
 
     // שמור גם את הצלילים המותאמים
     saveCustomSounds();
+
+    // שמור מלאי
+    saveInventory();
 
     console.log('✅ ההגדרות נשמרו בהצלחה!');
 
@@ -621,17 +680,21 @@ document.getElementById('close-settings').addEventListener('click', () => {
     gameState.winFrequency = tempSettings.winFrequency;
     gameState.soundEnabled = tempSettings.soundEnabled;
     gameState.mode = tempSettings.mode;
+    gameState.guaranteedWinMode = tempSettings.guaranteedWinMode;
+    gameState.inventory = [...tempSettings.inventory];
 
     // עדכן את האלמנטים בממשק
     const winFreqSlider = document.getElementById('win-frequency');
     const winFreqValue = document.getElementById('win-frequency-value');
     const winFreqText = document.getElementById('win-frequency-text');
     const soundCheckbox = document.getElementById('sound-enabled');
+    const guaranteedWinCheckbox = document.getElementById('guaranteed-win-mode');
 
     if (winFreqSlider) winFreqSlider.value = gameState.winFrequency;
     if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
     if (winFreqText) winFreqText.textContent = gameState.winFrequency;
     if (soundCheckbox) soundCheckbox.checked = gameState.soundEnabled;
+    if (guaranteedWinCheckbox) guaranteedWinCheckbox.checked = gameState.guaranteedWinMode;
 
     // עדכן את הרדיו של מצב המשחק
     document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
@@ -643,6 +706,9 @@ document.getElementById('close-settings').addEventListener('click', () => {
         applyBackgroundColor(tempSettings.backgroundColor);
         updateColorPicker(tempSettings.backgroundColor);
     }
+
+    // החזר מלאי
+    updateInventoryDisplay();
 
     console.log('❌ ההגדרות לא נשמרו - חזרה להגדרות הקודמות');
 
@@ -656,7 +722,9 @@ function openSettings() {
         winFrequency: gameState.winFrequency,
         soundEnabled: gameState.soundEnabled,
         mode: gameState.mode,
-        backgroundColor: gameState.backgroundColor
+        backgroundColor: gameState.backgroundColor,
+        guaranteedWinMode: gameState.guaranteedWinMode,
+        inventory: [...gameState.inventory]
     };
     settingsScreen.classList.remove('hidden');
 }
@@ -1108,6 +1176,56 @@ function resetSound(soundType) {
 }
 
 
+// פונקציות לניהול מלאי
+
+// שמור מלאי ב-localStorage
+function saveInventory() {
+    try {
+        localStorage.setItem('prizeInventory', JSON.stringify(gameState.inventory));
+        console.log('💾 מלאי נשמר:', gameState.inventory);
+    } catch (e) {
+        console.error('❌ שגיאה בשמירת מלאי:', e);
+    }
+}
+
+// טען מלאי מ-localStorage
+function loadInventory() {
+    try {
+        const savedInventory = localStorage.getItem('prizeInventory');
+        if (savedInventory) {
+            gameState.inventory = JSON.parse(savedInventory);
+            console.log('✅ מלאי נטען:', gameState.inventory);
+            updateInventoryDisplay();
+        }
+    } catch (e) {
+        console.error('❌ שגיאה בטעינת מלאי:', e);
+    }
+}
+
+// עדכן תצוגת המלאי בממשק
+function updateInventoryDisplay() {
+    for (let i = 0; i < 9; i++) {
+        const input = document.getElementById(`inventory${i + 1}`);
+        if (input) {
+            input.value = gameState.inventory[i] || 0;
+        }
+    }
+}
+
+// הגדר מאזינים לשדות המלאי
+function setupInventoryInputs() {
+    for (let i = 0; i < 9; i++) {
+        const input = document.getElementById(`inventory${i + 1}`);
+        if (input) {
+            input.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value) || 0;
+                gameState.inventory[i] = Math.max(0, value); // מינימום 0
+                console.log(`📦 מלאי סמל ${i} עודכן ל-${gameState.inventory[i]}`);
+            });
+        }
+    }
+}
+
 // טען הגדרות מ-localStorage
 function loadSettings() {
     // טען תדירות זכיות
@@ -1131,6 +1249,14 @@ function loadSettings() {
             radio.checked = radio.value === savedMode;
         });
     }
+
+    // טען מצב זכייה מובטחת
+    const savedGuaranteedWin = localStorage.getItem('guaranteedWinMode');
+    if (savedGuaranteedWin !== null) {
+        gameState.guaranteedWinMode = savedGuaranteedWin === 'true';
+        const checkbox = document.getElementById('guaranteed-win-mode');
+        if (checkbox) checkbox.checked = gameState.guaranteedWinMode;
+    }
 }
 
 // אתחול
@@ -1138,10 +1264,21 @@ loadSettings(); // טען הגדרות שמורות
 initSounds();
 loadImagesFromStorage(); // טען תמונות שמורות
 loadBackgroundColor(); // טען צבע רקע שמור
+loadInventory(); // טען מלאי שמור
 initColorPicker(); // אתחל color picker
 initReels();
 manageTutorial(); // נהל את המדריך
 setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
+setupInventoryInputs(); // הגדר שדות מלאי
+
+// הגדר מאזין למצב זכייה מובטחת
+const guaranteedWinCheckbox = document.getElementById('guaranteed-win-mode');
+if (guaranteedWinCheckbox) {
+    guaranteedWinCheckbox.addEventListener('change', (e) => {
+        gameState.guaranteedWinMode = e.target.checked;
+        console.log('🎯 מצב זכייה מובטחת:', gameState.guaranteedWinMode ? 'מופעל' : 'כבוי');
+    });
+}
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
