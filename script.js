@@ -17,7 +17,8 @@ const gameState = {
         lose: null
     },
     guaranteedWinMode: false, // מצב זכייה מובטחת
-    inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0] // מלאי לכל אחד מ-9 הסמלים
+    inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
+    initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0] // הכמות המקורית של כל פרס
 };
 
 // אלמנטים
@@ -496,13 +497,16 @@ function checkWin() {
             const symbolIndex = gameState.winningSymbol;
             if (gameState.inventory[symbolIndex] > 0) {
                 gameState.inventory[symbolIndex]--;
+                const distributed = gameState.initialInventory[symbolIndex] - gameState.inventory[symbolIndex];
                 console.log(`📦 מלאי סמל ${symbolIndex} הופחת ל-${gameState.inventory[symbolIndex]}`);
+                console.log(`🎁 חולקו ${distributed} מתוך ${gameState.initialInventory[symbolIndex]} פרסים`);
 
                 // שמור את המלאי המעודכן
                 saveInventory();
 
-                // עדכן את תצוגת המלאי בממשק (אם פתוח)
+                // עדכן את תצוגת המלאי והקאונטר בממשק (אם פתוח)
                 updateInventoryDisplay();
+                updateCounter(symbolIndex);
             }
         }
 
@@ -647,7 +651,8 @@ let tempSettings = {
     mode: gameState.mode,
     backgroundColor: gameState.backgroundColor,
     guaranteedWinMode: gameState.guaranteedWinMode,
-    inventory: [...gameState.inventory]
+    inventory: [...gameState.inventory],
+    initialInventory: [...gameState.initialInventory]
 };
 
 // שמירת הגדרות
@@ -682,6 +687,7 @@ document.getElementById('close-settings').addEventListener('click', () => {
     gameState.mode = tempSettings.mode;
     gameState.guaranteedWinMode = tempSettings.guaranteedWinMode;
     gameState.inventory = [...tempSettings.inventory];
+    gameState.initialInventory = [...tempSettings.initialInventory];
 
     // עדכן את האלמנטים בממשק
     const winFreqSlider = document.getElementById('win-frequency');
@@ -709,6 +715,7 @@ document.getElementById('close-settings').addEventListener('click', () => {
 
     // החזר מלאי
     updateInventoryDisplay();
+    updateAllCounters();
 
     console.log('❌ ההגדרות לא נשמרו - חזרה להגדרות הקודמות');
 
@@ -724,7 +731,8 @@ function openSettings() {
         mode: gameState.mode,
         backgroundColor: gameState.backgroundColor,
         guaranteedWinMode: gameState.guaranteedWinMode,
-        inventory: [...gameState.inventory]
+        inventory: [...gameState.inventory],
+        initialInventory: [...gameState.initialInventory]
     };
     settingsScreen.classList.remove('hidden');
 }
@@ -1182,6 +1190,7 @@ function resetSound(soundType) {
 function saveInventory() {
     try {
         localStorage.setItem('prizeInventory', JSON.stringify(gameState.inventory));
+        localStorage.setItem('initialPrizeInventory', JSON.stringify(gameState.initialInventory));
         console.log('💾 מלאי נשמר:', gameState.inventory);
     } catch (e) {
         console.error('❌ שגיאה בשמירת מלאי:', e);
@@ -1192,11 +1201,20 @@ function saveInventory() {
 function loadInventory() {
     try {
         const savedInventory = localStorage.getItem('prizeInventory');
+        const savedInitialInventory = localStorage.getItem('initialPrizeInventory');
+
         if (savedInventory) {
             gameState.inventory = JSON.parse(savedInventory);
             console.log('✅ מלאי נטען:', gameState.inventory);
-            updateInventoryDisplay();
         }
+
+        if (savedInitialInventory) {
+            gameState.initialInventory = JSON.parse(savedInitialInventory);
+            console.log('✅ מלאי ראשוני נטען:', gameState.initialInventory);
+        }
+
+        updateInventoryDisplay();
+        updateAllCounters();
     } catch (e) {
         console.error('❌ שגיאה בטעינת מלאי:', e);
     }
@@ -1212,6 +1230,28 @@ function updateInventoryDisplay() {
     }
 }
 
+// עדכן קאונטר בודד
+function updateCounter(index) {
+    const counter = document.getElementById(`counter${index + 1}`);
+    if (counter) {
+        const distributed = gameState.initialInventory[index] - gameState.inventory[index];
+        const total = gameState.initialInventory[index];
+
+        const distributedSpan = counter.querySelector('.distributed');
+        const totalSpan = counter.querySelector('.total');
+
+        if (distributedSpan) distributedSpan.textContent = distributed;
+        if (totalSpan) totalSpan.textContent = total;
+    }
+}
+
+// עדכן את כל הקאונטרים
+function updateAllCounters() {
+    for (let i = 0; i < 9; i++) {
+        updateCounter(i);
+    }
+}
+
 // הגדר מאזינים לשדות המלאי
 function setupInventoryInputs() {
     for (let i = 0; i < 9; i++) {
@@ -1220,6 +1260,15 @@ function setupInventoryInputs() {
             input.addEventListener('input', (e) => {
                 const value = parseInt(e.target.value) || 0;
                 gameState.inventory[i] = Math.max(0, value); // מינימום 0
+
+                // עדכן גם את המלאי הראשוני אם זה גדול יותר
+                if (value > gameState.initialInventory[i]) {
+                    gameState.initialInventory[i] = value;
+                }
+
+                // עדכן את הקאונטר
+                updateCounter(i);
+
                 console.log(`📦 מלאי סמל ${i} עודכן ל-${gameState.inventory[i]}`);
             });
         }

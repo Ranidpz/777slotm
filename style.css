@@ -590,6 +590,28 @@ body {
     border-color: rgba(255, 215, 0, 0.5);
 }
 
+/* קאונטר חלוקת פרסים */
+.inventory-counter {
+    text-align: center;
+    padding: 4px 8px;
+    margin-top: 4px;
+    font-size: 0.8em;
+    color: rgba(255, 215, 0, 0.9);
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    direction: ltr;
+}
+
+.inventory-counter .distributed {
+    color: #4ade80;
+    font-weight: 700;
+}
+
+.inventory-counter .total {
+    color: rgba(255, 255, 255, 0.8);
+}
+
 /* עיצוב למובייל */
 @media (max-width: 768px) {
     .inventory-input-wrapper {
@@ -605,6 +627,11 @@ body {
 
     .inventory-input-wrapper label {
         font-size: 0.8em;
+    }
+
+    .inventory-counter {
+        font-size: 0.75em;
+        padding: 3px 6px;
     }
 }
 
