@@ -1154,3 +1154,179 @@ button:active {
     }
 }
 
+/* WhatsApp Number Input */
+.whatsapp-input-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#whatsapp-number {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 1.1em;
+    font-family: 'Assistant', monospace;
+    font-weight: 600;
+    text-align: center;
+    direction: ltr;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+#whatsapp-number:focus {
+    outline: none;
+    border-color: #ffd700;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#whatsapp-number::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+#clear-whatsapp {
+    padding: 12px 20px;
+}
+
+/* QR Code Popup */
+#qr-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+#qr-popup.hidden {
+    display: none;
+    animation: none;
+}
+
+.qr-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow:
+        0 0 60px rgba(255, 215, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    text-align: center;
+    transform: scale(0.5);
+    animation: popIn 0.5s ease-out 0.2s forwards;
+    border: 3px solid rgba(255, 215, 0, 0.5);
+}
+
+.qr-content h2 {
+    color: #ffd700;
+    font-size: 2em;
+    margin-bottom: 25px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    font-family: 'Assistant', sans-serif;
+    font-weight: 700;
+}
+
+#qr-code-container {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    display: inline-block;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+#qr-code-container canvas,
+#qr-code-container img {
+    display: block;
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+}
+
+.qr-message {
+    color: #fff;
+    font-size: 1.2em;
+    margin-top: 15px;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 500;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.5) translateY(-100px);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05) translateY(0);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive for QR Popup */
+@media (max-width: 768px) {
+    .qr-content {
+        padding: 30px;
+        max-width: 90%;
+    }
+
+    .qr-content h2 {
+        font-size: 1.6em;
+    }
+
+    #qr-code-container {
+        padding: 15px;
+    }
+
+    #qr-code-container canvas,
+    #qr-code-container img {
+        max-width: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .qr-content {
+        padding: 25px;
+    }
+
+    .qr-content h2 {
+        font-size: 1.4em;
+        margin-bottom: 20px;
+    }
+
+    #qr-code-container {
+        padding: 12px;
+    }
+
+    #qr-code-container canvas,
+    #qr-code-container img {
+        max-width: 200px;
+    }
+
+    .qr-message {
+        font-size: 1em;
+    }
+}
+

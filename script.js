@@ -11,6 +11,7 @@ const gameState = {
     totalSymbols: 9, // מספר כולל של סמלים במשחק
     soundEnabled: true, // האם צלילים מופעלים
     backgroundColor: '#667eea', // צבע הרקע ברירת מחדל
+    whatsappNumber: '', // מספר WhatsApp להצגת QR code בזכייה
     customSounds: { // צלילים מותאמים אישית
         spin: null,
         win: null,
@@ -441,7 +442,7 @@ function checkWin() {
             return symbolElement?.textContent;
         }
     });
-    
+
     // הצג את הסמלים שנבדקים
     console.log('🎰 סמלים במרכז:', displayedSymbols);
 
@@ -460,15 +461,80 @@ function checkWin() {
         setTimeout(() => {
             winOverlay.classList.remove('flashing');
             winOverlay.classList.add('hidden');
+
+            // הצג QR code אם יש מספר WhatsApp
+            showQRCodeIfNeeded();
         }, 1500);
     } else {
         playSound('lose');
         console.log(`❌ לא זכייה. הסמלים: [${displayedSymbols[0]}] [${displayedSymbols[1]}] [${displayedSymbols[2]}]`);
     }
-    
+
     // נקה את הסמל הראשון
     delete gameState.firstSymbol;
     delete gameState.winningSymbol;
+}
+
+// הצג QR code אם הוגדר מספר WhatsApp
+function showQRCodeIfNeeded() {
+    const whatsappNumber = gameState.whatsappNumber.trim();
+
+    if (!whatsappNumber) {
+        console.log('💬 לא הוגדר מספר WhatsApp - מדלג על QR code');
+        return;
+    }
+
+    console.log('📱 מציג QR code למספר WhatsApp:', whatsappNumber);
+
+    // יצור הודעת WhatsApp
+    const message = encodeURIComponent('היי! זכיתי במכונת המזל! 🎰🎉');
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+    // יצור QR code באמצעות API
+    generateQRCode(whatsappURL);
+}
+
+// יצירת QR code
+function generateQRCode(url) {
+    const qrPopup = document.getElementById('qr-popup');
+    const qrContainer = document.getElementById('qr-code-container');
+
+    if (!qrPopup || !qrContainer) {
+        console.error('❌ לא נמצאו אלמנטי QR popup');
+        return;
+    }
+
+    // נקה תוכן קודם
+    qrContainer.innerHTML = '';
+
+    // צור QR code באמצעות API חיצוני
+    const qrSize = 300;
+    const qrImage = document.createElement('img');
+    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(url)}`;
+    qrImage.alt = 'QR Code for WhatsApp';
+    qrImage.style.maxWidth = '100%';
+    qrImage.style.height = 'auto';
+
+    qrContainer.appendChild(qrImage);
+
+    // הצג את ה-popup
+    qrPopup.classList.remove('hidden');
+
+    // סגור אוטומטית אחרי 8 שניות
+    setTimeout(() => {
+        closeQRPopup();
+    }, 8000);
+
+    console.log('✅ QR code נוצר והוצג בהצלחה');
+}
+
+// סגירת QR popup
+function closeQRPopup() {
+    const qrPopup = document.getElementById('qr-popup');
+    if (qrPopup) {
+        qrPopup.classList.add('hidden');
+        console.log('🔒 QR popup נסגר');
+    }
 }
 
 // פונקציה להפעלת המכונה
@@ -592,7 +658,8 @@ let tempSettings = {
     winFrequency: gameState.winFrequency,
     soundEnabled: gameState.soundEnabled,
     mode: gameState.mode,
-    backgroundColor: gameState.backgroundColor
+    backgroundColor: gameState.backgroundColor,
+    whatsappNumber: gameState.whatsappNumber
 };
 
 // שמירת הגדרות
@@ -604,6 +671,12 @@ document.getElementById('save-settings').addEventListener('click', () => {
 
     if (gameState.backgroundColor) {
         localStorage.setItem('backgroundColor', gameState.backgroundColor);
+    }
+
+    // שמור מספר WhatsApp
+    if (gameState.whatsappNumber) {
+        localStorage.setItem('whatsappNumber', gameState.whatsappNumber);
+        console.log('📱 מספר WhatsApp נשמר:', gameState.whatsappNumber);
     }
 
     // שמור גם את הצלילים המותאמים
@@ -621,17 +694,20 @@ document.getElementById('close-settings').addEventListener('click', () => {
     gameState.winFrequency = tempSettings.winFrequency;
     gameState.soundEnabled = tempSettings.soundEnabled;
     gameState.mode = tempSettings.mode;
+    gameState.whatsappNumber = tempSettings.whatsappNumber;
 
     // עדכן את האלמנטים בממשק
     const winFreqSlider = document.getElementById('win-frequency');
     const winFreqValue = document.getElementById('win-frequency-value');
     const winFreqText = document.getElementById('win-frequency-text');
     const soundCheckbox = document.getElementById('sound-enabled');
+    const whatsappInput = document.getElementById('whatsapp-number');
 
     if (winFreqSlider) winFreqSlider.value = gameState.winFrequency;
     if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
     if (winFreqText) winFreqText.textContent = gameState.winFrequency;
     if (soundCheckbox) soundCheckbox.checked = gameState.soundEnabled;
+    if (whatsappInput) whatsappInput.value = gameState.whatsappNumber;
 
     // עדכן את הרדיו של מצב המשחק
     document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
@@ -656,7 +732,8 @@ function openSettings() {
         winFrequency: gameState.winFrequency,
         soundEnabled: gameState.soundEnabled,
         mode: gameState.mode,
-        backgroundColor: gameState.backgroundColor
+        backgroundColor: gameState.backgroundColor,
+        whatsappNumber: gameState.whatsappNumber
     };
     settingsScreen.classList.remove('hidden');
 }
@@ -1131,6 +1208,54 @@ function loadSettings() {
             radio.checked = radio.value === savedMode;
         });
     }
+
+    // טען מספר WhatsApp
+    const savedWhatsApp = localStorage.getItem('whatsappNumber');
+    if (savedWhatsApp) {
+        gameState.whatsappNumber = savedWhatsApp;
+        const whatsappInput = document.getElementById('whatsapp-number');
+        if (whatsappInput) {
+            whatsappInput.value = savedWhatsApp;
+        }
+        console.log('📱 מספר WhatsApp נטען:', savedWhatsApp);
+    }
+}
+
+// הגדרת מאזינים למספר WhatsApp
+function setupWhatsAppInput() {
+    const whatsappInput = document.getElementById('whatsapp-number');
+    const clearBtn = document.getElementById('clear-whatsapp');
+
+    if (whatsappInput) {
+        // שמור בזמן הקלדה
+        whatsappInput.addEventListener('input', (e) => {
+            const value = e.target.value.trim();
+            gameState.whatsappNumber = value;
+            console.log('📱 מספר WhatsApp עודכן:', value);
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (whatsappInput) {
+                whatsappInput.value = '';
+                gameState.whatsappNumber = '';
+                localStorage.removeItem('whatsappNumber');
+                console.log('🗑️ מספר WhatsApp נמחק');
+            }
+        });
+    }
+
+    // הוסף סגירה ללחיצה על QR popup
+    const qrPopup = document.getElementById('qr-popup');
+    if (qrPopup) {
+        qrPopup.addEventListener('click', (e) => {
+            // אם לוחצים על הרקע (לא על התוכן), סגור
+            if (e.target === qrPopup) {
+                closeQRPopup();
+            }
+        });
+    }
 }
 
 // אתחול
@@ -1142,6 +1267,7 @@ initColorPicker(); // אתחל color picker
 initReels();
 manageTutorial(); // נהל את המדריך
 setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
+setupWhatsAppInput(); // הגדר שדה WhatsApp
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');

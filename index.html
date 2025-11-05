@@ -54,6 +54,14 @@
 
     <div id="win-overlay" class="hidden"></div>
 
+    <div id="qr-popup" class="hidden">
+        <div class="qr-content">
+            <h2>סרוק להודעת WhatsApp</h2>
+            <div id="qr-code-container"></div>
+            <p class="qr-message">סרוק את הקוד כדי לשלוח הודעה</p>
+        </div>
+    </div>
+
     <div id="settings-screen" class="hidden">
         <div class="settings-content">
             <h2>הגדרות</h2>
@@ -109,6 +117,15 @@
                     <span id="win-frequency-value">3</span>
                 </div>
                 <p class="setting-note">ערך נוכחי: זכייה כל <span id="win-frequency-text">3</span> נסיונות</p>
+            </div>
+
+            <div class="setting-group">
+                <h3>הודעת WhatsApp בזכייה</h3>
+                <p class="setting-description">הזן מספר WhatsApp (עם קידומת בינלאומית, לדוגמה: 972501234567) כדי להציג QR code אחרי זכייה</p>
+                <div class="whatsapp-input-container">
+                    <input type="text" id="whatsapp-number" placeholder="972501234567" maxlength="20">
+                    <button id="clear-whatsapp" class="small-btn">נקה</button>
+                </div>
             </div>
 
             <div class="setting-group">
