@@ -554,20 +554,47 @@ function checkWin() {
     if (isWin) {
         console.log(`🎉 ניצחון! כל 3 הסמלים זהים: ${displayedSymbols[0]}`);
 
-        // אם במצב זכייה מובטחת, הפחת מהמלאי
-        if (gameState.guaranteedWinMode && gameState.winningSymbol !== undefined) {
-            const symbolIndex = gameState.winningSymbol;
+        // Notify remote control about win
+        if (window.sessionManager) {
+            sessionManager.storeSpinResult(true);
+        }
 
+        // זהה את הסמל שזכה - תמיד צריך להפחית מהמלאי
+        let symbolIndex = gameState.winningSymbol;
+
+        // אם winningSymbol לא מוגדר, זהה לפי התמונה/טקסט המוצג
+        if (symbolIndex === undefined) {
+            const winningSymbolDisplay = displayedSymbols[0];
+
+            // אם זה תמונה (URL), חפש אותה במערכת התמונות הדינמיות
+            if (window.dynamicImagesManager && winningSymbolDisplay && winningSymbolDisplay.includes('blob:')) {
+                symbolIndex = dynamicImagesManager.findSymbolIndexByImageUrl(winningSymbolDisplay);
+                console.log(`🔍 זוהה סמל ${symbolIndex} לפי URL התמונה`);
+            }
+        }
+
+        // אם עדיין לא זוהה, נסה לפי הסמל הטקסטואלי
+        if (symbolIndex === undefined) {
+            const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🍓'];
+            symbolIndex = symbols.indexOf(displayedSymbols[0]);
+            if (symbolIndex >= 0) {
+                console.log(`🔍 זוהה סמל ${symbolIndex} לפי אימוג'י טקסט`);
+            }
+        }
+
+        // עדכן מלאי רק אם זוהה הסמל בהצלחה
+        if (symbolIndex !== undefined && symbolIndex >= 0) {
             // עדכן את הפרס האחרון שזכה (לרנדומליות)
             gameState.lastWinningSymbol = symbolIndex;
 
             // עדכן מלאי במערכת החדשה (תמונות דינמיות)
             if (window.dynamicImagesManager) {
                 dynamicImagesManager.decrementInventoryBySymbolIndex(symbolIndex);
+                console.log(`📦 מלאי תמונה ${symbolIndex} הופחת`);
             }
 
             // עדכן גם במערכת הישנה (לתאימות לאחור)
-            if (gameState.inventory[symbolIndex] > 0) {
+            if (gameState.inventory[symbolIndex] !== undefined && gameState.inventory[symbolIndex] > 0) {
                 gameState.inventory[symbolIndex]--;
                 const distributed = gameState.initialInventory[symbolIndex] - gameState.inventory[symbolIndex];
                 console.log(`📦 מלאי סמל ${symbolIndex} הופחת ל-${gameState.inventory[symbolIndex]}`);
@@ -580,6 +607,8 @@ function checkWin() {
                 updateInventoryDisplay();
                 updateCounter(symbolIndex);
             }
+        } else {
+            console.warn(`⚠️ לא הצלחנו לזהות את הסמל שזכה: ${displayedSymbols[0]}`);
         }
 
         playSound('win');
@@ -594,6 +623,11 @@ function checkWin() {
             showQRCodeIfNeeded();
         }, 1500);
     } else {
+        // Notify remote control about loss
+        if (window.sessionManager) {
+            sessionManager.storeSpinResult(false);
+        }
+
         playSound('lose');
         console.log(`❌ לא זכייה. הסמלים: [${displayedSymbols[0]}] [${displayedSymbols[1]}] [${displayedSymbols[2]}]`);
     }

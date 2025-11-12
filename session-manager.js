@@ -259,6 +259,9 @@ class SessionManager {
 
       // DON'T play buzzer sound here - let the game handle it
 
+      // Store reference to check result later
+      this.currentSpinPlayerId = playerId;
+
       // Trigger spin (if in automatic mode)
       if (typeof triggerSpin === 'function' && gameState.mode === 'automatic') {
         triggerSpin();
@@ -267,7 +270,7 @@ class SessionManager {
       // Wait for spin to complete (automatic mode: ~4-5 seconds)
       const spinDuration = gameState.mode === 'automatic' ? 5000 : 8000;
 
-      // Wait for spin to complete, then check if player has attempts left
+      // Wait for spin to complete, then check result and update player
       setTimeout(async () => {
         // Get updated player data to check actual attempts left
         const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${playerId}`);
@@ -286,6 +289,22 @@ class SessionManager {
           await getNextPlayer(this.sessionId);
         }
       }, spinDuration + 1000); // Wait for spin animation to complete
+    }
+  }
+
+  // Store spin result for current player
+  async storeSpinResult(isWin) {
+    if (!this.currentSpinPlayerId) return;
+
+    try {
+      await firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`).update({
+        lastResult: isWin ? 'win' : 'loss',
+        lastResultTime: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      console.log(`📊 Stored ${isWin ? 'WIN' : 'LOSS'} result for player:`, this.currentSpinPlayerId);
+    } catch (error) {
+      console.error('❌ Error storing spin result:', error);
     }
   }
 

@@ -472,6 +472,97 @@ body {
 }
 
 /* ============================================
+   WIN/LOSS RESULT SCREENS
+   ============================================ */
+
+.result-container {
+    text-align: center;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.win-container {
+    border: 2px solid rgba(68, 255, 68, 0.5);
+    background: rgba(68, 255, 68, 0.05);
+}
+
+.loss-container {
+    border: 2px solid rgba(255, 170, 0, 0.5);
+    background: rgba(255, 170, 0, 0.05);
+}
+
+.result-icon {
+    font-size: 6em;
+    margin-bottom: 20px;
+    animation: scaleIn 0.6s ease;
+}
+
+.win-icon {
+    animation: scaleIn 0.6s ease, celebrate 1.5s ease 0.6s;
+}
+
+@keyframes celebrate {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.1) rotate(-10deg);
+    }
+    75% {
+        transform: scale(1.1) rotate(10deg);
+    }
+}
+
+.loss-icon {
+    opacity: 0.9;
+}
+
+.result-container h2 {
+    font-size: 2.2em;
+    margin-bottom: 15px;
+    font-weight: 800;
+}
+
+.win-container h2 {
+    color: #44ff44;
+    text-shadow: 0 0 20px rgba(68, 255, 68, 0.5);
+}
+
+.loss-container h2 {
+    color: #ffaa00;
+}
+
+.result-message {
+    font-size: 1.3em;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+.attempts-info {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 25px 0;
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #ffd700;
+}
+
+.result-container .primary-btn {
+    margin-top: 20px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ============================================
    TIMEOUT SCREEN
    ============================================ */
 

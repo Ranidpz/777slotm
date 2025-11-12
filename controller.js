@@ -92,6 +92,16 @@ class MobileController {
       this.showScreen('connection-screen');
     });
 
+    // Continue after win button
+    document.getElementById('continue-after-win-btn').addEventListener('click', () => {
+      this.handleContinueAfterResult();
+    });
+
+    // Continue after loss button
+    document.getElementById('continue-after-loss-btn').addEventListener('click', () => {
+      this.handleContinueAfterResult();
+    });
+
     // Refresh button
     document.getElementById('refresh-btn').addEventListener('click', () => {
       location.reload();
@@ -195,6 +205,17 @@ class MobileController {
   handlePlayerStateChange(player) {
     console.log('🔄 Player state:', player.status);
 
+    // Check if there's a result to show
+    if (player.lastResult && player.status === 'played') {
+      if (player.lastResult === 'win') {
+        this.showWinResultScreen(player);
+        return;
+      } else if (player.lastResult === 'loss') {
+        this.showLossResultScreen(player);
+        return;
+      }
+    }
+
     switch (player.status) {
       case 'waiting':
         this.showWaitingScreen(player);
@@ -205,7 +226,10 @@ class MobileController {
         break;
 
       case 'played':
-        this.showPressedScreen();
+        // Only show pressed screen if no result yet
+        if (!player.lastResult) {
+          this.showPressedScreen();
+        }
         break;
 
       case 'timeout':
@@ -279,6 +303,57 @@ class MobileController {
     this.stopTimer();
     this.showScreen('pressed-screen');
     this.vibrate([200, 100, 200]);
+  }
+
+  // Show win result screen
+  showWinResultScreen(player) {
+    this.stopTimer();
+    this.showScreen('win-result-screen');
+
+    // Update attempts left display
+    const attemptsLeft = document.getElementById('win-attempts-left');
+    if (attemptsLeft) {
+      attemptsLeft.textContent = player.attemptsLeft || 0;
+    }
+
+    // Vibrate with celebration pattern
+    this.vibrate([100, 50, 100, 50, 100, 50, 200]);
+  }
+
+  // Show loss result screen
+  showLossResultScreen(player) {
+    this.stopTimer();
+    this.showScreen('loss-result-screen');
+
+    // Update attempts left display
+    const attemptsLeft = document.getElementById('loss-attempts-left');
+    if (attemptsLeft) {
+      attemptsLeft.textContent = player.attemptsLeft || 0;
+    }
+
+    // Vibrate with gentle pattern
+    this.vibrate([100, 100, 100]);
+  }
+
+  // Handle continue after result
+  async handleContinueAfterResult() {
+    console.log('▶️ Continue button pressed');
+
+    // Vibrate feedback
+    this.vibrate(100);
+
+    // Clear the result in Firebase so it doesn't show again
+    if (this.sessionId && this.playerId) {
+      try {
+        await firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}/lastResult`).remove();
+        console.log('✅ Result cleared, waiting for next turn...');
+      } catch (error) {
+        console.error('❌ Error clearing result:', error);
+      }
+    }
+
+    // The player state will update automatically via Firebase listener
+    // It will either go back to waiting or active for next attempt
   }
 
   // Show timeout screen

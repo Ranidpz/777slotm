@@ -95,6 +95,42 @@
             </div>
         </div>
 
+        <!-- Win Result Screen -->
+        <div id="win-result-screen" class="screen">
+            <div class="result-container win-container">
+                <div class="result-icon win-icon">🎉</div>
+                <h2>כל הכבוד! זכיתם</h2>
+                <p class="result-message">עקבו אחר ההוראות במסך או גשו לקבל את הפרס</p>
+
+                <div class="attempts-info">
+                    <p>נסיונות שנותרו: <span id="win-attempts-left">0</span></p>
+                </div>
+
+                <button id="continue-after-win-btn" class="primary-btn">
+                    <span class="btn-icon">▶️</span>
+                    <span>המשך</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loss Result Screen -->
+        <div id="loss-result-screen" class="screen">
+            <div class="result-container loss-container">
+                <div class="result-icon loss-icon">😔</div>
+                <h2>לא נורא נסו שוב</h2>
+                <p class="result-message">זה לא היה הפעם, אבל עוד יש סיכוי!</p>
+
+                <div class="attempts-info">
+                    <p>נסיונות שנותרו: <span id="loss-attempts-left">0</span></p>
+                </div>
+
+                <button id="continue-after-loss-btn" class="primary-btn">
+                    <span class="btn-icon">▶️</span>
+                    <span>המשך</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Timeout Screen -->
         <div id="timeout-screen" class="screen">
             <div class="timeout-container">
