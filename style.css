@@ -180,16 +180,16 @@ body {
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
     line-height: 50px;
-    padding: 8px 0;
+    padding: 12px 0 6px 0;
     animation: scroll-rtl 20s linear infinite;
 }
 
 @keyframes scroll-rtl {
     0% {
-        transform: translateX(100%);
+        transform: translateX(-100%);
     }
     100% {
-        transform: translateX(-100%);
+        transform: translateX(100%);
     }
 }
 
