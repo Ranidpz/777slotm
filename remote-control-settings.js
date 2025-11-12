@@ -4,6 +4,7 @@
 function setupRemoteControlToggle() {
     const remoteControlCheckbox = document.getElementById('remote-control-enabled');
     const qrContainer = document.getElementById('qr-container');
+    const attemptsContainer = document.getElementById('remote-attempts-container');
 
     if (remoteControlCheckbox) {
         // טען הגדרה שמורה
@@ -17,6 +18,11 @@ function setupRemoteControlToggle() {
             qrContainer.style.display = isEnabled ? 'block' : 'none';
         }
 
+        // הצג או הסתר את הסליידר של ניסיונות
+        if (attemptsContainer) {
+            attemptsContainer.style.display = isEnabled ? 'block' : 'none';
+        }
+
         console.log(`🎮 שליטה מרחוק: ${isEnabled ? 'מופעל' : 'כבוי'}`);
 
         // מאזין לשינויים
@@ -27,6 +33,11 @@ function setupRemoteControlToggle() {
             // הצג או הסתר את ה-QR container
             if (qrContainer) {
                 qrContainer.style.display = enabled ? 'block' : 'none';
+            }
+
+            // הצג או הסתר את הסליידר של ניסיונות
+            if (attemptsContainer) {
+                attemptsContainer.style.display = enabled ? 'block' : 'none';
             }
 
             console.log(`🎮 שליטה מרחוק ${enabled ? 'הופעל' : 'כובה'}`);
@@ -47,14 +58,12 @@ function setupRemoteControlToggle() {
 function setupMaxAttemptsControl() {
     const attemptsSlider = document.getElementById('max-player-attempts');
     const attemptsValue = document.getElementById('max-attempts-value');
-    const attemptsText = document.getElementById('max-attempts-text');
 
-    if (attemptsSlider && attemptsValue && attemptsText) {
+    if (attemptsSlider && attemptsValue) {
         // טען ערך שמור או ברירת מחדל
         const savedValue = localStorage.getItem('maxPlayerAttempts') || '3';
         attemptsSlider.value = savedValue;
         attemptsValue.textContent = savedValue;
-        attemptsText.textContent = savedValue;
 
         console.log(`🎮 מספר נסיונות לשחקן נטען: ${savedValue}`);
 
@@ -62,7 +71,6 @@ function setupMaxAttemptsControl() {
         attemptsSlider.addEventListener('input', (e) => {
             const value = e.target.value;
             attemptsValue.textContent = value;
-            attemptsText.textContent = value;
             localStorage.setItem('maxPlayerAttempts', value);
             console.log(`🎮 מספר נסיונות לשחקן עודכן: ${value}`);
         });

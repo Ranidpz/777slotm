@@ -178,7 +178,13 @@
                         <input type="checkbox" id="remote-control-enabled" checked>
                         <span>הצג QR Code</span>
                     </label>
-                    <p class="setting-description">הצגת QR למשחק דרך טלפון</p>
+                    <div id="remote-attempts-container" style="margin-top: 15px;">
+                        <p class="setting-description">נסיונות לשחקן:</p>
+                        <div class="slider-container">
+                            <input type="range" id="max-player-attempts" min="0" max="10" value="3" step="1">
+                            <span id="max-attempts-value">3</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -242,19 +248,6 @@
                     </label>
                     <p class="setting-description">זכייה תמיד, הפרס לפי המלאי</p>
                 </div>
-            </div>
-
-            <div class="settings-divider"></div>
-
-            <!-- Remote Control Settings -->
-            <div class="setting-group">
-                <h3>🎮 שליטה מרחוק (QR Code)</h3>
-                <p class="setting-description">מספר נסיונות לכל שחקן שמתחבר דרך הטלפון</p>
-                <div class="slider-container">
-                    <input type="range" id="max-player-attempts" min="1" max="10" value="3" step="1">
-                    <span id="max-attempts-value">3</span>
-                </div>
-                <p class="setting-note">כל שחקן יוכל לשחק <span id="max-attempts-text">3</span> פעמים</p>
             </div>
 
             <div class="settings-divider"></div>
