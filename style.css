@@ -180,6 +180,7 @@ body {
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
     line-height: 50px;
+    padding: 8px 0;
     animation: scroll-rtl 20s linear infinite;
 }
 
