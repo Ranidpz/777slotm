@@ -38,11 +38,6 @@ body {
     overflow: hidden;
     position: relative;
     border: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.reel-container:last-child {
-    border-right: none;
 }
 
 .reel {
@@ -61,8 +56,7 @@ body {
     align-items: center;
     font-size: clamp(60px, 12vmin, 200px);
     background: linear-gradient(180deg, #2d3561 0%, #1f2544 100%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    text-shadow: 
+    text-shadow:
         0 0 20px rgba(255, 215, 0, 0.6),
         0 0 40px rgba(255, 215, 0, 0.4),
         0 0 60px rgba(255, 215, 0, 0.2);
