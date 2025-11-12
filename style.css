@@ -1868,10 +1868,25 @@ button:active {
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
 }
 
-/* QR Instructions Container - Horizontal Layout */
-.qr-instructions-container {
-    margin-top: 25px;
-    width: 100%;
+/* QR Main Layout - Side by Side */
+.qr-main-layout {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 30px;
+    margin: 25px 0;
+    direction: rtl;
+}
+
+/* QR Code Section - Right Side */
+.qr-code-section {
+    flex: 0 0 auto;
+}
+
+/* Steps Section - Left Side */
+.qr-steps-section {
+    flex: 1;
+    max-width: 400px;
 }
 
 .qr-main-title {
@@ -1880,35 +1895,43 @@ button:active {
     margin-bottom: 20px;
     font-family: 'Assistant', sans-serif;
     font-weight: 700;
-    text-align: center;
+    text-align: right;
 }
 
-.qr-steps-horizontal {
+/* Vertical Steps List */
+.qr-steps-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.qr-step-item {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 15px;
-    flex-wrap: wrap;
+    padding: 15px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    transition: all 0.3s ease;
     direction: rtl;
 }
 
-.qr-step {
-    flex: 1;
-    min-width: 150px;
-    max-width: 200px;
-    background: rgba(255, 215, 0, 0.1);
-    border: 2px solid rgba(255, 215, 0, 0.4);
-    border-radius: 12px;
-    padding: 15px;
-    text-align: center;
-    transition: all 0.3s ease;
+.qr-step-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+    border-color: rgba(255, 215, 0, 0.5);
+    transform: translateX(-5px);
 }
 
-.qr-step:hover {
-    background: rgba(255, 215, 0, 0.15);
-    border-color: #ffd700;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+.qr-step-item p {
+    flex: 1;
+    font-size: 1em;
+    line-height: 1.5;
+    margin: 0;
+    color: #fff;
+    text-align: right;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 500;
 }
 
 .step-number {
@@ -1922,25 +1945,9 @@ button:active {
     justify-content: center;
     font-size: 1.3em;
     font-weight: 800;
-    margin: 0 auto 12px;
+    flex-shrink: 0;
     box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
     font-family: 'Assistant', sans-serif;
-}
-
-.qr-step p {
-    color: #fff;
-    font-size: 0.95em;
-    line-height: 1.5;
-    margin: 0;
-    font-family: 'Assistant', sans-serif;
-    font-weight: 500;
-}
-
-.qr-arrow {
-    color: #ffd700;
-    font-size: 2em;
-    font-weight: bold;
-    animation: arrowPulse 1.5s ease-in-out infinite;
 }
 
 /* QR Custom Message - מתחת לשלבים */
@@ -2028,8 +2035,25 @@ button:active {
         font-size: 1.8em;
     }
 
-    .qr-instructions {
-        font-size: 1.1em;
+    /* Stack QR and steps vertically on tablets */
+    .qr-main-layout {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .qr-code-section {
+        order: 1;
+    }
+
+    .qr-steps-section {
+        order: 2;
+        max-width: 100%;
+    }
+
+    .qr-main-title {
+        font-size: 1.2em;
+        text-align: center;
     }
 
     #qr-code-container {
@@ -2041,24 +2065,12 @@ button:active {
         max-width: 250px;
     }
 
-    .qr-steps-horizontal {
-        flex-direction: column;
-        gap: 10px;
+    .qr-step-item {
+        padding: 12px;
     }
 
-    .qr-step {
-        max-width: 100%;
-        width: 100%;
-    }
-
-    .qr-arrow {
-        transform: rotate(90deg);
-        font-size: 1.5em;
-    }
-
-    .qr-main-title {
-        font-size: 1.2em;
-        margin-bottom: 15px;
+    .qr-step-item p {
+        font-size: 0.95em;
     }
 
     .qr-powered-by {
@@ -2089,14 +2101,21 @@ button:active {
         margin-bottom: 15px;
     }
 
-    .qr-instructions {
-        font-size: 1em;
+    /* Keep vertical layout on mobile */
+    .qr-main-layout {
+        flex-direction: column;
+        gap: 15px;
+        margin: 15px 0;
+    }
+
+    .qr-main-title {
+        font-size: 1.1em;
         margin-bottom: 12px;
     }
 
     #qr-code-container {
         padding: 10px;
-        margin: 15px 0;
+        margin: 0;
     }
 
     #qr-code-container canvas,
@@ -2104,37 +2123,28 @@ button:active {
         max-width: 180px;
     }
 
-    .qr-message {
-        font-size: 0.95em;
-    }
-
-    .qr-step {
+    .qr-step-item {
         padding: 10px;
+        gap: 12px;
     }
 
-    .qr-step p {
-        font-size: 0.85em;
+    .qr-step-item p {
+        font-size: 0.9em;
     }
 
     .step-number {
-        width: 28px;
-        height: 28px;
-        font-size: 1em;
-        margin-bottom: 8px;
-    }
-
-    .qr-continue {
-        font-size: 1em;
-        margin-top: 12px;
+        width: 30px;
+        height: 30px;
+        font-size: 1.1em;
     }
 
     .qr-custom-message {
-        margin-top: 12px;
-        padding: 10px 12px;
+        margin-top: 15px;
+        padding: 12px 15px;
     }
 
     .qr-custom-message p {
-        font-size: 0.95em;
+        font-size: 1em;
     }
 
     .qr-powered-by {
@@ -2149,12 +2159,6 @@ button:active {
 
     .qr-powered-by span {
         font-size: 8px;
-    }
-
-    .qr-steps {
-        font-size: 1em;
-        max-width: 100%;
-        padding: 0 10px;
     }
 }
 

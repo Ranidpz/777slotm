@@ -62,38 +62,42 @@
     <div id="qr-popup" class="hidden">
         <div class="qr-content">
             <h2>🎉 מזל טוב! זכית! 🎉</h2>
-            <div id="qr-code-container"></div>
 
-            <div class="qr-instructions-container">
-                <p class="qr-main-title">השלבים הבאים:</p>
-                <div class="qr-steps-horizontal">
-                    <div class="qr-step">
-                        <div class="step-number">1</div>
-                        <p>סרקו את הקוד לשליחת מסך הזכייה בוואטסאפ</p>
-                    </div>
-                    <div class="qr-arrow">→</div>
-                    <div class="qr-step">
-                        <div class="step-number">2</div>
-                        <p>לחצו כאן על המסך או על הבאזר לחזרה אל מסך הזכייה</p>
-                    </div>
-                    <div class="qr-arrow">→</div>
-                    <div class="qr-step">
-                        <div class="step-number">3</div>
-                        <p>צלמו סלפי שלכם עם מסך הזכייה</p>
-                    </div>
-                    <div class="qr-arrow">→</div>
-                    <div class="qr-step">
-                        <div class="step-number">4</div>
-                        <p>שלחו לנו את התמונה</p>
-                    </div>
+            <!-- QR Code and Steps side by side -->
+            <div class="qr-main-layout">
+                <!-- Right side: QR Code -->
+                <div class="qr-code-section">
+                    <div id="qr-code-container"></div>
                 </div>
 
-                <div class="qr-custom-message" id="qr-custom-message">
-                    <p>אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸</p>
+                <!-- Left side: Steps -->
+                <div class="qr-steps-section">
+                    <p class="qr-main-title">השלבים הבאים:</p>
+                    <div class="qr-steps-vertical">
+                        <div class="qr-step-item">
+                            <div class="step-number">1</div>
+                            <p>סרקו את הקוד לשליחת מסך הזכייה בוואטסאפ</p>
+                        </div>
+                        <div class="qr-step-item">
+                            <div class="step-number">2</div>
+                            <p>לחצו כאן על המסך או על הבאזר לחזרה אל מסך הזכייה</p>
+                        </div>
+                        <div class="qr-step-item">
+                            <div class="step-number">3</div>
+                            <p>צלמו סלפי שלכם עם מסך הזכייה</p>
+                        </div>
+                        <div class="qr-step-item">
+                            <div class="step-number">4</div>
+                            <p>שלחו לנו את התמונה</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <p class="qr-continue">👆 לחצו כדי לחזור למסך הזכייה ולצלם 📸</p>
+            <!-- Custom message at the bottom -->
+            <div class="qr-custom-message" id="qr-custom-message">
+                <p>👈 לחצו כדי לחזור למסך הזכייה ולצלם 📸 אחרי שסרקתם את הקוד למעלה</p>
+            </div>
 
             <!-- Powered by Playzone -->
             <div class="qr-powered-by">
