@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>שליטה מרחוק - מכונת מזל 777</title>
+
+    <!-- Google Fonts - Assistant for Hebrew -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Controller Styles -->
+    <link rel="stylesheet" href="controller.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div id="controller-app">
+        <!-- Connection Screen -->
+        <div id="connection-screen" class="screen active">
+            <div class="logo-container">
+                <div class="slot-icon">🎰</div>
+                <h1>מכונת מזל 777</h1>
+                <p class="subtitle">שליטה מרחוק</p>
+            </div>
+
+            <div class="form-container">
+                <label for="player-name-input">הכנס את שמך:</label>
+                <input
+                    type="text"
+                    id="player-name-input"
+                    placeholder="השם שלך"
+                    maxlength="20"
+                    autocomplete="name"
+                >
+
+                <button id="connect-btn" class="primary-btn">
+                    <span class="btn-icon">🎮</span>
+                    <span>התחבר למשחק</span>
+                </button>
+
+                <p class="info-text">לחץ להתחבר ולהתחיל לשחק!</p>
+            </div>
+
+            <div class="error-message" id="error-message" style="display: none;"></div>
+        </div>
+
+        <!-- Waiting Screen -->
+        <div id="waiting-screen" class="screen">
+            <div class="status-container">
+                <div class="spinner"></div>
+                <h2>מחכה לתורך...</h2>
+                <p class="player-name-display">שלום, <span id="waiting-player-name"></span>!</p>
+                <p class="waiting-message">המשחק מלא כרגע. נא להמתין שהמתקן יתפנה.</p>
+
+                <div class="queue-info">
+                    <div class="queue-icon">👥</div>
+                    <p>מיקום בתור: <span id="queue-position">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Playing Screen -->
+        <div id="playing-screen" class="screen">
+            <div class="player-header">
+                <h2>שלום, <span id="active-player-name"></span>!</h2>
+                <p class="attempts-left">נסיונות שנותרו: <span id="attempts-count">3</span></p>
+            </div>
+
+            <div class="timer-circle" id="timer-circle">
+                <div class="timer-number" id="timer-number">10</div>
+                <svg class="timer-svg">
+                    <circle class="timer-circle-bg" cx="90" cy="90" r="80"></circle>
+                    <circle class="timer-circle-progress" cx="90" cy="90" r="80" id="timer-progress-circle"></circle>
+                </svg>
+            </div>
+
+            <button id="buzz-btn" class="buzz-btn">
+                <span class="buzz-icon">⚡</span>
+                <span class="buzz-text">לחץ לעצירה!</span>
+            </button>
+
+            <p class="instruction-text">לחץ על הכפתור כדי להפעיל את הבאזר!</p>
+        </div>
+
+        <!-- Button Pressed Screen -->
+        <div id="pressed-screen" class="screen">
+            <div class="success-animation">
+                <div class="checkmark">✓</div>
+                <h2>נלחץ בהצלחה!</h2>
+                <p class="pressed-message">הבאזר הופעל במכונה</p>
+
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <p class="wait-message">נא להמתין לסיום ההגרלה...</p>
+            </div>
+        </div>
+
+        <!-- Timeout Screen -->
+        <div id="timeout-screen" class="screen">
+            <div class="timeout-container">
+                <div class="timeout-icon">⏰</div>
+                <h2>אופס! הזמן נגמר</h2>
+                <p class="timeout-message">לא לחצת על הכפתור בזמן</p>
+
+                <button id="retry-btn" class="primary-btn">
+                    <span class="btn-icon">🔄</span>
+                    <span>נסה שוב</span>
+                </button>
+
+                <p class="instruction-text">סרוק שוב את ה-QR כדי לשחק</p>
+            </div>
+        </div>
+
+        <!-- No Attempts Left Screen -->
+        <div id="finished-screen" class="screen">
+            <div class="finished-container">
+                <div class="finished-icon">🎉</div>
+                <h2>תודה ששיחקת!</h2>
+                <p class="finished-message">סיימת את כל הנסיונות שלך</p>
+
+                <div class="stats-box">
+                    <p>נסיונות ששימשת: <span id="total-attempts">0</span></p>
+                </div>
+
+                <button id="play-again-btn" class="primary-btn">
+                    <span class="btn-icon">🎰</span>
+                    <span>סרוק QR לשחק שוב</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Screen -->
+        <div id="error-screen" class="screen">
+            <div class="error-container">
+                <div class="error-icon">❌</div>
+                <h2>שגיאת חיבור</h2>
+                <p class="error-text" id="error-text">לא הצלחנו להתחבר למשחק</p>
+
+                <button id="refresh-btn" class="primary-btn">
+                    <span class="btn-icon">🔄</span>
+                    <span>רענן דף</span>
+                </button>
+
+                <p class="instruction-text">אם הבעיה נמשכת, סרוק שוב את ה-QR</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powered by Playzone -->
+    <div class="footer-powered-by">
+        <span>Powered by</span>
+        <a href="https://playzone.co.il" target="_blank" rel="noopener">Playzone</a>
+    </div>
+
+    <!-- Firebase Config & Controller Logic -->
+    <script src="firebase-config.js"></script>
+    <script src="controller.js"></script>
+</body>
+</html>

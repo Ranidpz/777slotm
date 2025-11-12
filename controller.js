@@ -1,0 +1,466 @@
+// Mobile Controller Logic
+// Handles player connection, button presses, and state management
+
+class MobileController {
+  constructor() {
+    this.sessionId = null;
+    this.playerId = null;
+    this.playerName = null;
+    this.database = null;
+    this.unsubscribePlayer = null;
+    this.unsubscribeSession = null;
+    this.timerInterval = null;
+    this.timeLeft = 10;
+    this.maxWaitTime = 10;
+    this.hasVibration = 'vibrate' in navigator;
+  }
+
+  // Initialize controller
+  async init() {
+    console.log('🎮 Initializing Mobile Controller...');
+
+    // Get session ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    this.sessionId = urlParams.get('session');
+
+    if (!this.sessionId) {
+      this.showError('קוד Session לא נמצא. אנא סרוק את ה-QR שוב.');
+      return;
+    }
+
+    console.log('📱 Session ID:', this.sessionId);
+
+    // Initialize Firebase
+    this.database = initFirebase();
+    if (!this.database) {
+      this.showError('שגיאת חיבור לשרת. אנא נסה שוב.');
+      return;
+    }
+
+    // Check if player name is stored
+    const storedName = localStorage.getItem(`player_${this.sessionId}`);
+    if (storedName) {
+      document.getElementById('player-name-input').value = storedName;
+    } else {
+      // Generate random name
+      this.generateRandomName();
+    }
+
+    // Setup event listeners
+    this.setupEventListeners();
+
+    // Show connection screen
+    this.showScreen('connection-screen');
+  }
+
+  // Generate random player name
+  generateRandomName() {
+    const adjectives = ['מהיר', 'חזק', 'חכם', 'אמיץ', 'שמח', 'מצליח'];
+    const nouns = ['שחקן', 'גיבור', 'אלוף', 'מנצח', 'כוכב'];
+    const random = Math.floor(Math.random() * 1000);
+    const name = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]} ${random}`;
+
+    document.getElementById('player-name-input').value = name;
+  }
+
+  // Setup event listeners
+  setupEventListeners() {
+    // Connect button
+    document.getElementById('connect-btn').addEventListener('click', () => {
+      this.connectToGame();
+    });
+
+    // Enter key in input
+    document.getElementById('player-name-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        this.connectToGame();
+      }
+    });
+
+    // Buzz button
+    document.getElementById('buzz-btn').addEventListener('click', () => {
+      this.pressBuzzButton();
+    });
+
+    // Retry button
+    document.getElementById('retry-btn').addEventListener('click', () => {
+      this.showScreen('connection-screen');
+    });
+
+    // Play again button
+    document.getElementById('play-again-btn').addEventListener('click', () => {
+      this.showScreen('connection-screen');
+    });
+
+    // Refresh button
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      location.reload();
+    });
+
+    // Prevent accidental navigation
+    window.addEventListener('beforeunload', (e) => {
+      if (this.playerId) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  }
+
+  // Connect to game
+  async connectToGame() {
+    const nameInput = document.getElementById('player-name-input');
+    const name = nameInput.value.trim();
+
+    if (!name || name.length < 2) {
+      this.showErrorMessage('אנא הכנס שם בן לפחות 2 תווים');
+      this.vibrate(100);
+      return;
+    }
+
+    this.playerName = name;
+
+    // Save name
+    localStorage.setItem(`player_${this.sessionId}`, name);
+
+    // Disable button
+    const connectBtn = document.getElementById('connect-btn');
+    connectBtn.disabled = true;
+    connectBtn.textContent = 'מתחבר...';
+
+    // Add player to session
+    const result = await addPlayer(this.sessionId, name);
+
+    if (!result) {
+      this.showError('שגיאת חיבור. אנא נסה שוב.');
+      connectBtn.disabled = false;
+      connectBtn.innerHTML = '<span class="btn-icon">🎮</span><span>התחבר למשחק</span>';
+      return;
+    }
+
+    if (result.error === 'full') {
+      this.showErrorMessage(result.message);
+      connectBtn.disabled = false;
+      connectBtn.innerHTML = '<span class="btn-icon">🎮</span><span>התחבר למשחק</span>';
+      this.vibrate(100);
+      return;
+    }
+
+    this.playerId = result.playerId;
+    console.log('✅ Connected as:', this.playerId);
+
+    // Start listening to player state
+    this.startListening();
+
+    // Vibrate on success
+    this.vibrate(200);
+  }
+
+  // Start listening to player state
+  startListening() {
+    if (!this.database || !this.sessionId || !this.playerId) return;
+
+    // Listen to player changes
+    const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`);
+
+    this.unsubscribePlayer = playerRef.on('value', (snapshot) => {
+      const player = snapshot.val();
+
+      if (!player) {
+        // Player removed
+        console.log('❌ Player removed from session');
+        this.cleanup();
+        this.showScreen('connection-screen');
+        return;
+      }
+
+      this.handlePlayerStateChange(player);
+    });
+
+    // Listen to session changes
+    const sessionRef = firebase.database().ref(`sessions/${this.sessionId}`);
+
+    this.unsubscribeSession = sessionRef.on('value', (snapshot) => {
+      const session = snapshot.val();
+
+      if (!session) {
+        this.showError('הסשן הסתיים. אנא סרוק QR חדש.');
+        return;
+      }
+
+      this.handleSessionChange(session);
+    });
+  }
+
+  // Handle player state change
+  handlePlayerStateChange(player) {
+    console.log('🔄 Player state:', player.status);
+
+    switch (player.status) {
+      case 'waiting':
+        this.showWaitingScreen(player);
+        break;
+
+      case 'active':
+        this.showPlayingScreen(player);
+        break;
+
+      case 'played':
+        this.showPressedScreen();
+        break;
+
+      case 'timeout':
+        this.showTimeoutScreen();
+        break;
+
+      case 'finished':
+        this.showFinishedScreen(player);
+        break;
+    }
+  }
+
+  // Handle session change
+  handleSessionChange(session) {
+    // Update queue position if waiting
+    if (session.players && this.playerId) {
+      const players = Object.entries(session.players);
+      const waitingPlayers = players.filter(([id, p]) => p.status === 'waiting');
+      const myIndex = waitingPlayers.findIndex(([id]) => id === this.playerId);
+
+      if (myIndex >= 0) {
+        const queuePosition = document.getElementById('queue-position');
+        if (queuePosition) {
+          queuePosition.textContent = myIndex + 1;
+        }
+      }
+    }
+  }
+
+  // Show waiting screen
+  showWaitingScreen(player) {
+    this.showScreen('waiting-screen');
+
+    const playerNameDisplay = document.getElementById('waiting-player-name');
+    if (playerNameDisplay) {
+      playerNameDisplay.textContent = player.name;
+    }
+  }
+
+  // Show playing screen
+  showPlayingScreen(player) {
+    this.showScreen('playing-screen');
+
+    // Update player name
+    const activePlayerName = document.getElementById('active-player-name');
+    if (activePlayerName) {
+      activePlayerName.textContent = player.name;
+    }
+
+    // Update attempts
+    const attemptsCount = document.getElementById('attempts-count');
+    if (attemptsCount) {
+      attemptsCount.textContent = player.attemptsLeft || 0;
+    }
+
+    // Start countdown timer
+    this.startTimer();
+
+    // Vibrate to notify player
+    this.vibrate([100, 50, 100]);
+  }
+
+  // Show pressed screen
+  showPressedScreen() {
+    this.stopTimer();
+    this.showScreen('pressed-screen');
+    this.vibrate([200, 100, 200]);
+  }
+
+  // Show timeout screen
+  showTimeoutScreen() {
+    this.stopTimer();
+    this.showScreen('timeout-screen');
+    this.vibrate([100, 50, 100, 50, 100]);
+  }
+
+  // Show finished screen
+  showFinishedScreen(player) {
+    this.stopTimer();
+    this.showScreen('finished-screen');
+
+    const totalAttempts = document.getElementById('total-attempts');
+    if (totalAttempts && player.attemptsLeft !== undefined) {
+      const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
+      totalAttempts.textContent = maxAttempts - player.attemptsLeft;
+    }
+
+    this.vibrate(300);
+  }
+
+  // Start countdown timer
+  startTimer() {
+    this.stopTimer(); // Clear any existing timer
+
+    this.timeLeft = this.maxWaitTime;
+
+    const timerNumber = document.getElementById('timer-number');
+    const timerProgressCircle = document.getElementById('timer-progress-circle');
+    const circumference = 2 * Math.PI * 80; // radius = 80
+
+    this.timerInterval = setInterval(() => {
+      this.timeLeft--;
+
+      // Update number
+      if (timerNumber) {
+        timerNumber.textContent = this.timeLeft;
+      }
+
+      // Update circle progress
+      if (timerProgressCircle) {
+        const percentage = this.timeLeft / this.maxWaitTime;
+        const offset = circumference * (1 - percentage);
+        timerProgressCircle.style.strokeDashoffset = offset;
+
+        // Change color
+        if (this.timeLeft <= 3) {
+          timerProgressCircle.style.stroke = '#ff4444'; // Red
+        } else if (this.timeLeft <= 6) {
+          timerProgressCircle.style.stroke = '#ffaa00'; // Orange
+        } else {
+          timerProgressCircle.style.stroke = '#44ff44'; // Green
+        }
+      }
+
+      // Vibrate at milestones
+      if (this.timeLeft === 5 || this.timeLeft === 3) {
+        this.vibrate(50);
+      }
+
+      if (this.timeLeft <= 0) {
+        this.stopTimer();
+      }
+    }, 1000);
+  }
+
+  // Stop countdown timer
+  stopTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
+  // Press buzz button
+  async pressBuzzButton() {
+    console.log('🔴 Buzz button pressed!');
+
+    const buzzBtn = document.getElementById('buzz-btn');
+    buzzBtn.disabled = true;
+
+    // Vibrate strongly
+    this.vibrate(300);
+
+    // Trigger action in Firebase
+    const success = await triggerPlayerAction(this.sessionId, this.playerId, 'buzz');
+
+    if (!success) {
+      console.error('❌ Failed to trigger action');
+      buzzBtn.disabled = false;
+      this.vibrate(100);
+      return;
+    }
+
+    // Show pressed screen
+    this.showPressedScreen();
+  }
+
+  // Vibrate device
+  vibrate(pattern) {
+    if (this.hasVibration) {
+      navigator.vibrate(pattern);
+    }
+  }
+
+  // Show screen
+  showScreen(screenId) {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => screen.classList.remove('active'));
+
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+      targetScreen.classList.add('active');
+    }
+  }
+
+  // Show error message (inline)
+  showErrorMessage(message) {
+    const errorDiv = document.getElementById('error-message');
+    if (errorDiv) {
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 4000);
+    }
+  }
+
+  // Show error screen
+  showError(message) {
+    this.showScreen('error-screen');
+
+    const errorText = document.getElementById('error-text');
+    if (errorText) {
+      errorText.textContent = message;
+    }
+
+    this.vibrate([100, 50, 100]);
+  }
+
+  // Cleanup listeners
+  cleanup() {
+    if (this.unsubscribePlayer) {
+      firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`).off('value');
+      this.unsubscribePlayer = null;
+    }
+
+    if (this.unsubscribeSession) {
+      firebase.database().ref(`sessions/${this.sessionId}`).off('value');
+      this.unsubscribeSession = null;
+    }
+
+    this.stopTimer();
+  }
+
+  // Destroy controller
+  destroy() {
+    this.cleanup();
+
+    if (this.playerId && this.sessionId) {
+      removePlayer(this.sessionId, this.playerId);
+    }
+  }
+}
+
+// Initialize controller when page loads
+let mobileController = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  mobileController = new MobileController();
+  await mobileController.init();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  if (mobileController) {
+    mobileController.destroy();
+  }
+});
+
+// Handle visibility change (app goes to background)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    console.log('📱 App went to background');
+  } else {
+    console.log('📱 App came to foreground');
+  }
+});

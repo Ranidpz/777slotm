@@ -9,8 +9,41 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+    <!-- QR Code Container (Top Left) -->
+    <div id="qr-container">
+        <!-- QR Code Display -->
+        <div id="qr-display">
+            <!-- QR code will be generated here -->
+        </div>
+
+        <!-- Player Info (shown when player is active) -->
+        <div id="player-info" style="display: none;">
+            <div class="player-name-container">
+                <span class="player-label">שחקן פעיל:</span>
+                <span class="player-name" id="player-name"></span>
+            </div>
+            <div class="timer-container">
+                <div class="timer-display" id="player-timer">⏱️ 10</div>
+                <div class="timer-progress-bar">
+                    <div class="timer-progress" id="timer-progress"></div>
+                </div>
+            </div>
+            <div class="player-attempts" id="player-attempts"></div>
+        </div>
+
+        <!-- Waiting Queue -->
+        <div id="waiting-queue"></div>
+    </div>
+
     <div id="slot-machine">
         <div class="reel-container">
             <div class="reel" id="reel1">
@@ -204,6 +237,19 @@
 
             <div class="settings-divider"></div>
 
+            <!-- Remote Control Settings -->
+            <div class="setting-group">
+                <h3>🎮 שליטה מרחוק (QR Code)</h3>
+                <p class="setting-description">מספר נסיונות לכל שחקן שמתחבר דרך הטלפון</p>
+                <div class="slider-container">
+                    <input type="range" id="max-player-attempts" min="1" max="10" value="3" step="1">
+                    <span id="max-attempts-value">3</span>
+                </div>
+                <p class="setting-note">כל שחקן יוכל לשחק <span id="max-attempts-text">3</span> פעמים</p>
+            </div>
+
+            <div class="settings-divider"></div>
+
             <!-- שורה: WhatsApp + טקסט QR -->
             <div class="settings-row">
                 <div class="setting-group third">
@@ -304,6 +350,9 @@
     </div>
 
     <script src="dynamic-images.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="remote-control-settings.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
