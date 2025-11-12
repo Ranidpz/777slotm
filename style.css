@@ -234,6 +234,38 @@ body {
     z-index: 1000;
 }
 
+/* כפתור X לסגירה */
+.close-settings-x {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: rgba(244, 67, 54, 0.9);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    font-size: 28px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+.close-settings-x:hover {
+    background: rgba(244, 67, 54, 1);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.6);
+}
+
+.close-settings-x:active {
+    transform: scale(0.95) rotate(90deg);
+}
+
 .settings-content {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     padding: 30px;
@@ -1398,7 +1430,8 @@ button:active {
     left: 0;
     right: 0;
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    gap: 15px;
     justify-content: center;
     align-items: center;
     padding: 20px 30px;
@@ -1416,6 +1449,64 @@ button:active {
     justify-content: center;
     align-items: center;
     margin-top: 30px;
+}
+
+/* כפתור שמור יחיד */
+.save-btn-single {
+    width: 100%;
+    max-width: 300px;
+    padding: 18px 50px;
+    border: none;
+    border-radius: 12px;
+    font-size: 22px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Assistant', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+}
+
+.save-btn-single:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(76, 175, 80, 0.6);
+    background: linear-gradient(135deg, #5bc05e 0%, #4caf50 100%);
+}
+
+.save-btn-single:active {
+    transform: translateY(0);
+}
+
+/* Powered by בפוטר */
+.footer-powered-by {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Assistant', sans-serif;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+}
+
+.footer-powered-by span {
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+.footer-powered-by a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-right: 5px;
+}
+
+.footer-powered-by a:hover {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
 }
 
 .save-btn,
@@ -1471,12 +1562,45 @@ button:active {
 }
 
 /* רספונסיבי לכפתורים */
+@media (max-width: 768px) {
+    .close-settings-x {
+        top: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 24px;
+    }
+
+    .save-btn-single {
+        max-width: 100%;
+        font-size: 20px;
+        padding: 16px 40px;
+    }
+}
+
 @media (max-width: 480px) {
+    .close-settings-x {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+    }
+
+    .save-btn-single {
+        font-size: 18px;
+        padding: 14px 30px;
+    }
+
+    .footer-powered-by {
+        font-size: 11px;
+    }
+
     .settings-buttons {
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .save-btn,
     .close-btn {
         max-width: 100%;

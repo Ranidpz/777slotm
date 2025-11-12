@@ -776,8 +776,8 @@ document.getElementById('save-settings').addEventListener('click', () => {
     settingsScreen.classList.add('hidden');
 });
 
-// סגירה בלי שמירה
-document.getElementById('close-settings').addEventListener('click', () => {
+// סגירה בלי שמירה - כפתור X
+document.getElementById('close-settings-x').addEventListener('click', () => {
     // החזר את ההגדרות הקודמות
     gameState.winFrequency = tempSettings.winFrequency;
     gameState.soundEnabled = tempSettings.soundEnabled;
