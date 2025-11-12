@@ -1597,8 +1597,14 @@ function updateScrollingBanner() {
     if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
         scrollingText.textContent = gameState.scrollingBannerText;
         scrollingText.style.fontSize = gameState.scrollingBannerFontSize + 'px';
+
+        // התאם את גובה הפס לגודל הגופן (גופן + 28px padding)
+        const bannerHeight = gameState.scrollingBannerFontSize + 28;
+        banner.style.height = bannerHeight + 'px';
+
         banner.classList.remove('hidden');
         console.log('✅ פס מתגלגל מוצג - טקסט:', gameState.scrollingBannerText);
+        console.log('✅ גובה פס:', bannerHeight + 'px');
         console.log('✅ hidden class הוסר, classes:', banner.className);
     } else {
         banner.classList.add('hidden');
