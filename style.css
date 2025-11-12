@@ -170,6 +170,8 @@ body {
     overflow: hidden;
     z-index: 999;
     border-top: 2px solid rgba(255, 215, 0, 0.5);
+    display: flex;
+    align-items: center;
 }
 
 .scrolling-text {
@@ -179,8 +181,6 @@ body {
     font-size: 32px;
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
-    line-height: 50px;
-    padding: 12px 0 6px 0;
     animation: scroll-rtl 20s linear infinite;
 }
 
