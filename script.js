@@ -19,7 +19,8 @@ const gameState = {
     },
     guaranteedWinMode: false, // מצב זכייה מובטחת
     inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
-    initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0] // הכמות המקורית של כל פרס
+    initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
+    qrPopupVisible: false // האם QR popup מוצג כרגע
 };
 
 // אלמנטים
@@ -578,12 +579,10 @@ function generateQRCode(url) {
     // הצג את ה-popup
     qrPopup.classList.remove('hidden');
 
-    // סגור אוטומטית אחרי 8 שניות
-    setTimeout(() => {
-        closeQRPopup();
-    }, 8000);
+    // עדכן את ה-flag שה-QR מוצג
+    gameState.qrPopupVisible = true;
 
-    console.log('✅ QR code נוצר והוצג בהצלחה');
+    console.log('✅ QR code נוצר והוצג בהצלחה - לחץ כדי להמשיך');
 }
 
 // סגירת QR popup
@@ -591,12 +590,19 @@ function closeQRPopup() {
     const qrPopup = document.getElementById('qr-popup');
     if (qrPopup) {
         qrPopup.classList.add('hidden');
-        console.log('🔒 QR popup נסגר');
+        gameState.qrPopupVisible = false;
+        console.log('🔒 QR popup נסגר - מוכן למשחק הבא');
     }
 }
 
 // פונקציה להפעלת המכונה
 function triggerSpin() {
+    // אם QR popup מוצג, סגור אותו במקום להתחיל סיבוב חדש
+    if (gameState.qrPopupVisible) {
+        closeQRPopup();
+        return;
+    }
+
     if (gameState.mode === 'automatic') {
         startSpin();
     } else if (gameState.mode === 'manual') {
@@ -1418,17 +1424,6 @@ function setupWhatsAppInput() {
                 gameState.whatsappNumber = '';
                 localStorage.removeItem('whatsappNumber');
                 console.log('🗑️ מספר WhatsApp נמחק');
-            }
-        });
-    }
-
-    // הוסף סגירה ללחיצה על QR popup
-    const qrPopup = document.getElementById('qr-popup');
-    if (qrPopup) {
-        qrPopup.addEventListener('click', (e) => {
-            // אם לוחצים על הרקע (לא על התוכן), סגור
-            if (e.target === qrPopup) {
-                closeQRPopup();
             }
         });
     }
