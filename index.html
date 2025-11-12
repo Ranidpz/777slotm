@@ -54,6 +54,11 @@
 
     <div id="win-overlay" class="hidden"></div>
 
+    <!-- Scrolling Text Banner -->
+    <div id="scrolling-banner" class="scrolling-banner hidden">
+        <div class="scrolling-text" id="scrolling-text"></div>
+    </div>
+
     <div id="qr-popup" class="hidden">
         <div class="qr-content">
             <h2>🎉 מזל טוב! זכית! 🎉</h2>
@@ -188,20 +193,33 @@
 
             <div class="settings-divider"></div>
 
-            <!-- WhatsApp -->
-            <div class="setting-group">
-                <h3>הודעת WhatsApp בזכייה</h3>
-                <p class="setting-description">הזן מספר (עם קידומת: 972501234567) להצגת QR code</p>
-                <div class="whatsapp-input-container">
-                    <input type="text" id="whatsapp-number" placeholder="972501234567" maxlength="20">
-                    <button id="clear-whatsapp" class="small-btn">נקה</button>
+            <!-- שורה: WhatsApp + טקסט QR -->
+            <div class="settings-row">
+                <div class="setting-group half">
+                    <h3>הודעת WhatsApp בזכייה</h3>
+                    <p class="setting-description">הזן מספר (עם קידומת: 972501234567)</p>
+                    <div class="whatsapp-input-container">
+                        <input type="text" id="whatsapp-number" placeholder="972501234567" maxlength="20">
+                        <button id="clear-whatsapp" class="small-btn">נקה</button>
+                    </div>
                 </div>
 
-                <h3 style="margin-top: 25px;">טקסט מותאם במסך QR</h3>
-                <p class="setting-description">טקסט שיופיע מתחת לשלבים במסך הזכייה</p>
+                <div class="setting-group half">
+                    <h3>טקסט מותאם במסך QR</h3>
+                    <p class="setting-description">טקסט מתחת לשלבים במסך זכייה</p>
+                    <div class="custom-text-container">
+                        <textarea id="qr-custom-text" placeholder="👉 לחצו כדי לחזור למסך הפיצ'ה ולצלם 📸" rows="3" maxlength="200"></textarea>
+                        <button id="clear-custom-text" class="small-btn">נקה</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>טקסט נגלל במסך הראשי</h3>
+                <p class="setting-description">טקסט שיופיע בפס שחור מתגלגל למטה (השאר ריק כדי להסתיר)</p>
                 <div class="custom-text-container">
-                    <textarea id="qr-custom-text" placeholder="👉 לחצו כדי לחזור למסך הפיצ'ה ולצלם 📸" rows="3" maxlength="200"></textarea>
-                    <button id="clear-custom-text" class="small-btn">נקה</button>
+                    <textarea id="scrolling-banner-text" placeholder="🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰" rows="2" maxlength="300"></textarea>
+                    <button id="clear-scrolling-text" class="small-btn">נקה</button>
                 </div>
             </div>
 

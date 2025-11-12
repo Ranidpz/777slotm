@@ -21,7 +21,8 @@ const gameState = {
     inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
     initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
     qrPopupVisible: false, // האם QR popup מוצג כרגע
-    qrCustomText: '👉 לחצו כדי לחזור למסך הפיצ\'ה ולצלם 📸' // טקסט מותאם למסך QR
+    qrCustomText: '👉 לחצו כדי לחזור למסך הפיצ\'ה ולצלם 📸', // טקסט מותאם למסך QR
+    scrollingBannerText: '' // טקסט נגלל במסך הראשי
 };
 
 // אלמנטים
@@ -1458,6 +1459,18 @@ function loadSettings() {
         }
         console.log('💬 טקסט מותאם ל-QR נטען');
     }
+
+    // טען טקסט נגלל
+    const savedScrollingText = localStorage.getItem('scrollingBannerText');
+    if (savedScrollingText) {
+        gameState.scrollingBannerText = savedScrollingText;
+        const bannerTextArea = document.getElementById('scrolling-banner-text');
+        if (bannerTextArea) {
+            bannerTextArea.value = savedScrollingText;
+        }
+        updateScrollingBanner();
+        console.log('📜 טקסט נגלל נטען');
+    }
 }
 
 // הגדרת מאזינים למספר WhatsApp
@@ -1513,6 +1526,52 @@ function setupCustomTextInput() {
     }
 }
 
+// הגדרת מאזינים לטקסט נגלל
+function setupScrollingBannerInput() {
+    const bannerTextArea = document.getElementById('scrolling-banner-text');
+    const clearBtn = document.getElementById('clear-scrolling-text');
+
+    if (bannerTextArea) {
+        // שמור בזמן הקלדה ועדכן תצוגה
+        bannerTextArea.addEventListener('input', (e) => {
+            const value = e.target.value.trim();
+            gameState.scrollingBannerText = value;
+            localStorage.setItem('scrollingBannerText', value);
+            updateScrollingBanner();
+            console.log('📜 טקסט נגלל עודכן');
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (bannerTextArea) {
+                bannerTextArea.value = '';
+                gameState.scrollingBannerText = '';
+                localStorage.removeItem('scrollingBannerText');
+                updateScrollingBanner();
+                console.log('🗑️ טקסט נגלל נמחק');
+            }
+        });
+    }
+}
+
+// עדכון פס מתגלגל
+function updateScrollingBanner() {
+    const banner = document.getElementById('scrolling-banner');
+    const scrollingText = document.getElementById('scrolling-text');
+
+    if (!banner || !scrollingText) return;
+
+    if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
+        scrollingText.textContent = gameState.scrollingBannerText;
+        banner.classList.remove('hidden');
+        console.log('✅ פס מתגלגל מוצג');
+    } else {
+        banner.classList.add('hidden');
+        console.log('🚫 פס מתגלגל מוסתר');
+    }
+}
+
 // הגדר סגירת QR בלחיצה על המסך
 function setupQRPopupClose() {
     const qrPopup = document.getElementById('qr-popup');
@@ -1548,6 +1607,7 @@ setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
 setupInventoryInputs(); // הגדר שדות מלאי
 setupWhatsAppInput(); // הגדר שדה WhatsApp
 setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
+setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 
 // הגדר מאזין למצב זכייה מובטחת

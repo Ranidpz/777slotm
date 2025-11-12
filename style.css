@@ -159,6 +159,67 @@ body {
     display: none !important;
 }
 
+/* Scrolling Banner - פס מתגלגל למטה */
+.scrolling-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 50px;
+    background: #000000;
+    overflow: hidden;
+    z-index: 50;
+    border-top: 2px solid rgba(255, 215, 0, 0.5);
+}
+
+.scrolling-text {
+    display: inline-block;
+    white-space: nowrap;
+    color: #ffd700;
+    font-size: 1.5em;
+    font-weight: 700;
+    font-family: 'Assistant', sans-serif;
+    line-height: 50px;
+    padding-right: 100%;
+    animation: scroll-rtl 20s linear infinite;
+}
+
+@keyframes scroll-rtl {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* עבור LTR (שמאל לימין) */
+.scrolling-text.ltr {
+    animation: scroll-ltr 20s linear infinite;
+    padding-left: 100%;
+    padding-right: 0;
+}
+
+@keyframes scroll-ltr {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@media (max-width: 768px) {
+    .scrolling-banner {
+        height: 40px;
+    }
+
+    .scrolling-text {
+        font-size: 1.2em;
+        line-height: 40px;
+    }
+}
+
 /* מסך הגדרות */
 #settings-screen {
     position: fixed;
