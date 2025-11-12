@@ -169,24 +169,25 @@ function createSyntheticSound(type) {
 
 // אתחול הגלילים
 function initReels() {
-    // איסוף כל התמונות המותאמות
-    const uploadedImages = gameState.customSymbols.filter(img => img !== null);
-    
-    // יצירת מערך סמלים משולב
+    // קבל סמלים מהמערכת הדינמית החדשה
     let allSymbols;
-    if (uploadedImages.length > 0) {
-        // אם יש תמונות מותאמות, השתמש בהן
-        allSymbols = [...uploadedImages];
-        
-        // אם יש פחות מ-9 תמונות, הוסף סמלים דיפולטיים להשלמה
-        if (allSymbols.length < 9) {
-            const neededSymbols = 9 - allSymbols.length;
-            const remainingSymbols = gameState.defaultSymbols.slice(0, neededSymbols);
-            allSymbols = [...allSymbols, ...remainingSymbols];
+
+    if (window.dynamicImagesManager) {
+        const customSymbols = dynamicImagesManager.getGameSymbols();
+
+        if (customSymbols && customSymbols.length >= 2) {
+            // יש תמונות מותאמות - השתמש רק בהן (ללא אימוג'י!)
+            allSymbols = customSymbols;
+            console.log('🖼️ משתמש בתמונות מותאמות בלבד (ללא אימוג\'י)');
+        } else {
+            // אין תמונות מותאמות - השתמש רק באימוג'י
+            allSymbols = [...gameState.defaultSymbols];
+            console.log('😀 משתמש באימוג\'י ברירת מחדל בלבד (ללא תמונות)');
         }
     } else {
-        // אם אין תמונות מותאמות, השתמש בסמלים הדיפולטיים
+        // fallback - אם אין מנהל תמונות
         allSymbols = [...gameState.defaultSymbols];
+        console.warn('⚠️ מנהל תמונות לא נטען, משתמש באימוג\'י');
     }
     
     // צור מערך בסיסי של סמלים שיהיה זהה לכל הגלילים
@@ -1655,7 +1656,14 @@ function setupQRPopupClose() {
 // אתחול
 loadSettings(); // טען הגדרות שמורות
 initSounds();
-loadImagesFromStorage(); // טען תמונות שמורות
+
+// אתחל מערכת תמונות דינמית חדשה
+if (window.dynamicImagesManager) {
+    dynamicImagesManager.init();
+    console.log('✅ מערכת תמונות דינמית אותחלה');
+}
+
+loadImagesFromStorage(); // טען תמונות שמורות (מערכת ישנה - לתאימות)
 loadBackgroundColor(); // טען צבע רקע שמור
 loadInventory(); // טען מלאי שמור
 initColorPicker(); // אתחל color picker

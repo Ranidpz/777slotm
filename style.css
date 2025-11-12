@@ -832,31 +832,91 @@ button:active {
     margin: 30px auto 0;
 }
 
-/* Reset Images Button - Smaller and closer to images */
-.reset-images-btn {
-    margin-top: 12px;
-    padding: 10px 20px;
-    font-size: 0.9em;
-    background: rgba(255, 70, 70, 0.3);
+/* Images Actions Container */
+.images-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Add Image Button */
+.add-image-btn {
+    padding: 12px 25px;
+    font-size: 1em;
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
     color: white;
-    border: 1px solid rgba(255, 70, 70, 0.6);
-    border-radius: 8px;
+    border: 2px solid rgba(76, 175, 80, 0.6);
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Assistant', sans-serif;
-    font-weight: 600;
-    width: auto;
-    display: inline-block;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.add-image-btn:hover {
+    background: linear-gradient(135deg, #5bc05e 0%, #4caf50 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+}
+
+.add-image-btn:active {
+    transform: translateY(0);
+}
+
+/* Reset Images Button */
+.reset-images-btn {
+    padding: 12px 25px;
+    font-size: 1em;
+    background: linear-gradient(135deg, rgba(255, 70, 70, 0.4), rgba(244, 67, 54, 0.5));
+    color: white;
+    border: 2px solid rgba(255, 70, 70, 0.6);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(255, 70, 70, 0.3);
 }
 
 .reset-images-btn:hover {
-    background: rgba(255, 70, 70, 0.5);
-    border-color: rgba(255, 70, 70, 0.8);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(255, 70, 70, 0.6), rgba(244, 67, 54, 0.7));
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 70, 70, 0.5);
 }
 
 .reset-images-btn:active {
     transform: translateY(0);
+}
+
+/* Remove Image Button */
+.remove-image-btn {
+    padding: 8px 12px;
+    font-size: 1.2em;
+    background: rgba(255, 70, 70, 0.3);
+    color: white;
+    border: 1px solid rgba(255, 70, 70, 0.5);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 5px;
+}
+
+.remove-image-btn:hover {
+    background: rgba(255, 70, 70, 0.6);
+    transform: scale(1.1);
+}
+
+.remove-image-btn:active {
+    transform: scale(0.95);
 }
 
 /* Tutorial Modal Styles */
