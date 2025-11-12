@@ -502,6 +502,13 @@ function checkWin() {
         // אם במצב זכייה מובטחת, הפחת מהמלאי
         if (gameState.guaranteedWinMode && gameState.winningSymbol !== undefined) {
             const symbolIndex = gameState.winningSymbol;
+
+            // עדכן מלאי במערכת החדשה (תמונות דינמיות)
+            if (window.dynamicImagesManager) {
+                dynamicImagesManager.decrementInventoryBySymbolIndex(symbolIndex);
+            }
+
+            // עדכן גם במערכת הישנה (לתאימות לאחור)
             if (gameState.inventory[symbolIndex] > 0) {
                 gameState.inventory[symbolIndex]--;
                 const distributed = gameState.initialInventory[symbolIndex] - gameState.inventory[symbolIndex];
@@ -772,6 +779,10 @@ document.getElementById('save-settings').addEventListener('click', () => {
     saveInventory();
 
     console.log('✅ ההגדרות נשמרו בהצלחה!');
+
+    // רענן את הגלגלים עם התמונות החדשות
+    initReels();
+    console.log('🔄 גלגלים אותחלו מחדש עם התמונות החדשות');
 
     // סגור את מסך ההגדרות
     settingsScreen.classList.add('hidden');

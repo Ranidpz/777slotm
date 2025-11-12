@@ -286,6 +286,42 @@ const dynamicImagesManager = {
         return inventory;
     },
 
+    // הפחת מלאי לפי אינדקס סמל (0-8)
+    decrementInventoryBySymbolIndex(symbolIndex) {
+        const uploadedImages = this.images.filter(img => img.imageData !== null);
+
+        if (uploadedImages.length === 0) {
+            console.warn('⚠️ אין תמונות להפחית מהן מלאי');
+            return false;
+        }
+
+        // מצא את התמונה המקורית מתוך 9 הסמלים
+        const imageIndex = symbolIndex % uploadedImages.length;
+        const targetImage = uploadedImages[imageIndex];
+
+        if (!targetImage) {
+            console.warn(`⚠️ לא נמצאה תמונה לאינדקס ${symbolIndex}`);
+            return false;
+        }
+
+        // בדוק אם יש מלאי
+        if (targetImage.inventory === null) {
+            console.log(`♾️ מלאי אינסופי לתמונה - לא מפחית`);
+            return true; // אינסוף - תמיד זמין
+        }
+
+        if (targetImage.inventory > 0) {
+            targetImage.inventory--;
+            console.log(`📦 מלאי הופחת ל-${targetImage.inventory} עבור תמונה`);
+            this.saveToStorage();
+            this.render(); // רענן את התצוגה
+            return true;
+        } else {
+            console.warn(`⚠️ אין מלאי זמין לתמונה זו`);
+            return false;
+        }
+    },
+
     // שמור ב-localStorage
     saveToStorage() {
         try {
