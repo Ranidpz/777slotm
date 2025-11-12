@@ -343,12 +343,44 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
                 }
 
                 if (availableSymbols.length > 0) {
+                    // תקופת חימום - 4 סיבובים ראשונים
+                    let candidateSymbols = availableSymbols;
+
+                    if (gameState.spinsCount <= 4) {
+                        console.log(`🔥 תקופת חימום: סיבוב ${gameState.spinsCount}/4`);
+
+                        // מצא את הפרסים עם המלאי הנמוך ביותר
+                        const inventoryCounts = availableSymbols.map(idx => ({
+                            idx: idx,
+                            count: gameState.inventory[idx]
+                        }));
+
+                        // מיין לפי כמות מלאי (מהנמוך לגבוה)
+                        inventoryCounts.sort((a, b) => a.count - b.count);
+
+                        // המלאי הנמוך ביותר
+                        const lowestInventory = inventoryCounts[0].count;
+
+                        // סנן פרסים שיש להם מלאי גבוה יותר מהנמוך ביותר
+                        const higherInventorySymbols = availableSymbols.filter(idx =>
+                            gameState.inventory[idx] > lowestInventory
+                        );
+
+                        // אם יש פרסים עם מלאי גבוה יותר, השתמש בהם
+                        if (higherInventorySymbols.length > 0) {
+                            candidateSymbols = higherInventorySymbols;
+                            console.log(`⏳ נמנע מפרסים נדירים (מלאי: ${lowestInventory}), נותרו ${candidateSymbols.length} אפשרויות`);
+                        } else {
+                            console.log(`⚠️ כל הפרסים באותו רמת מלאי - משתמש בכולם`);
+                        }
+                    }
+
                     // נסה למנוע בחירה של אותו פרס פעמיים ברצף
                     let selectedSymbol;
 
-                    if (availableSymbols.length > 1 && gameState.lastWinningSymbol !== null) {
+                    if (candidateSymbols.length > 1 && gameState.lastWinningSymbol !== null) {
                         // אם יש יותר מפרס אחד ויש היסטוריה, נסה לבחור משהו אחר
-                        const otherSymbols = availableSymbols.filter(s => s !== gameState.lastWinningSymbol);
+                        const otherSymbols = candidateSymbols.filter(s => s !== gameState.lastWinningSymbol);
 
                         if (otherSymbols.length > 0) {
                             // בחר מהפרסים האחרים
@@ -357,13 +389,13 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
                             console.log(`🎲 נמנע מחזרה על פרס ${gameState.lastWinningSymbol}, נבחר ${selectedSymbol}`);
                         } else {
                             // אין ברירה - רק הפרס האחרון נשאר
-                            selectedSymbol = availableSymbols[0];
-                            console.log(`⚠️ רק פרס ${selectedSymbol} נשאר במלאי`);
+                            selectedSymbol = candidateSymbols[0];
+                            console.log(`⚠️ רק פרס ${selectedSymbol} נשאר במועמדים`);
                         }
                     } else {
                         // בחירה רנדומלית רגילה (אין היסטוריה או רק פרס אחד)
-                        const randomIndex = Math.floor(Math.random() * availableSymbols.length);
-                        selectedSymbol = availableSymbols[randomIndex];
+                        const randomIndex = Math.floor(Math.random() * candidateSymbols.length);
+                        selectedSymbol = candidateSymbols[randomIndex];
                     }
 
                     gameState.winningSymbol = selectedSymbol;
