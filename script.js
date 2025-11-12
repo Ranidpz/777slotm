@@ -20,7 +20,8 @@ const gameState = {
     guaranteedWinMode: false, // מצב זכייה מובטחת
     inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
     initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
-    qrPopupVisible: false // האם QR popup מוצג כרגע
+    qrPopupVisible: false, // האם QR popup מוצג כרגע
+    qrCustomText: '👉 לחצו כדי לחזור למסך הפיצ\'ה ולצלם 📸' // טקסט מותאם למסך QR
 };
 
 // אלמנטים
@@ -582,7 +583,21 @@ function generateQRCode(url) {
     // עדכן את ה-flag שה-QR מוצג
     gameState.qrPopupVisible = true;
 
+    // עדכן את הטקסט המותאם
+    updateQRCustomMessage();
+
     console.log('✅ QR code נוצר והוצג בהצלחה - לחץ כדי להמשיך');
+}
+
+// עדכון הטקסט המותאם במסך QR
+function updateQRCustomMessage() {
+    const customMessageDiv = document.getElementById('qr-custom-message');
+    if (customMessageDiv && gameState.qrCustomText) {
+        const paragraph = customMessageDiv.querySelector('p');
+        if (paragraph) {
+            paragraph.textContent = gameState.qrCustomText;
+        }
+    }
 }
 
 // סגירת QR popup
@@ -1432,6 +1447,17 @@ function loadSettings() {
         }
         console.log('📱 מספר WhatsApp נטען:', savedWhatsApp);
     }
+
+    // טען טקסט מותאם ל-QR
+    const savedCustomText = localStorage.getItem('qrCustomText');
+    if (savedCustomText) {
+        gameState.qrCustomText = savedCustomText;
+        const customTextArea = document.getElementById('qr-custom-text');
+        if (customTextArea) {
+            customTextArea.value = savedCustomText;
+        }
+        console.log('💬 טקסט מותאם ל-QR נטען');
+    }
 }
 
 // הגדרת מאזינים למספר WhatsApp
@@ -1455,6 +1481,33 @@ function setupWhatsAppInput() {
                 gameState.whatsappNumber = '';
                 localStorage.removeItem('whatsappNumber');
                 console.log('🗑️ מספר WhatsApp נמחק');
+            }
+        });
+    }
+}
+
+// הגדרת מאזינים לטקסט מותאם ל-QR
+function setupCustomTextInput() {
+    const customTextArea = document.getElementById('qr-custom-text');
+    const clearBtn = document.getElementById('clear-custom-text');
+
+    if (customTextArea) {
+        // שמור בזמן הקלדה
+        customTextArea.addEventListener('input', (e) => {
+            const value = e.target.value;
+            gameState.qrCustomText = value;
+            localStorage.setItem('qrCustomText', value);
+            console.log('💬 טקסט מותאם ל-QR עודכן');
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (customTextArea) {
+                customTextArea.value = '👉 לחצו כדי לחזור למסך הפיצ\'ה ולצלם 📸';
+                gameState.qrCustomText = customTextArea.value;
+                localStorage.setItem('qrCustomText', customTextArea.value);
+                console.log('🔄 טקסט מותאם ל-QR אופס לברירת מחדל');
             }
         });
     }
@@ -1494,6 +1547,7 @@ manageTutorial(); // נהל את המדריך
 setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
 setupInventoryInputs(); // הגדר שדות מלאי
 setupWhatsAppInput(); // הגדר שדה WhatsApp
+setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 
 // הגדר מאזין למצב זכייה מובטחת

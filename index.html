@@ -82,6 +82,10 @@
                         <p>שלחו לנו את התמונה</p>
                     </div>
                 </div>
+
+                <div class="qr-custom-message" id="qr-custom-message">
+                    <p>👉 לחצו כדי לחזור למסך הפיצ'ה ולצלם 📸</p>
+                </div>
             </div>
 
             <p class="qr-continue">👆 לחצו כדי לחזור למסך הזכייה ולצלם 📸</p>
@@ -107,7 +111,7 @@
                 </div>
 
                 <div class="setting-group half">
-                    <h3>צבע רקע התאים</h3>
+                    <h3>צבע רקע </h3>
                     <div class="color-picker-container">
                         <label for="background-color-picker" class="color-picker-label">
                             <div class="color-preview" id="color-preview"></div>
@@ -191,6 +195,13 @@
                 <div class="whatsapp-input-container">
                     <input type="text" id="whatsapp-number" placeholder="972501234567" maxlength="20">
                     <button id="clear-whatsapp" class="small-btn">נקה</button>
+                </div>
+
+                <h3 style="margin-top: 25px;">טקסט מותאם במסך QR</h3>
+                <p class="setting-description">טקסט שיופיע מתחת לשלבים במסך הזכייה</p>
+                <div class="custom-text-container">
+                    <textarea id="qr-custom-text" placeholder="👉 לחצו כדי לחזור למסך הפיצ'ה ולצלם 📸" rows="3" maxlength="200"></textarea>
+                    <button id="clear-custom-text" class="small-btn">נקה</button>
                 </div>
             </div>
 

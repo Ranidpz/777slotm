@@ -1409,6 +1409,44 @@ button:active {
     padding: 12px 20px;
 }
 
+/* Custom Text Container */
+.custom-text-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#qr-custom-text {
+    flex: 1;
+    min-width: 300px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 1em;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 500;
+    resize: vertical;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+#qr-custom-text:focus {
+    outline: none;
+    border-color: #ffd700;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#qr-custom-text::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+#clear-custom-text {
+    padding: 12px 20px;
+    align-self: flex-start;
+}
+
 /* QR Code Popup */
 #qr-popup {
     position: fixed;
@@ -1583,6 +1621,25 @@ button:active {
     animation: arrowPulse 1.5s ease-in-out infinite;
 }
 
+/* QR Custom Message - מתחת לשלבים */
+.qr-custom-message {
+    margin-top: 25px;
+    padding: 15px 20px;
+    background: rgba(255, 215, 0, 0.08);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.qr-custom-message p {
+    color: #ffd700;
+    font-size: 1.2em;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.6;
+}
+
 @keyframes arrowPulse {
     0%, 100% {
         opacity: 1;
@@ -1718,6 +1775,15 @@ button:active {
     .qr-continue {
         font-size: 1.1em;
         margin-top: 15px;
+    }
+
+    .qr-custom-message {
+        margin-top: 15px;
+        padding: 12px 15px;
+    }
+
+    .qr-custom-message p {
+        font-size: 1em;
     }
 }
 
