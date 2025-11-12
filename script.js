@@ -20,6 +20,8 @@ const gameState = {
     guaranteedWinMode: false, // מצב זכייה מובטחת
     inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
     initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
+    winningSymbol: null, // הסמל הזוכה הנוכחי
+    lastWinningSymbol: null, // הפרס האחרון שזכה - למניעת חזרות
     qrPopupVisible: false, // האם QR popup מוצג כרגע
     qrCustomText: 'אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸', // טקסט מותאם למסך QR
     scrollingBannerText: '🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰', // טקסט נגלל במסך הראשי
@@ -282,11 +284,11 @@ function determineWin() {
         const hasInventory = gameState.inventory.some(count => count > 0);
         if (hasInventory) {
             console.log('✅ זכייה מובטחת! (יש מלאי זמין - יבחר מהמלאי)');
+            return true; // זוכה רק אם יש מלאי
         } else {
-            console.log('✅ זכייה מובטחת! (אין מלאי - יבחר אימוג\'י רנדומלי)');
+            console.log('🚫 אין מלאי זמין - הזכייה בוטלה!');
+            return false; // אין מלאי = אין זכייה
         }
-
-        return true; // תמיד זוכה במצב זכייה מובטחת
     }
 
     if (gameState.winFrequency === 0) {
@@ -341,12 +343,33 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
                 }
 
                 if (availableSymbols.length > 0) {
-                    // בחר סמל אקראי מרשימת הסמלים הזמינים
-                    const randomIndex = Math.floor(Math.random() * availableSymbols.length);
-                    gameState.winningSymbol = availableSymbols[randomIndex];
+                    // נסה למנוע בחירה של אותו פרס פעמיים ברצף
+                    let selectedSymbol;
+
+                    if (availableSymbols.length > 1 && gameState.lastWinningSymbol !== null) {
+                        // אם יש יותר מפרס אחד ויש היסטוריה, נסה לבחור משהו אחר
+                        const otherSymbols = availableSymbols.filter(s => s !== gameState.lastWinningSymbol);
+
+                        if (otherSymbols.length > 0) {
+                            // בחר מהפרסים האחרים
+                            const randomIndex = Math.floor(Math.random() * otherSymbols.length);
+                            selectedSymbol = otherSymbols[randomIndex];
+                            console.log(`🎲 נמנע מחזרה על פרס ${gameState.lastWinningSymbol}, נבחר ${selectedSymbol}`);
+                        } else {
+                            // אין ברירה - רק הפרס האחרון נשאר
+                            selectedSymbol = availableSymbols[0];
+                            console.log(`⚠️ רק פרס ${selectedSymbol} נשאר במלאי`);
+                        }
+                    } else {
+                        // בחירה רנדומלית רגילה (אין היסטוריה או רק פרס אחד)
+                        const randomIndex = Math.floor(Math.random() * availableSymbols.length);
+                        selectedSymbol = availableSymbols[randomIndex];
+                    }
+
+                    gameState.winningSymbol = selectedSymbol;
                     console.log(`🎯 גליל 1 נבחר לעצור על סמל מספר: ${gameState.winningSymbol} (מלאי: ${gameState.inventory[gameState.winningSymbol]})`);
                 } else {
-                    // אין מלאי - אל תזכה
+                    // אין מלאי - אל תזכה (לא צריך להגיע לכאן בגלל התיקון ב-determineWin)
                     gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
                     console.log('⚠️ אין מלאי זמין - זכייה בוטלה');
                 }
@@ -502,6 +525,9 @@ function checkWin() {
         // אם במצב זכייה מובטחת, הפחת מהמלאי
         if (gameState.guaranteedWinMode && gameState.winningSymbol !== undefined) {
             const symbolIndex = gameState.winningSymbol;
+
+            // עדכן את הפרס האחרון שזכה (לרנדומליות)
+            gameState.lastWinningSymbol = symbolIndex;
 
             // עדכן מלאי במערכת החדשה (תמונות דינמיות)
             if (window.dynamicImagesManager) {
@@ -1702,5 +1728,31 @@ console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
 console.log('Press ד or S for settings');
 
+// ============================================
+// FIREBASE REMOTE CONTROL INTEGRATION
+// ============================================
 
+// Flag to track if we're waiting for remote control
+let isRemoteControlActive = false;
+
+// Function to handle remote buzzer trigger
+function handleRemoteBuzzer() {
+    console.log('🔴 Remote buzzer activated!');
+
+    // Play the buzzer sound (lose sound)
+    playSound('lose');
+
+    // If in automatic mode, trigger the spin
+    if (gameState.mode === 'automatic' && !gameState.isSpinning) {
+        setTimeout(() => {
+            triggerSpin();
+        }, 500); // Small delay for better UX
+    }
+}
+
+// Initialize remote control integration when session manager is ready
+if (typeof sessionManager !== 'undefined' && sessionManager) {
+    console.log('🎮 Remote control integration active');
+    isRemoteControlActive = true;
+}
 
