@@ -106,13 +106,23 @@ class SessionManager {
     const currentPlayerId = this.currentSession.currentPlayer;
 
     if (currentPlayerId && players[currentPlayerId]) {
+      const player = players[currentPlayerId];
+
       // Show player info instead of QR
-      this.currentPlayer = { id: currentPlayerId, ...players[currentPlayerId] };
+      this.currentPlayer = { id: currentPlayerId, ...player };
       qrDisplay.style.display = 'none';
       playerInfo.style.display = 'block';
 
       this.updatePlayerInfo();
-      this.startPlayerTimer();
+
+      // Only start timer if player is 'active' and not 'played'
+      // Don't start timer if they just pressed the button
+      if (player.status === 'active' && !player.lastAction) {
+        this.startPlayerTimer();
+      } else if (player.status === 'played' || player.lastAction === 'buzz') {
+        // Stop timer if they already played
+        this.stopPlayerTimer();
+      }
     } else {
       // Show QR code
       this.currentPlayer = null;
@@ -221,15 +231,15 @@ class SessionManager {
       // Stop timer
       this.stopPlayerTimer();
 
-      // Play buzzer sound (trigger existing game function)
-      if (typeof playSound === 'function') {
-        playSound('lose');
-      }
+      // DON'T play buzzer sound here - let the game handle it
 
       // Trigger spin (if in automatic mode)
       if (typeof triggerSpin === 'function' && gameState.mode === 'automatic') {
         triggerSpin();
       }
+
+      // Wait for spin to complete (automatic mode: ~4-5 seconds)
+      const spinDuration = gameState.mode === 'automatic' ? 5000 : 8000;
 
       // Check if player has attempts left
       if (player.attemptsLeft <= 0) {
@@ -237,13 +247,13 @@ class SessionManager {
         setTimeout(async () => {
           await removePlayer(this.sessionId, playerId);
           await getNextPlayer(this.sessionId);
-        }, 2000);
+        }, spinDuration + 1000); // Wait for spin + small delay
       } else {
         // Reset player to waiting status after spin completes
         setTimeout(async () => {
           await resetPlayerAction(this.sessionId, playerId);
           await getNextPlayer(this.sessionId);
-        }, 5000); // Wait for spin animation to complete
+        }, spinDuration + 1000); // Wait for spin animation to complete
       }
     }
   }
