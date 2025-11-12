@@ -22,7 +22,7 @@ const gameState = {
     initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
     qrPopupVisible: false, // האם QR popup מוצג כרגע
     qrCustomText: 'אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸', // טקסט מותאם למסך QR
-    scrollingBannerText: '', // טקסט נגלל במסך הראשי
+    scrollingBannerText: '🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰', // טקסט נגלל במסך הראשי
     scrollingBannerFontSize: 32 // גודל גופן לטקסט נגלל (בפיקסלים)
 };
 
@@ -1642,6 +1642,7 @@ setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
 setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
 setupBannerFontSizeControl(); // הגדר גודל גופן לטקסט נגלל
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
+updateScrollingBanner(); // הצג את הטקסט הנגלל בהתחלה
 
 // הגדר מאזין למצב זכייה מובטחת
 const guaranteedWinCheckbox = document.getElementById('guaranteed-win-mode');
