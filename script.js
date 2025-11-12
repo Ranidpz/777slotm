@@ -269,18 +269,19 @@ function startSpin() {
 
 // קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם משופר
 function determineWin() {
-    // אם מצב זכייה מובטחת פעיל
+    // אם מצב זכייה מובטחת פעיל - תמיד זוכה!
     if (gameState.guaranteedWinMode) {
+        console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב זכייה מובטחת)`);
+
         // בדוק אם יש מלאי זמין
         const hasInventory = gameState.inventory.some(count => count > 0);
         if (hasInventory) {
-            console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב זכייה מובטחת)`);
-            console.log('✅ זכייה מובטחת! (יש מלאי זמין)');
-            return true;
+            console.log('✅ זכייה מובטחת! (יש מלאי זמין - יבחר מהמלאי)');
         } else {
-            console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב זכייה מובטחת)`);
-            console.log('⚠️ אין מלאי זמין! חזרה למצב רגיל');
+            console.log('✅ זכייה מובטחת! (אין מלאי - יבחר אימוג\'י רנדומלי)');
         }
+
+        return true; // תמיד זוכה במצב זכייה מובטחת
     }
 
     if (gameState.winFrequency === 0) {
