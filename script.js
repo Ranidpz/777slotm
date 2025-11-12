@@ -1583,16 +1583,26 @@ function updateScrollingBanner() {
     const banner = document.getElementById('scrolling-banner');
     const scrollingText = document.getElementById('scrolling-text');
 
-    if (!banner || !scrollingText) return;
+    console.log('🔍 updateScrollingBanner נקרא');
+    console.log('📋 banner element:', banner);
+    console.log('📋 scrollingText element:', scrollingText);
+    console.log('📝 טקסט נוכחי:', gameState.scrollingBannerText);
+    console.log('📏 גודל גופן:', gameState.scrollingBannerFontSize);
+
+    if (!banner || !scrollingText) {
+        console.error('❌ אלמנטים לא נמצאו!');
+        return;
+    }
 
     if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
         scrollingText.textContent = gameState.scrollingBannerText;
         scrollingText.style.fontSize = gameState.scrollingBannerFontSize + 'px';
         banner.classList.remove('hidden');
-        console.log('✅ פס מתגלגל מוצג');
+        console.log('✅ פס מתגלגל מוצג - טקסט:', gameState.scrollingBannerText);
+        console.log('✅ hidden class הוסר, classes:', banner.className);
     } else {
         banner.classList.add('hidden');
-        console.log('🚫 פס מתגלגל מוסתר');
+        console.log('🚫 פס מתגלגל מוסתר - אין טקסט');
     }
 }
 
