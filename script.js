@@ -1429,6 +1429,28 @@ function setupWhatsAppInput() {
     }
 }
 
+// הגדר סגירת QR בלחיצה על המסך
+function setupQRPopupClose() {
+    const qrPopup = document.getElementById('qr-popup');
+
+    if (qrPopup) {
+        // סגור בלחיצת עכבר
+        qrPopup.addEventListener('click', () => {
+            if (gameState.qrPopupVisible) {
+                closeQRPopup();
+            }
+        });
+
+        // סגור במגע
+        qrPopup.addEventListener('touchstart', (e) => {
+            if (gameState.qrPopupVisible) {
+                e.preventDefault();
+                closeQRPopup();
+            }
+        }, { passive: false });
+    }
+}
+
 // אתחול
 loadSettings(); // טען הגדרות שמורות
 initSounds();
@@ -1441,6 +1463,7 @@ manageTutorial(); // נהל את המדריך
 setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
 setupInventoryInputs(); // הגדר שדות מלאי
 setupWhatsAppInput(); // הגדר שדה WhatsApp
+setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 
 // הגדר מאזין למצב זכייה מובטחת
 const guaranteedWinCheckbox = document.getElementById('guaranteed-win-mode');
