@@ -73,88 +73,94 @@
         <div class="settings-content">
             <h2>הגדרות</h2>
             
-            <div class="setting-group">
-                <h3>סוג המשחק</h3>
-                <label>
-                    <input type="radio" name="game-mode" value="automatic" checked>
-                    <span>רגיל (עצירה אוטומטית)</span>
-                </label>
-                <label>
-                    <input type="radio" name="game-mode" value="manual">
-                    <span>ידני (עצור כל גלגל בנפרד)</span>
-                </label>
+            <!-- שורה 1: סוג משחק + צבע רקע -->
+            <div class="settings-row">
+                <div class="setting-group half">
+                    <h3>סוג המשחק</h3>
+                    <label>
+                        <input type="radio" name="game-mode" value="automatic" checked>
+                        <span>רגיל (אוטומטי)</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="game-mode" value="manual">
+                        <span>ידני</span>
+                    </label>
+                </div>
+
+                <div class="setting-group half">
+                    <h3>צבע רקע התאים</h3>
+                    <div class="color-picker-container">
+                        <label for="background-color-picker" class="color-picker-label">
+                            <div class="color-preview" id="color-preview"></div>
+                            <span>בחר צבע</span>
+                        </label>
+                        <input type="color" id="background-color-picker" value="#1a1a2e" hidden>
+                        <input type="text" id="background-color-input" placeholder="#1a1a2e" maxlength="7">
+                        <button id="reset-background-color" class="small-btn">איפוס</button>
+                    </div>
+                </div>
             </div>
 
+            <!-- שורה 2: צלילים -->
             <div class="setting-group">
                 <h3>צלילים</h3>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="sound-enabled" checked>
-                    <span>הפעל צלילים במשחק</span>
-                </label>
-                <p class="setting-description">צלילי סיבוב, זכייה והפסד</p>
+                <div class="sounds-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="sound-enabled" checked>
+                        <span>הפעל צלילים</span>
+                    </label>
 
-                <div class="sound-uploads">
-                    <h4>צלילים מותאמים אישית</h4>
+                    <div class="sound-uploads-inline">
+                        <div class="sound-upload-item">
+                            <label for="sound-spin">סיבוב:</label>
+                            <input type="file" id="sound-spin" accept="audio/*">
+                            <button class="reset-sound" data-sound="spin">🔄</button>
+                        </div>
 
-                    <div class="sound-upload-item">
-                        <label for="sound-spin">צליל סיבוב:</label>
-                        <input type="file" id="sound-spin" accept="audio/*">
-                        <button class="reset-sound" data-sound="spin">🔄</button>
-                    </div>
+                        <div class="sound-upload-item">
+                            <label for="sound-win">זכייה:</label>
+                            <input type="file" id="sound-win" accept="audio/*">
+                            <button class="reset-sound" data-sound="win">🔄</button>
+                        </div>
 
-                    <div class="sound-upload-item">
-                        <label for="sound-win">צליל זכייה:</label>
-                        <input type="file" id="sound-win" accept="audio/*">
-                        <button class="reset-sound" data-sound="win">🔄</button>
-                    </div>
-
-                    <div class="sound-upload-item">
-                        <label for="sound-lose">צליל הפסד:</label>
-                        <input type="file" id="sound-lose" accept="audio/*">
-                        <button class="reset-sound" data-sound="lose">🔄</button>
+                        <div class="sound-upload-item">
+                            <label for="sound-lose">הפסד:</label>
+                            <input type="file" id="sound-lose" accept="audio/*">
+                            <button class="reset-sound" data-sound="lose">🔄</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="setting-group">
-                <h3>תדירות זכיות</h3>
-                <p class="setting-description">קבע כל כמה נסיונות תהיה זכייה מובטחת (0 = רנדומלי לגמרי)</p>
-                <div class="slider-container">
-                    <input type="range" id="win-frequency" min="0" max="20" value="3" step="1">
-                    <span id="win-frequency-value">3</span>
+            <!-- שורה 3: תדירות זכיות + מצב זכייה מובטחת -->
+            <div class="settings-row">
+                <div class="setting-group half">
+                    <h3>תדירות זכיות</h3>
+                    <p class="setting-description">כל כמה סיבובים (0 = רנדומלי)</p>
+                    <div class="slider-container">
+                        <input type="range" id="win-frequency" min="0" max="20" value="3" step="1">
+                        <span id="win-frequency-value">3</span>
+                    </div>
+                    <p class="setting-note">זכייה כל <span id="win-frequency-text">3</span> נסיונות</p>
                 </div>
-                <p class="setting-note">ערך נוכחי: זכייה כל <span id="win-frequency-text">3</span> נסיונות</p>
+
+                <div class="setting-group half">
+                    <h3>מצב זכייה מובטחת</h3>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="guaranteed-win-mode">
+                        <span>הפעל זכייה בכל סיבוב</span>
+                    </label>
+                    <p class="setting-description">זכייה תמיד, הפרס לפי המלאי</p>
+                </div>
             </div>
 
-            <div class="setting-group">
-                <h3>מצב זכייה מובטחת</h3>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="guaranteed-win-mode">
-                    <span>הפעל מצב זכייה מובטחת</span>
-                </label>
-                <p class="setting-description">במצב זה תמיד יהיה זכייה, והפרס ייבחר בהתאם למלאי שהוגדר</p>
-            </div>
-
+            <!-- WhatsApp -->
             <div class="setting-group">
                 <h3>הודעת WhatsApp בזכייה</h3>
-                <p class="setting-description">הזן מספר WhatsApp (עם קידומת בינלאומית, לדוגמה: 972501234567) כדי להציג QR code אחרי זכייה</p>
+                <p class="setting-description">הזן מספר (עם קידומת: 972501234567) להצגת QR code</p>
                 <div class="whatsapp-input-container">
                     <input type="text" id="whatsapp-number" placeholder="972501234567" maxlength="20">
                     <button id="clear-whatsapp" class="small-btn">נקה</button>
-                </div>
-            </div>
-
-            <div class="setting-group">
-                <h3>צבע רקע התאים</h3>
-                <p class="setting-description">בחר צבע רקע לתאי המשחק</p>
-                <div class="color-picker-container">
-                    <label for="background-color-picker" class="color-picker-label">
-                        <div class="color-preview" id="color-preview"></div>
-                        <span>לחץ לבחירת צבע</span>
-                    </label>
-                    <input type="color" id="background-color-picker" value="#1a1a2e" hidden>
-                    <input type="text" id="background-color-input" placeholder="#1a1a2e" maxlength="7">
-                    <button id="reset-background-color" class="small-btn">איפוס</button>
                 </div>
             </div>
 
