@@ -174,7 +174,8 @@ class SessionManager {
     }
 
     if (playerAttempts) {
-      playerAttempts.textContent = `נסיונות שנותרו: ${this.currentPlayer.attemptsLeft}`;
+      const attemptsLeft = this.currentPlayer.attemptsLeft !== undefined ? this.currentPlayer.attemptsLeft : 0;
+      playerAttempts.textContent = `נסיונות שנותרו: ${attemptsLeft}`;
     }
   }
 
@@ -191,7 +192,7 @@ class SessionManager {
       const timerProgress = document.getElementById('timer-progress');
 
       if (playerTimer) {
-        playerTimer.textContent = `⏱️ ${this.timeLeft}`;
+        playerTimer.textContent = this.timeLeft;
       }
 
       if (timerProgress) {
