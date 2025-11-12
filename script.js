@@ -1469,8 +1469,17 @@ function loadSettings() {
         if (bannerTextArea) {
             bannerTextArea.value = savedScrollingText;
         }
-        updateScrollingBanner();
-        console.log('📜 טקסט נגלל נטען');
+        console.log('📜 טקסט נגלל נטען:', savedScrollingText);
+    } else {
+        // אם אין טקסט שמור, השתמש בברירת מחדל
+        const defaultText = '🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰';
+        gameState.scrollingBannerText = defaultText;
+        const bannerTextArea = document.getElementById('scrolling-banner-text');
+        if (bannerTextArea) {
+            bannerTextArea.value = defaultText;
+        }
+        localStorage.setItem('scrollingBannerText', defaultText);
+        console.log('📜 טקסט ברירת מחדל נטען');
     }
 
     // טען גודל גופן לטקסט נגלל
