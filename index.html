@@ -57,14 +57,33 @@
     <div id="qr-popup" class="hidden">
         <div class="qr-content">
             <h2>🎉 מזל טוב! זכית! 🎉</h2>
-            <p class="qr-instructions">כדי לקבל את הפרס:</p>
-            <ol class="qr-steps">
-                <li>סרקו את הקוד</li>
-                <li>לחצו שוב לחזרה אל מסך הזכייה</li>
-                <li>צלמו תמונה של מסך הזכייה</li>
-                <li>שלחו לנו את התמונה</li>
-            </ol>
             <div id="qr-code-container"></div>
+
+            <div class="qr-instructions-container">
+                <p class="qr-main-title">השלבים הבאים:</p>
+                <div class="qr-steps-horizontal">
+                    <div class="qr-step">
+                        <div class="step-number">1</div>
+                        <p>סרקו את הקוד לשליחת מסך הזכייה בוואטסאפ</p>
+                    </div>
+                    <div class="qr-arrow">→</div>
+                    <div class="qr-step">
+                        <div class="step-number">2</div>
+                        <p>לחצו כאן על המסך או על הבאזר לחזרה אל מסך הזכייה</p>
+                    </div>
+                    <div class="qr-arrow">→</div>
+                    <div class="qr-step">
+                        <div class="step-number">3</div>
+                        <p>צלמו סלפי שלכם עם מסך הזכייה</p>
+                    </div>
+                    <div class="qr-arrow">→</div>
+                    <div class="qr-step">
+                        <div class="step-number">4</div>
+                        <p>שלחו לנו את התמונה</p>
+                    </div>
+                </div>
+            </div>
+
             <p class="qr-continue">👆 לחצו כדי לחזור למסך הזכייה ולצלם 📸</p>
         </div>
     </div>
@@ -101,36 +120,45 @@
                 </div>
             </div>
 
+            <div class="settings-divider"></div>
+
             <!-- שורה 2: צלילים -->
             <div class="setting-group">
                 <h3>צלילים</h3>
-                <div class="sounds-row">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="sound-enabled" checked>
-                        <span>הפעל צלילים</span>
-                    </label>
 
-                    <div class="sound-uploads-inline">
-                        <div class="sound-upload-item">
-                            <label for="sound-spin">סיבוב:</label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="sound-enabled" checked>
+                    <span>הפעל צלילים</span>
+                </label>
+
+                <div class="sound-uploads-grid">
+                    <div class="sound-upload-item">
+                        <label class="sound-label">צליל סיבוב</label>
+                        <div class="sound-input-row">
                             <input type="file" id="sound-spin" accept="audio/*">
                             <button class="reset-sound" data-sound="spin">🔄</button>
                         </div>
+                    </div>
 
-                        <div class="sound-upload-item">
-                            <label for="sound-win">זכייה:</label>
+                    <div class="sound-upload-item">
+                        <label class="sound-label">צליל זכייה</label>
+                        <div class="sound-input-row">
                             <input type="file" id="sound-win" accept="audio/*">
                             <button class="reset-sound" data-sound="win">🔄</button>
                         </div>
+                    </div>
 
-                        <div class="sound-upload-item">
-                            <label for="sound-lose">הפסד:</label>
+                    <div class="sound-upload-item">
+                        <label class="sound-label">צליל הפסד</label>
+                        <div class="sound-input-row">
                             <input type="file" id="sound-lose" accept="audio/*">
                             <button class="reset-sound" data-sound="lose">🔄</button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="settings-divider"></div>
 
             <!-- שורה 3: תדירות זכיות + מצב זכייה מובטחת -->
             <div class="settings-row">
@@ -154,6 +182,8 @@
                 </div>
             </div>
 
+            <div class="settings-divider"></div>
+
             <!-- WhatsApp -->
             <div class="setting-group">
                 <h3>הודעת WhatsApp בזכייה</h3>
@@ -163,6 +193,8 @@
                     <button id="clear-whatsapp" class="small-btn">נקה</button>
                 </div>
             </div>
+
+            <div class="settings-divider"></div>
 
             <div class="setting-group">
                 <h3>תמונות מותאמות אישית ומלאי פרסים</h3>
