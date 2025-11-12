@@ -1357,6 +1357,37 @@ function setupInventoryInputs() {
             });
         }
     }
+
+    // הגדר כפתורי איפוס אישיים
+    const resetButtons = document.querySelectorAll('.reset-inventory-btn');
+    resetButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const index = parseInt(btn.dataset.index);
+            resetIndividualInventory(index);
+        });
+    });
+}
+
+// איפוס מלאי של פריט בודד
+function resetIndividualInventory(index) {
+    // אפס את המלאי
+    gameState.inventory[index] = 0;
+    gameState.initialInventory[index] = 0;
+
+    // עדכן את השדה
+    const input = document.getElementById(`inventory${index + 1}`);
+    if (input) {
+        input.value = 0;
+    }
+
+    // עדכן את הקאונטר
+    updateCounter(index);
+
+    // שמור
+    saveInventory();
+
+    console.log(`🔄 מלאי סמל ${index + 1} אופס`);
 }
 
 // טען הגדרות מ-localStorage

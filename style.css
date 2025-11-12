@@ -560,6 +560,28 @@ body {
     font-weight: 500;
 }
 
+.reset-inventory-btn {
+    padding: 4px 10px;
+    background: rgba(255, 70, 70, 0.8);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Assistant', sans-serif;
+    font-size: 0.75em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reset-inventory-btn:hover {
+    background: rgba(255, 50, 50, 1);
+    transform: scale(1.05);
+}
+
+.reset-inventory-btn:active {
+    transform: scale(0.95);
+}
+
 .inventory-input {
     width: 60px;
     padding: 6px 10px;
