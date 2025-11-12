@@ -178,11 +178,13 @@ body {
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 0 50px rgba(102, 126, 234, 0.5);
-    max-width: 700px;
-    width: 95%;
+    max-width: 1400px;
+    width: 80%;
     max-height: 90vh;
     overflow-y: auto;
+    overflow-x: hidden;
     color: white;
+    box-sizing: border-box;
 }
 
 /* סקרולבר מעוצב */
@@ -469,6 +471,8 @@ body {
 .image-upload-item {
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .image-upload-item label {
@@ -552,6 +556,8 @@ body {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     margin-top: 8px;
+    box-sizing: border-box;
+    flex-wrap: wrap;
 }
 
 .inventory-input-wrapper label {
