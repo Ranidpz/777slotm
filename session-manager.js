@@ -42,7 +42,32 @@ class SessionManager {
     // Start listening to session changes
     this.startListening();
 
+    // Add click handler to skip current player
+    this.setupPlayerInfoClickHandler();
+
     return true;
+  }
+
+  // Setup click handler for player info area
+  setupPlayerInfoClickHandler() {
+    const playerInfo = document.getElementById('player-info');
+    if (playerInfo) {
+      playerInfo.style.cursor = 'pointer';
+      playerInfo.addEventListener('click', async () => {
+        if (this.currentPlayer && this.currentPlayer.id) {
+          console.log('⏭️ Skipping current player:', this.currentPlayer.id);
+
+          // Stop timer
+          this.stopPlayerTimer();
+
+          // Remove current player
+          await removePlayer(this.sessionId, this.currentPlayer.id);
+
+          // Move to next player
+          await getNextPlayer(this.sessionId);
+        }
+      });
+    }
   }
 
   // Generate QR code with session URL

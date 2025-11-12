@@ -2322,6 +2322,21 @@ button:active {
     flex-direction: column;
     gap: 12px;
     animation: fadeIn 0.3s ease;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    padding: 8px;
+    margin: -8px;
+}
+
+#player-info:hover {
+    background: rgba(255, 68, 68, 0.15);
+    transform: scale(1.02);
+}
+
+#player-info:active {
+    transform: scale(0.98);
+    background: rgba(255, 68, 68, 0.25);
 }
 
 @keyframes fadeIn {
