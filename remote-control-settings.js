@@ -1,5 +1,48 @@
 // Remote Control Settings Helper
-// Handles max attempts slider functionality
+// Handles remote control enable/disable and max attempts
+
+function setupRemoteControlToggle() {
+    const remoteControlCheckbox = document.getElementById('remote-control-enabled');
+    const qrContainer = document.getElementById('qr-container');
+
+    if (remoteControlCheckbox) {
+        // טען הגדרה שמורה
+        const savedEnabled = localStorage.getItem('remoteControlEnabled');
+        const isEnabled = savedEnabled === null ? true : savedEnabled === 'true';
+
+        remoteControlCheckbox.checked = isEnabled;
+
+        // הצג או הסתר את ה-QR container
+        if (qrContainer) {
+            qrContainer.style.display = isEnabled ? 'block' : 'none';
+        }
+
+        console.log(`🎮 שליטה מרחוק: ${isEnabled ? 'מופעל' : 'כבוי'}`);
+
+        // מאזין לשינויים
+        remoteControlCheckbox.addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+            localStorage.setItem('remoteControlEnabled', enabled);
+
+            // הצג או הסתר את ה-QR container
+            if (qrContainer) {
+                qrContainer.style.display = enabled ? 'block' : 'none';
+            }
+
+            console.log(`🎮 שליטה מרחוק ${enabled ? 'הופעל' : 'כובה'}`);
+
+            // אם כובה - נקה את ה-session manager
+            if (!enabled && window.sessionManager) {
+                sessionManager.destroy();
+            }
+
+            // אם הופעל - אתחל מחדש
+            if (enabled && window.sessionManager) {
+                sessionManager.init();
+            }
+        });
+    }
+}
 
 function setupMaxAttemptsControl() {
     const attemptsSlider = document.getElementById('max-player-attempts');
@@ -30,6 +73,7 @@ function setupMaxAttemptsControl() {
 window.addEventListener('DOMContentLoaded', () => {
     // Only run on main page (not controller)
     if (!window.location.pathname.includes('controller.html')) {
+        setupRemoteControlToggle();
         setupMaxAttemptsControl();
     }
 });

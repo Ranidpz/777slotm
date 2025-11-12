@@ -145,9 +145,9 @@
         <div class="settings-content">
             <h2>הגדרות</h2>
             
-            <!-- שורה 1: סוג משחק + צבע רקע -->
+            <!-- שורה 1: סוג משחק + צבע רקע + שליטה מרחוק -->
             <div class="settings-row">
-                <div class="setting-group half">
+                <div class="setting-group third">
                     <h3>סוג המשחק</h3>
                     <label>
                         <input type="radio" name="game-mode" value="automatic" checked>
@@ -159,8 +159,8 @@
                     </label>
                 </div>
 
-                <div class="setting-group half">
-                    <h3>צבע רקע </h3>
+                <div class="setting-group third">
+                    <h3>צבע רקע</h3>
                     <div class="color-picker-container">
                         <label for="background-color-picker" class="color-picker-label">
                             <div class="color-preview" id="color-preview"></div>
@@ -170,6 +170,15 @@
                         <input type="text" id="background-color-input" placeholder="#1a1a2e" maxlength="7">
                         <button id="reset-background-color" class="small-btn">איפוס</button>
                     </div>
+                </div>
+
+                <div class="setting-group third">
+                    <h3>🎮 שליטה מרחוק</h3>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remote-control-enabled" checked>
+                        <span>הצג QR Code</span>
+                    </label>
+                    <p class="setting-description">הצגת QR למשחק דרך טלפון</p>
                 </div>
             </div>
 

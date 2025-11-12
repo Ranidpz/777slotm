@@ -68,20 +68,14 @@ class SessionManager {
 
     new QRCode(qrCodeDiv, {
       text: controllerUrl,
-      width: 180,
-      height: 180,
+      width: 124,
+      height: 124,
       colorDark: '#000000',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
     });
 
     qrContainer.appendChild(qrCodeDiv);
-
-    // Add text below QR
-    const qrText = document.createElement('div');
-    qrText.className = 'qr-text';
-    qrText.textContent = 'סרוק להתחברות';
-    qrContainer.appendChild(qrText);
   }
 
   // Start listening to Firebase changes

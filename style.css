@@ -2231,13 +2231,14 @@ button:active {
     position: fixed;
     top: 20px;
     left: 20px;
-    width: 280px;
-    background: rgba(26, 26, 46, 0.95);
-    backdrop-filter: blur(10px);
+    width: 200px;
+    background: rgba(26, 26, 46, 0.75);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    border: 2px solid rgba(255, 215, 0, 0.3);
+    padding: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 215, 0, 0.2);
     z-index: 9999;
     font-family: 'Assistant', 'Arial', sans-serif;
     direction: rtl;
@@ -2246,8 +2247,9 @@ button:active {
 }
 
 #qr-container:hover {
-    box-shadow: 0 12px 40px rgba(255, 215, 0, 0.3);
-    border-color: rgba(255, 215, 0, 0.5);
+    box-shadow: 0 12px 40px rgba(255, 215, 0, 0.25);
+    border-color: rgba(255, 215, 0, 0.4);
+    background: rgba(26, 26, 46, 0.85);
 }
 
 /* QR Display Section */
@@ -2255,27 +2257,30 @@ button:active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 0;
 }
 
 #qr-code-image {
     background: white;
-    padding: 15px;
-    border-radius: 12px;
+    padding: 8px;
+    border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 140px;
+    height: 140px;
 }
 
 #qr-code-image img {
-    display: block;
-    width: 180px;
-    height: 180px;
+    display: block !important;
+    width: 124px !important;
+    height: 124px !important;
+    margin: 0 auto;
 }
 
 .qr-text {
-    color: #ffd700;
-    font-size: 1.1em;
-    font-weight: 600;
-    text-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    display: none;
 }
 
 /* Player Info Section */
@@ -2403,53 +2408,57 @@ button:active {
 /* Responsive adjustments */
 @media (max-width: 768px) {
     #qr-container {
-        width: 240px;
-        padding: 15px;
+        width: 170px;
+        padding: 12px;
         top: 15px;
         left: 15px;
     }
 
+    #qr-code-image {
+        width: 120px;
+        height: 120px;
+        padding: 6px;
+    }
+
     #qr-code-image img {
-        width: 150px;
-        height: 150px;
+        width: 108px !important;
+        height: 108px !important;
     }
 
     .player-name {
-        font-size: 1.2em;
+        font-size: 1.1em;
     }
 
     .timer-display {
-        font-size: 1.6em;
+        font-size: 1.5em;
     }
 }
 
 @media (max-width: 480px) {
     #qr-container {
-        width: 200px;
-        padding: 12px;
+        width: 150px;
+        padding: 10px;
         top: 10px;
         left: 10px;
     }
 
     #qr-code-image {
-        padding: 10px;
+        width: 100px;
+        height: 100px;
+        padding: 5px;
     }
 
     #qr-code-image img {
-        width: 120px;
-        height: 120px;
-    }
-
-    .qr-text {
-        font-size: 0.9em;
+        width: 90px !important;
+        height: 90px !important;
     }
 
     .player-name {
-        font-size: 1em;
+        font-size: 0.95em;
     }
 
     .timer-display {
-        font-size: 1.4em;
+        font-size: 1.3em;
     }
 }
 
