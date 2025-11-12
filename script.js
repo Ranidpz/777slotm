@@ -1547,7 +1547,7 @@ function setupScrollingBannerInput() {
     if (bannerTextArea) {
         // שמור בזמן הקלדה ועדכן תצוגה
         bannerTextArea.addEventListener('input', (e) => {
-            const value = e.target.value.trim();
+            const value = e.target.value;
             gameState.scrollingBannerText = value;
             localStorage.setItem('scrollingBannerText', value);
             updateScrollingBanner();
@@ -1558,11 +1558,12 @@ function setupScrollingBannerInput() {
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             if (bannerTextArea) {
-                bannerTextArea.value = '';
-                gameState.scrollingBannerText = '';
-                localStorage.removeItem('scrollingBannerText');
+                const defaultText = '🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰';
+                bannerTextArea.value = defaultText;
+                gameState.scrollingBannerText = defaultText;
+                localStorage.setItem('scrollingBannerText', defaultText);
                 updateScrollingBanner();
-                console.log('🗑️ טקסט נגלל נמחק');
+                console.log('🔄 טקסט נגלל אופס לברירת מחדל');
             }
         });
     }
