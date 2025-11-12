@@ -162,7 +162,7 @@ body {
 /* Scrolling Banner - פס מתגלגל למטה */
 .scrolling-banner {
     position: fixed;
-    bottom: 0;
+    bottom: 10px;
     left: 0;
     width: 100vw;
     height: 50px;
@@ -181,7 +181,7 @@ body {
     font-size: 32px;
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
-    animation: scroll-rtl 20s linear infinite;
+    animation: scroll-rtl 30s linear infinite;
 }
 
 @keyframes scroll-rtl {
