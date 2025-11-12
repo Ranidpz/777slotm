@@ -267,20 +267,25 @@ class SessionManager {
       // Wait for spin to complete (automatic mode: ~4-5 seconds)
       const spinDuration = gameState.mode === 'automatic' ? 5000 : 8000;
 
-      // Check if player has attempts left
-      if (player.attemptsLeft <= 0) {
-        // Remove player - no more attempts
-        setTimeout(async () => {
+      // Wait for spin to complete, then check if player has attempts left
+      setTimeout(async () => {
+        // Get updated player data to check actual attempts left
+        const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${playerId}`);
+        const snapshot = await playerRef.once('value');
+        const updatedPlayer = snapshot.val();
+
+        if (!updatedPlayer || updatedPlayer.attemptsLeft <= 0) {
+          // Remove player - no more attempts
+          console.log('🔚 Player finished all attempts:', playerId);
           await removePlayer(this.sessionId, playerId);
           await getNextPlayer(this.sessionId);
-        }, spinDuration + 1000); // Wait for spin + small delay
-      } else {
-        // Reset player to waiting status after spin completes
-        setTimeout(async () => {
+        } else {
+          // Reset player to waiting status
+          console.log('↩️ Player has', updatedPlayer.attemptsLeft, 'attempts left');
           await resetPlayerAction(this.sessionId, playerId);
           await getNextPlayer(this.sessionId);
-        }, spinDuration + 1000); // Wait for spin animation to complete
-      }
+        }
+      }, spinDuration + 1000); // Wait for spin animation to complete
     }
   }
 
