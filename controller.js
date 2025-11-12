@@ -261,6 +261,12 @@ class MobileController {
       attemptsCount.textContent = player.attemptsLeft || 0;
     }
 
+    // Re-enable buzz button
+    const buzzBtn = document.getElementById('buzz-btn');
+    if (buzzBtn) {
+      buzzBtn.disabled = false;
+    }
+
     // Start countdown timer
     this.startTimer();
 
