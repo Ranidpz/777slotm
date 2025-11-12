@@ -11,7 +11,7 @@ class SessionManager {
     this.playerTimeout = null;
     this.timerInterval = null;
     this.timeLeft = 0;
-    this.maxWaitTime = 10; // 10 seconds to press button
+    this.maxWaitTime = 30; // 30 seconds to press button
   }
 
   // Initialize session manager

@@ -10,8 +10,8 @@ class MobileController {
     this.unsubscribePlayer = null;
     this.unsubscribeSession = null;
     this.timerInterval = null;
-    this.timeLeft = 10;
-    this.maxWaitTime = 10;
+    this.timeLeft = 30;
+    this.maxWaitTime = 30;
     this.hasVibration = 'vibrate' in navigator;
   }
 
@@ -55,8 +55,8 @@ class MobileController {
 
   // Generate random player name
   generateRandomName() {
-    const adjectives = ['מהיר', 'חזק', 'חכם', 'אמיץ', 'שמח', 'מצליח'];
-    const nouns = ['שחקן', 'גיבור', 'אלוף', 'מנצח', 'כוכב'];
+    const adjectives = ['מהירים', 'חזקים', 'חכמים', 'אמיצים', 'שמחים', 'מצליחים'];
+    const nouns = ['שחקנים', 'גיבורים', 'אלופים', 'מנצחים', 'כוכבים'];
     const random = Math.floor(Math.random() * 1000);
     const name = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]} ${random}`;
 
@@ -303,8 +303,7 @@ class MobileController {
     this.timeLeft = this.maxWaitTime;
 
     const timerNumber = document.getElementById('timer-number');
-    const timerProgressCircle = document.getElementById('timer-progress-circle');
-    const circumference = 2 * Math.PI * 80; // radius = 80
+    const timerBarProgress = document.getElementById('timer-bar-progress');
 
     this.timerInterval = setInterval(() => {
       this.timeLeft--;
@@ -314,24 +313,22 @@ class MobileController {
         timerNumber.textContent = this.timeLeft;
       }
 
-      // Update circle progress
-      if (timerProgressCircle) {
-        const percentage = this.timeLeft / this.maxWaitTime;
-        const offset = circumference * (1 - percentage);
-        timerProgressCircle.style.strokeDashoffset = offset;
+      // Update bar progress
+      if (timerBarProgress) {
+        const percentage = (this.timeLeft / this.maxWaitTime) * 100;
+        timerBarProgress.style.setProperty('--progress-width', percentage + '%');
 
-        // Change color
-        if (this.timeLeft <= 3) {
-          timerProgressCircle.style.stroke = '#ff4444'; // Red
-        } else if (this.timeLeft <= 6) {
-          timerProgressCircle.style.stroke = '#ffaa00'; // Orange
-        } else {
-          timerProgressCircle.style.stroke = '#44ff44'; // Green
+        // Update the ::after pseudo-element width via inline style
+        const afterElement = timerBarProgress.querySelector('::after');
+        if (timerBarProgress.style) {
+          timerBarProgress.style.width = '100%';
+          // Use CSS variable for the ::after element
+          timerBarProgress.style.setProperty('--timer-width', percentage + '%');
         }
       }
 
       // Vibrate at milestones
-      if (this.timeLeft === 5 || this.timeLeft === 3) {
+      if (this.timeLeft === 10 || this.timeLeft === 5) {
         this.vibrate(50);
       }
 
