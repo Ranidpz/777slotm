@@ -1835,6 +1835,36 @@ button:active {
     animation: blink 1.5s ease-in-out infinite;
 }
 
+/* Powered by Playzone in QR popup */
+.qr-powered-by {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    font-family: 'Assistant', sans-serif;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qr-powered-by span {
+    margin-left: 5px;
+    font-size: 10px;
+}
+
+.qr-powered-by a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-right: 5px;
+    font-size: 11px;
+}
+
+.qr-powered-by a:hover {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
 /* QR Instructions Container - Horizontal Layout */
 .qr-instructions-container {
     margin-top: 25px;
