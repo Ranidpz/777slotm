@@ -89,7 +89,7 @@
                 </div>
 
                 <div class="qr-custom-message" id="qr-custom-message">
-                    <p>👉 לחצו כדי לחזור למסך הפיצ'ה ולצלם 📸</p>
+                    <p>אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸</p>
                 </div>
             </div>
 
@@ -195,7 +195,7 @@
 
             <!-- שורה: WhatsApp + טקסט QR -->
             <div class="settings-row">
-                <div class="setting-group half">
+                <div class="setting-group third">
                     <h3>הודעת WhatsApp בזכייה</h3>
                     <p class="setting-description">הזן מספר (עם קידומת: 972501234567)</p>
                     <div class="whatsapp-input-container">
@@ -204,11 +204,11 @@
                     </div>
                 </div>
 
-                <div class="setting-group half">
+                <div class="setting-group two-thirds">
                     <h3>טקסט מותאם במסך QR</h3>
                     <p class="setting-description">טקסט מתחת לשלבים במסך זכייה</p>
                     <div class="custom-text-container">
-                        <textarea id="qr-custom-text" placeholder="👉 לחצו כדי לחזור למסך הפיצ'ה ולצלם 📸" rows="3" maxlength="200"></textarea>
+                        <textarea id="qr-custom-text" placeholder="אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸" rows="3" maxlength="200"></textarea>
                         <button id="clear-custom-text" class="small-btn">נקה</button>
                     </div>
                 </div>
@@ -218,8 +218,16 @@
                 <h3>טקסט נגלל במסך הראשי</h3>
                 <p class="setting-description">טקסט שיופיע בפס שחור מתגלגל למטה (השאר ריק כדי להסתיר)</p>
                 <div class="custom-text-container">
-                    <textarea id="scrolling-banner-text" placeholder="🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰" rows="2" maxlength="300"></textarea>
+                    <textarea id="scrolling-banner-text" placeholder="🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰" rows="3" maxlength="300"></textarea>
                     <button id="clear-scrolling-text" class="small-btn">נקה</button>
+                </div>
+                <div class="font-size-control">
+                    <label for="banner-font-size">גודל גופן:</label>
+                    <div class="slider-container">
+                        <input type="range" id="banner-font-size" min="16" max="64" value="32" step="2">
+                        <span id="banner-font-size-value">32</span>
+                        <span style="font-size: 0.9em; color: #ccc;">px</span>
+                    </div>
                 </div>
             </div>
 
@@ -383,10 +391,10 @@
                         </div>
                     </div>
                 </div>
-                <button id="reset-images">איפוס לסמלים ברירת מחדל</button>
+                <button id="reset-images" class="reset-images-btn">איפוס לסמלים ברירת מחדל</button>
             </div>
 
-            <div class="settings-buttons">
+            <div class="settings-sticky-footer">
                 <button id="save-settings" class="save-btn">שמור</button>
                 <button id="close-settings" class="close-btn">סגור</button>
             </div>

@@ -21,8 +21,9 @@ const gameState = {
     inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
     initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
     qrPopupVisible: false, // האם QR popup מוצג כרגע
-    qrCustomText: '👉 לחצו כדי לחזור למסך הפיצ\'ה ולצלם 📸', // טקסט מותאם למסך QR
-    scrollingBannerText: '' // טקסט נגלל במסך הראשי
+    qrCustomText: 'אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸', // טקסט מותאם למסך QR
+    scrollingBannerText: '', // טקסט נגלל במסך הראשי
+    scrollingBannerFontSize: 32 // גודל גופן לטקסט נגלל (בפיקסלים)
 };
 
 // אלמנטים
@@ -1471,6 +1472,18 @@ function loadSettings() {
         updateScrollingBanner();
         console.log('📜 טקסט נגלל נטען');
     }
+
+    // טען גודל גופן לטקסט נגלל
+    const savedFontSize = localStorage.getItem('scrollingBannerFontSize');
+    if (savedFontSize) {
+        gameState.scrollingBannerFontSize = parseInt(savedFontSize);
+        const fontSizeSlider = document.getElementById('banner-font-size');
+        const fontSizeValue = document.getElementById('banner-font-size-value');
+        if (fontSizeSlider) fontSizeSlider.value = gameState.scrollingBannerFontSize;
+        if (fontSizeValue) fontSizeValue.textContent = gameState.scrollingBannerFontSize;
+        updateScrollingBanner();
+        console.log(`📏 גודל גופן נגלל נטען: ${gameState.scrollingBannerFontSize}px`);
+    }
 }
 
 // הגדרת מאזינים למספר WhatsApp
@@ -1517,7 +1530,7 @@ function setupCustomTextInput() {
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             if (customTextArea) {
-                customTextArea.value = '👉 לחצו כדי לחזור למסך הפיצ\'ה ולצלם 📸';
+                customTextArea.value = 'אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸';
                 gameState.qrCustomText = customTextArea.value;
                 localStorage.setItem('qrCustomText', customTextArea.value);
                 console.log('🔄 טקסט מותאם ל-QR אופס לברירת מחדל');
@@ -1564,11 +1577,30 @@ function updateScrollingBanner() {
 
     if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
         scrollingText.textContent = gameState.scrollingBannerText;
+        scrollingText.style.fontSize = gameState.scrollingBannerFontSize + 'px';
         banner.classList.remove('hidden');
         console.log('✅ פס מתגלגל מוצג');
     } else {
         banner.classList.add('hidden');
         console.log('🚫 פס מתגלגל מוסתר');
+    }
+}
+
+// הגדרת מאזינים לגודל גופן נגלל
+function setupBannerFontSizeControl() {
+    const fontSizeSlider = document.getElementById('banner-font-size');
+    const fontSizeValue = document.getElementById('banner-font-size-value');
+
+    if (fontSizeSlider && fontSizeValue) {
+        // עדכן את התצוגה של הערך
+        fontSizeSlider.addEventListener('input', (e) => {
+            const size = parseInt(e.target.value);
+            fontSizeValue.textContent = size;
+            gameState.scrollingBannerFontSize = size;
+            localStorage.setItem('scrollingBannerFontSize', size);
+            updateScrollingBanner();
+            console.log(`📏 גודל גופן נגלל עודכן ל-${size}px`);
+        });
     }
 }
 
@@ -1608,6 +1640,7 @@ setupInventoryInputs(); // הגדר שדות מלאי
 setupWhatsAppInput(); // הגדר שדה WhatsApp
 setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
 setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
+setupBannerFontSizeControl(); // הגדר גודל גופן לטקסט נגלל
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 
 // הגדר מאזין למצב זכייה מובטחת
