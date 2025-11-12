@@ -168,7 +168,7 @@ body {
     height: 50px;
     background: #000000;
     overflow: hidden;
-    z-index: 50;
+    z-index: 999;
     border-top: 2px solid rgba(255, 215, 0, 0.5);
 }
 
@@ -180,13 +180,12 @@ body {
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
     line-height: 50px;
-    padding-right: 100%;
     animation: scroll-rtl 20s linear infinite;
 }
 
 @keyframes scroll-rtl {
     0% {
-        transform: translateX(0);
+        transform: translateX(100%);
     }
     100% {
         transform: translateX(-100%);
