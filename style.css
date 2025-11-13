@@ -2329,7 +2329,7 @@ button:active {
     font-size: 1.1em;
     font-weight: 700;
     text-align: center;
-    margin: 0;
+    margin: 8px 0 0 0;
     text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
     font-family: 'Assistant', sans-serif;
 }
