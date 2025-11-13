@@ -317,16 +317,30 @@ class SessionManager {
   }
 
   // Store spin result for current player
-  async storeSpinResult(isWin) {
+  async storeSpinResult(isWin, prizeDetails = null) {
     if (!this.currentSpinPlayerId) return;
 
     try {
-      await firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`).update({
+      const updateData = {
         lastResult: isWin ? 'win' : 'loss',
         lastResultTime: firebase.database.ServerValue.TIMESTAMP
-      });
+      };
 
-      console.log(`📊 Stored ${isWin ? 'WIN' : 'LOSS'} result for player:`, this.currentSpinPlayerId);
+      // הוסף פרטי פרס אם זכייה
+      if (isWin && prizeDetails) {
+        updateData.prizeDetails = {
+          prizeName: prizeDetails.prizeName || 'לא זוהה',
+          symbolIndex: prizeDetails.symbolIndex,
+          symbolDisplay: prizeDetails.symbolDisplay,
+          remainingInventory: prizeDetails.remainingInventory
+        };
+        console.log(`📊 Stored WIN with prize details:`, updateData.prizeDetails);
+      } else {
+        console.log(`📊 Stored ${isWin ? 'WIN' : 'LOSS'} result for player:`, this.currentSpinPlayerId);
+      }
+
+      await firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`).update(updateData);
+
     } catch (error) {
       console.error('❌ Error storing spin result:', error);
     }

@@ -294,20 +294,50 @@ function startSpin() {
     }
 }
 
+// ===== פונקציות עזר למנגנון זכיות =====
+
+// פונקציה לזיהוי האם משתמשים בתמונות מותאמות או באימוג'ים
+function isUsingCustomImages() {
+    if (!window.dynamicImagesManager) return false;
+
+    const uploadedImages = dynamicImagesManager.images.filter(
+        img => img.imageData !== null
+    );
+
+    // נחשיב שמשתמשים בתמונות רק אם יש לפחות 2 תמונות מועלות
+    return uploadedImages.length >= 2;
+}
+
+// פונקציה לבדוק אם יש פרסים זמינים (מלאי או אימוג'ים)
+function hasAvailableInventory() {
+    if (!isUsingCustomImages()) {
+        // אימוג'ים - תמיד זמינים ללא הגבלה
+        return true;
+    }
+
+    // תמונות מותאמות - בדוק אם יש לפחות תמונה אחת עם מלאי זמין
+    return dynamicImagesManager.images.some(
+        img => img.imageData !== null &&
+               (img.inventory === null || img.inventory > 0)
+    );
+}
+
+// ===== סוף פונקציות עזר =====
+
 // קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם משופר
 function determineWin() {
     // אם מצב זכייה מובטחת פעיל - תמיד זוכה!
     if (gameState.guaranteedWinMode) {
         console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב זכייה מובטחת)`);
 
-        // בדוק אם יש מלאי זמין
-        const hasInventory = gameState.inventory.some(count => count > 0);
-        if (hasInventory) {
-            console.log('✅ זכייה מובטחת! (יש מלאי זמין - יבחר מהמלאי)');
-            return true; // זוכה רק אם יש מלאי
+        // בדוק אם יש פרסים זמינים (אימוג'ים או תמונות עם מלאי)
+        if (hasAvailableInventory()) {
+            const mode = isUsingCustomImages() ? 'תמונות מותאמות' : 'אימוג\'ים';
+            console.log(`✅ זכייה מובטחת! (${mode})`);
+            return true;
         } else {
-            console.log('🚫 אין מלאי זמין - הזכייה בוטלה!');
-            return false; // אין מלאי = אין זכייה
+            console.log('🚫 כל הפרסים אזלו מהמלאי - הזכייה בוטלה!');
+            return false;
         }
     }
 
@@ -354,76 +384,48 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
         if (reelIndex === 0) {
             // הגליל הראשון בוחר סמל - בהתאם למצב
             if (gameState.guaranteedWinMode) {
-                // במצב זכייה מובטחת - בחר רק מסמלים עם מלאי
-                const availableSymbols = [];
-                for (let i = 0; i < gameState.inventory.length; i++) {
-                    if (gameState.inventory[i] > 0) {
-                        availableSymbols.push(i);
-                    }
-                }
+                // במצב זכייה מובטחת - בחר סמל לפי סוג המשחק
 
-                if (availableSymbols.length > 0) {
-                    // תקופת חימום - 4 סיבובים ראשונים
-                    let candidateSymbols = availableSymbols;
+                if (isUsingCustomImages()) {
+                    // תמונות מותאמות - בחר רק מתמונות עם מלאי זמין
+                    const availableSymbols = [];
 
-                    if (gameState.spinsCount <= 4) {
-                        console.log(`🔥 תקופת חימום: סיבוב ${gameState.spinsCount}/4`);
-
-                        // מצא את הפרסים עם המלאי הנמוך ביותר
-                        const inventoryCounts = availableSymbols.map(idx => ({
-                            idx: idx,
-                            count: gameState.inventory[idx]
-                        }));
-
-                        // מיין לפי כמות מלאי (מהנמוך לגבוה)
-                        inventoryCounts.sort((a, b) => a.count - b.count);
-
-                        // המלאי הנמוך ביותר
-                        const lowestInventory = inventoryCounts[0].count;
-
-                        // סנן פרסים שיש להם מלאי גבוה יותר מהנמוך ביותר
-                        const higherInventorySymbols = availableSymbols.filter(idx =>
-                            gameState.inventory[idx] > lowestInventory
-                        );
-
-                        // אם יש פרסים עם מלאי גבוה יותר, השתמש בהם
-                        if (higherInventorySymbols.length > 0) {
-                            candidateSymbols = higherInventorySymbols;
-                            console.log(`⏳ נמנע מפרסים נדירים (מלאי: ${lowestInventory}), נותרו ${candidateSymbols.length} אפשרויות`);
-                        } else {
-                            console.log(`⚠️ כל הפרסים באותו רמת מלאי - משתמש בכולם`);
+                    dynamicImagesManager.images.forEach((img, idx) => {
+                        if (img.imageData !== null && (img.inventory === null || img.inventory > 0)) {
+                            availableSymbols.push(idx);
                         }
-                    }
+                    });
 
-                    // נסה למנוע בחירה של אותו פרס פעמיים ברצף
-                    let selectedSymbol;
+                    if (availableSymbols.length > 0) {
+                        // נסה למנוע בחירה של אותו פרס פעמיים ברצף
+                        let selectedSymbol;
 
-                    if (candidateSymbols.length > 1 && gameState.lastWinningSymbol !== null) {
-                        // אם יש יותר מפרס אחד ויש היסטוריה, נסה לבחור משהו אחר
-                        const otherSymbols = candidateSymbols.filter(s => s !== gameState.lastWinningSymbol);
+                        if (availableSymbols.length > 1 && gameState.lastWinningSymbol !== null) {
+                            const otherSymbols = availableSymbols.filter(s => s !== gameState.lastWinningSymbol);
 
-                        if (otherSymbols.length > 0) {
-                            // בחר מהפרסים האחרים
-                            const randomIndex = Math.floor(Math.random() * otherSymbols.length);
-                            selectedSymbol = otherSymbols[randomIndex];
-                            console.log(`🎲 נמנע מחזרה על פרס ${gameState.lastWinningSymbol}, נבחר ${selectedSymbol}`);
+                            if (otherSymbols.length > 0) {
+                                selectedSymbol = otherSymbols[Math.floor(Math.random() * otherSymbols.length)];
+                                console.log(`🎲 תמונה מותאמת - נמנע מחזרה על פרס ${gameState.lastWinningSymbol}, נבחר ${selectedSymbol}`);
+                            } else {
+                                selectedSymbol = availableSymbols[0];
+                            }
                         } else {
-                            // אין ברירה - רק הפרס האחרון נשאר
-                            selectedSymbol = candidateSymbols[0];
-                            console.log(`⚠️ רק פרס ${selectedSymbol} נשאר במועמדים`);
+                            selectedSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
                         }
+
+                        gameState.winningSymbol = selectedSymbol;
+                        const inventory = dynamicImagesManager.images[selectedSymbol].inventory;
+                        const inventoryText = inventory === null ? 'אינסוף' : inventory;
+                        console.log(`🎯 תמונה ${gameState.winningSymbol} נבחרה (מלאי: ${inventoryText})`);
                     } else {
-                        // בחירה רנדומלית רגילה (אין היסטוריה או רק פרס אחד)
-                        const randomIndex = Math.floor(Math.random() * candidateSymbols.length);
-                        selectedSymbol = candidateSymbols[randomIndex];
+                        // לא אמור להגיע לכאן בגלל התיקון ב-determineWin
+                        gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
+                        console.error('❌ שגיאה: אין מלאי אבל shouldWin=true');
                     }
-
-                    gameState.winningSymbol = selectedSymbol;
-                    console.log(`🎯 גליל 1 נבחר לעצור על סמל מספר: ${gameState.winningSymbol} (מלאי: ${gameState.inventory[gameState.winningSymbol]})`);
                 } else {
-                    // אין מלאי - אל תזכה (לא צריך להגיע לכאן בגלל התיקון ב-determineWin)
+                    // אימוג'ים - בחר רנדומלי מכל הסמלים (אין הגבלת מלאי)
                     gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
-                    console.log('⚠️ אין מלאי זמין - זכייה בוטלה');
+                    console.log(`🎯 אימוג'י ${gameState.winningSymbol} נבחר (ללא הגבלת מלאי)`);
                 }
             } else {
                 // מצב רגיל - בחר סמל רנדומלי
@@ -574,11 +576,6 @@ function checkWin() {
     if (isWin) {
         console.log(`🎉 ניצחון! כל 3 הסמלים זהים: ${displayedSymbols[0]}`);
 
-        // Notify remote control about win
-        if (window.sessionManager) {
-            sessionManager.storeSpinResult(true);
-        }
-
         // זהה את הסמל שזכה - תמיד צריך להפחית מהמלאי
         let symbolIndex = gameState.winningSymbol;
 
@@ -595,40 +592,55 @@ function checkWin() {
 
         // אם עדיין לא זוהה, נסה לפי הסמל הטקסטואלי
         if (symbolIndex === undefined) {
-            const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🍓'];
+            const symbols = gameState.defaultSymbols;
             symbolIndex = symbols.indexOf(displayedSymbols[0]);
             if (symbolIndex >= 0) {
                 console.log(`🔍 זוהה סמל ${symbolIndex} לפי אימוג'י טקסט`);
             }
         }
 
-        // עדכן מלאי רק אם זוהה הסמל בהצלחה
+        // עדכן מלאי ושלח הודעה לשלט מרחוק עם פרטי הפרס
         if (symbolIndex !== undefined && symbolIndex >= 0) {
-            // עדכן את הפרס האחרון שזכה (לרנדומליות)
+            // עדכן את הפרס האחרון שזכה (למניעת חזרות)
             gameState.lastWinningSymbol = symbolIndex;
 
-            // עדכן מלאי במערכת החדשה (תמונות דינמיות)
-            if (window.dynamicImagesManager) {
-                dynamicImagesManager.decrementInventoryBySymbolIndex(symbolIndex);
-                console.log(`📦 מלאי תמונה ${symbolIndex} הופחת`);
+            // הכן פרטי פרס לשלט מרחוק
+            let prizeDetails = {
+                symbolIndex: symbolIndex,
+                symbolDisplay: displayedSymbols[0]
+            };
+
+            // עדכן מלאי לפי סוג המשחק
+            if (isUsingCustomImages() && window.dynamicImagesManager) {
+                // תמונות מותאמות - עדכן דרך dynamicImagesManager
+                const img = dynamicImagesManager.images[symbolIndex];
+                if (img && img.imageData !== null) {
+                    dynamicImagesManager.decrementInventoryBySymbolIndex(symbolIndex);
+                    const remaining = img.inventory === null ? 'אינסוף' : img.inventory;
+                    console.log(`📦 מלאי תמונה ${symbolIndex} הופחת. נותר: ${remaining}`);
+
+                    prizeDetails.prizeName = img.label || `תמונה ${symbolIndex + 1}`;
+                    prizeDetails.remainingInventory = remaining;
+                }
+            } else {
+                // אימוג'ים - אין צורך בעדכון מלאי
+                console.log(`🎯 זכייה באימוג'י ${symbolIndex} (ללא הגבלת מלאי)`);
+                prizeDetails.prizeName = displayedSymbols[0];
+                prizeDetails.remainingInventory = 'אינסוף';
             }
 
-            // עדכן גם במערכת הישנה (לתאימות לאחור)
-            if (gameState.inventory[symbolIndex] !== undefined && gameState.inventory[symbolIndex] > 0) {
-                gameState.inventory[symbolIndex]--;
-                const distributed = gameState.initialInventory[symbolIndex] - gameState.inventory[symbolIndex];
-                console.log(`📦 מלאי סמל ${symbolIndex} הופחת ל-${gameState.inventory[symbolIndex]}`);
-                console.log(`🎁 חולקו ${distributed} מתוך ${gameState.initialInventory[symbolIndex]} פרסים`);
-
-                // שמור את המלאי המעודכן
-                saveInventory();
-
-                // עדכן את תצוגת המלאי והקאונטר בממשק (אם פתוח)
-                updateInventoryDisplay();
-                updateCounter(symbolIndex);
+            // שלח הודעה לשלט מרחוק עם פרטי הפרס
+            if (window.sessionManager) {
+                sessionManager.storeSpinResult(true, prizeDetails);
+                console.log(`📡 נשלח לשלט מרחוק: זכייה בפרס ${prizeDetails.prizeName}`);
             }
         } else {
             console.warn(`⚠️ לא הצלחנו לזהות את הסמל שזכה: ${displayedSymbols[0]}`);
+
+            // שלח הודעת זכייה כללית גם אם לא זיהינו את הסמל
+            if (window.sessionManager) {
+                sessionManager.storeSpinResult(true, { symbolDisplay: displayedSymbols[0] });
+            }
         }
 
         playSound('win');
@@ -643,9 +655,9 @@ function checkWin() {
             showQRCodeIfNeeded();
         }, 1500);
     } else {
-        // Notify remote control about loss
+        // שלח הודעת הפסד לשלט מרחוק
         if (window.sessionManager) {
-            sessionManager.storeSpinResult(false);
+            sessionManager.storeSpinResult(false, null);
         }
 
         playSound('lose');
