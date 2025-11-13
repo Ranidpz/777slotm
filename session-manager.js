@@ -428,6 +428,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Only initialize on main game page (not controller)
   if (!window.location.pathname.includes('controller.html')) {
     sessionManager = new SessionManager();
+    window.sessionManager = sessionManager; // Make it globally accessible
     await sessionManager.init();
   }
 });
