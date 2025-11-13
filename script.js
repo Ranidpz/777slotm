@@ -793,6 +793,13 @@ function triggerSpin(fromRemotePlayer = false) {
         console.log('🎮 סיבוב משחקן מרחוק - שומר currentSpinPlayerId');
     }
 
+    // שחקנים מרחוקים - תמיד הפעל spin בלי תלות ב-mode
+    if (fromRemotePlayer) {
+        console.log('🎮 מפעיל spin לשחקן מרחוק');
+        startSpin();
+        return;
+    }
+
     if (gameState.mode === 'automatic') {
         startSpin();
     } else if (gameState.mode === 'manual') {

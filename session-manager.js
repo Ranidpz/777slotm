@@ -319,12 +319,12 @@ class SessionManager {
       // Store reference to check result later
       this.currentSpinPlayerId = playerId;
 
-      // Trigger spin (if in automatic mode)
-      if (typeof triggerSpin === 'function' && gameState.mode === 'automatic') {
+      // Trigger spin - always trigger for remote players
+      if (typeof triggerSpin === 'function') {
         console.log('🎰 Calling triggerSpin() for remote player');
         triggerSpin(true); // Pass true to indicate this is from a remote player
       } else {
-        console.log('⚠️ Manual mode - spin not triggered automatically');
+        console.log('❌ triggerSpin function not available');
       }
 
       // Wait for spin to complete (automatic mode: ~4-5 seconds)
