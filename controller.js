@@ -241,7 +241,7 @@ class MobileController {
 
   // Handle player state change
   handlePlayerStateChange(player) {
-    console.log('🔄 Player state:', player.status, 'lastResult:', player.lastResult);
+    console.log('🔄 Player state:', player.status, 'lastResult:', player.lastResult, 'attemptsLeft:', player.attemptsLeft);
 
     // IMPORTANT: Check if we're currently showing a result screen
     // Don't override it unless user clicked "Continue"
@@ -250,15 +250,18 @@ class MobileController {
       currentScreen.id === 'win-result-screen' ||
       currentScreen.id === 'loss-result-screen'
     );
+    console.log('📺 Current screen:', currentScreen?.id, 'isShowingResult:', isShowingResult);
 
     // PRIORITY: Check if there's a result to show first (even if status is 'finished')
     // This ensures the player sees their win/loss before the finished screen
     if (player.lastResult && !isShowingResult) {
-      console.log('📊 Showing result screen:', player.lastResult);
+      console.log('📊 ✅ HAS RESULT! Showing result screen:', player.lastResult);
       if (player.lastResult === 'win') {
+        console.log('🎉 Calling showWinResultScreen()');
         this.showWinResultScreen(player);
         return;
       } else if (player.lastResult === 'loss') {
+        console.log('😔 Calling showLossResultScreen()');
         this.showLossResultScreen(player);
         return;
       }
@@ -270,6 +273,7 @@ class MobileController {
       return;
     }
 
+    console.log('💫 Switching to status-based screen:', player.status);
     switch (player.status) {
       case 'waiting':
         this.showWaitingScreen(player);
@@ -283,6 +287,8 @@ class MobileController {
         // Only show pressed screen if no result yet
         if (!player.lastResult) {
           this.showPressedScreen(player);
+        } else {
+          console.log('⚠️ played status but has result - waiting for result screen');
         }
         break;
 
@@ -293,7 +299,10 @@ class MobileController {
       case 'finished':
         // Only show finished screen if no result is being shown
         if (!player.lastResult) {
+          console.log('🏁 No result, showing finished screen');
           this.showFinishedScreen(player);
+        } else {
+          console.log('⚠️ finished status but has result - result should be shown above');
         }
         break;
     }
