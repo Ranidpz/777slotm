@@ -2321,7 +2321,17 @@ button:active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0;
+    gap: 10px;
+}
+
+.qr-scan-text {
+    color: #ffd700;
+    font-size: 1.1em;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+    font-family: 'Assistant', sans-serif;
 }
 
 #qr-code-image {
