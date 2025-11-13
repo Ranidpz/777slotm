@@ -691,16 +691,16 @@ function showQRCodeIfNeeded() {
         if (playerId) {
             firebase.database().ref(`sessions/${sessionManager.sessionId}/players/${playerId}`).once('value').then(snapshot => {
                 const player = snapshot.val();
-                // רק אם השחקן קיים וב-status 'active' או 'played', הצג את השם
-                if (player && player.name && (player.status === 'active' || player.status === 'played')) {
+                // רק אם השחקן קיים וב-status 'active', 'played', או 'finished', הצג את השם
+                if (player && player.name && (player.status === 'active' || player.status === 'played' || player.status === 'finished')) {
                     const playerName = player.name;
                     // הצג את השם בירוק דולק כמו הטיימר
                     winMessage.innerHTML = `🎉 מזל טוב <span style="color: #4ade80; text-shadow: 0 0 20px #4ade80, 0 0 30px #4ade80; font-weight: bold;">${playerName}</span>! זכית! 🎉`;
-                    console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName}`);
+                    console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName} (status: ${player.status})`);
                 } else {
-                    // שחקן לא פעיל (timeout/finished/etc) - אפס להודעה רגילה
+                    // שחקן לא פעיל (timeout/etc) - אפס להודעה רגילה
                     winMessage.innerHTML = '🎉 מזל טוב! זכית! 🎉';
-                    console.log('💭 שחקן לא פעיל - אופסה הודעת זכייה לדיפולט');
+                    console.log(`💭 שחקן ${player ? `בסטטוס ${player.status}` : 'לא קיים'} - אופסה הודעת זכייה לדיפולט`);
                 }
             }).catch(error => {
                 console.error('❌ Error fetching player from Firebase:', error);
