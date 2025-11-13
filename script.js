@@ -787,10 +787,15 @@ function closeQRPopup() {
 
 // פונקציה להפעלת המכונה
 function triggerSpin(fromRemotePlayer = false) {
-    // אם QR popup מוצג, סגור אותו במקום להתחיל סיבוב חדש
-    if (gameState.qrPopupVisible) {
+    // אם QR popup מוצג וזה לא שחקן מרחוק, סגור אותו במקום להתחיל סיבוב חדש
+    if (gameState.qrPopupVisible && !fromRemotePlayer) {
         closeQRPopup();
         return;
+    }
+
+    // אם שחקן מרחוק וה-QR מוצג - סגור אותו והמשך לסpin
+    if (gameState.qrPopupVisible && fromRemotePlayer) {
+        closeQRPopup();
     }
 
     // נקה את currentSpinPlayerId רק אם זה סיבוב אנונימי (לא מרחוק)
