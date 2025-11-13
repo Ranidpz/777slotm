@@ -68,69 +68,60 @@ function setupRemoteControlCheckbox() {
 
     // כפתור שיתוף לינק לשלט רחוק
     if (shareBtn) {
+        // השבת את הכפתור בהתחלה
+        shareBtn.disabled = true;
+        shareBtn.style.opacity = '0.5';
+        shareBtn.style.cursor = 'not-allowed';
+        shareBtn.title = 'מחכה לאתחול...';
+
+        // המתן ל-sessionId להיות מוכן
+        const waitForSession = setInterval(() => {
+            if (window.sessionManager && sessionManager.sessionId) {
+                clearInterval(waitForSession);
+                // אפשר את הכפתור
+                shareBtn.disabled = false;
+                shareBtn.style.opacity = '1';
+                shareBtn.style.cursor = 'pointer';
+                shareBtn.title = 'פתח שלט רחוק';
+                console.log('✅ כפתור שיתוף מוכן');
+            }
+        }, 100);
+
+        // timeout אחרי 10 שניות
+        setTimeout(() => {
+            if (shareBtn.disabled) {
+                clearInterval(waitForSession);
+                shareBtn.title = 'שגיאה - רענן את הדף';
+                console.error('❌ Timeout: sessionId לא נוצר');
+            }
+        }, 10000);
+
         shareBtn.addEventListener('click', async () => {
-            // בדוק אם sessionManager קיים ומוכן
-            if (!window.sessionManager) {
+            if (!window.sessionManager || !sessionManager.sessionId) {
                 alert('שגיאה: מערכת השליטה מרחוק לא מוכנה. נא לרענן את הדף.');
-                console.error('❌ sessionManager לא קיים');
                 return;
             }
 
-            // פונקציה להעתקת הלינק ללוח
-            const copyToClipboard = async () => {
+            try {
+                const controllerUrl = sessionManager.getControllerUrl();
+                console.log(`🔗 לינק שלט רחוק: ${controllerUrl}`);
+
+                // העתק ללוח
+                await navigator.clipboard.writeText(controllerUrl);
+
+                // הודעת הצלחה
+                alert('✅ הלינק הועתק ללוח!\n\nהדבק אותו בדפדפן כדי לפתוח את השלט רחוק.');
+                console.log('✅ לינק הועתק בהצלחה');
+            } catch (error) {
+                console.error('❌ שגיאה בהעתקת לינק:', error);
+
+                // אם ההעתקה נכשלה, הצג את הלינק בהודעה
                 try {
-                    if (!window.sessionManager || !sessionManager.sessionId) {
-                        console.error('❌ sessionManager או sessionId לא קיים');
-                        alert('שגיאה: לא ניתן ליצור לינק. נא לרענן את הדף.');
-                        return false;
-                    }
-
-                    const controllerUrl = sessionManager.getControllerUrl();
-                    console.log(`🔗 לינק שלט רחוק: ${controllerUrl}`);
-
-                    // העתק ללוח
-                    await navigator.clipboard.writeText(controllerUrl);
-
-                    // הודעת הצלחה
-                    alert('✅ הלינק הועתק ללוח!\n\nהדבק אותו בדפדפן כדי לפתוח את השלט רחוק.');
-                    console.log('✅ לינק הועתק בהצלחה');
-
-                    return true;
-                } catch (error) {
-                    console.error('❌ שגיאה בהעתקת לינק:', error);
-
-                    // אם ההעתקה נכשלה, הצג את הלינק בהודעה
                     const controllerUrl = sessionManager.getControllerUrl();
                     prompt('העתק את הלינק הזה:', controllerUrl);
-
-                    return false;
+                } catch (err) {
+                    alert('שגיאה: לא ניתן ליצור לינק. נא לרענן את הדף.');
                 }
-            };
-
-            // אם אין sessionId עדיין, חכה רגע
-            if (!sessionManager.sessionId) {
-                console.log('⏳ ממתין ל-sessionId...');
-
-                // נסה כמה פעמים עם timeout
-                let attempts = 0;
-                const checkInterval = setInterval(() => {
-                    attempts++;
-                    console.log(`🔄 נסיון ${attempts}/20...`);
-
-                    if (window.sessionManager && sessionManager.sessionId) {
-                        clearInterval(checkInterval);
-                        console.log('✅ sessionId נמצא!');
-                        copyToClipboard();
-                    } else if (attempts >= 20) { // 10 שניות (20 * 500ms)
-                        clearInterval(checkInterval);
-                        alert('שגיאה: לא ניתן ליצור לינק. נא לרענן את הדף.');
-                        console.error('❌ Timeout: sessionId לא נוצר אחרי 10 שניות');
-                    }
-                }, 500);
-            } else {
-                // sessionId כבר קיים, העתק ישירות
-                console.log('✅ sessionId כבר קיים');
-                copyToClipboard();
             }
         });
     }
