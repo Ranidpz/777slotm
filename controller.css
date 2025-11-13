@@ -45,6 +45,7 @@ body {
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
+    padding-bottom: 50px; /* Space for powered by footer */
 }
 
 /* Screen Management */
@@ -741,6 +742,34 @@ body {
 }
 
 .form-powered-by a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   GLOBAL POWERED BY (visible on all screens)
+   ============================================ */
+
+.global-powered-by {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 1000;
+    width: 100%;
+    max-width: 500px;
+}
+
+.global-powered-by a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.global-powered-by a:hover {
     text-decoration: underline;
 }
 
