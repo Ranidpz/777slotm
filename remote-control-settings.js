@@ -3,13 +3,19 @@
 
 function updateRemoteControlState() {
     const qrContainer = document.getElementById('qr-container');
+    const qrDisplay = document.getElementById('qr-display');
     const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
 
     // אם maxAttempts = 0, כבה שליטה מרחוק
     const isEnabled = maxAttempts > 0;
 
+    // הסתר את כל ה-container וגם את ה-QR display עצמו
     if (qrContainer) {
         qrContainer.style.display = isEnabled ? 'block' : 'none';
+    }
+
+    if (qrDisplay) {
+        qrDisplay.style.display = isEnabled ? 'block' : 'none';
     }
 
     console.log(`🎮 שליטה מרחוק: ${isEnabled ? 'מופעל' : 'כבוי'} (נסיונות: ${maxAttempts})`);
