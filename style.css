@@ -2578,3 +2578,22 @@ button:active {
     }
 }
 
+/* כפתור שיתוף שלט רחוק */
+#share-controller-link-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+#share-controller-link-btn:hover {
+    background: #5a6678 !important;
+    transform: scale(1.05);
+}
+
+#share-controller-link-btn:active {
+    transform: scale(0.98);
+}
+
+#share-controller-link-btn svg {
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
+}
+
