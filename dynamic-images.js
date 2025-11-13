@@ -246,11 +246,15 @@ const dynamicImagesManager = {
 
     // קבל מערך של 9 תמונות לשימוש במשחק
     getGameSymbols() {
+        console.log('🔍 getGameSymbols נקרא, this.images:', this.images.length, 'תמונות');
+
         // סנן רק תמונות שהועלו
         const uploadedImages = this.images.filter(img => img.imageData !== null);
+        console.log('🔍 uploadedImages:', uploadedImages.length, 'תמונות עם imageData');
 
         if (uploadedImages.length === 0) {
             // אין תמונות - החזר null כדי להשתמש באימוג'י
+            console.warn('⚠️ אין תמונות - מחזיר null');
             return null;
         }
 
