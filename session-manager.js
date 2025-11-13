@@ -259,7 +259,10 @@ class SessionManager {
       // Stop timer
       this.stopPlayerTimer();
 
-      // DON'T play buzzer sound here - let the game handle it
+      // Play spin sound on main screen
+      if (typeof playSound === 'function') {
+        playSound('spin');
+      }
 
       // Store reference to check result later
       this.currentSpinPlayerId = playerId;

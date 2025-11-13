@@ -507,15 +507,12 @@ class MobileController {
   // Show finished screen
   showFinishedScreen(player) {
     this.stopTimer();
-    this.showScreen('finished-screen');
 
-    const totalAttempts = document.getElementById('total-attempts');
-    if (totalAttempts && player.attemptsLeft !== undefined) {
-      const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
-      totalAttempts.textContent = maxAttempts - player.attemptsLeft;
-    }
-
-    this.vibrate(300);
+    // After a short delay, show connection screen with notice
+    setTimeout(() => {
+      this.showConnectionScreenWithNotice();
+      this.vibrate(300);
+    }, 500);
   }
 
   // Start countdown timer
@@ -616,6 +613,15 @@ class MobileController {
         connectBtn.innerHTML = '<span>התחברו למשחק</span>';
       }
     }
+  }
+
+  // Show connection screen with finished notice
+  showConnectionScreenWithNotice() {
+    const finishedNotice = document.getElementById('finished-notice');
+    if (finishedNotice) {
+      finishedNotice.style.display = 'block';
+    }
+    this.showScreen('connection-screen');
   }
 
   // Show error message (inline)
