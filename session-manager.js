@@ -290,6 +290,12 @@ class SessionManager {
     console.log('🎮 Player action received from mobile:', playerId, player);
 
     if (player.lastAction === 'buzz') {
+      // בדוק אם נותרו נסיונות
+      if (!player.attemptsLeft || player.attemptsLeft <= 0) {
+        console.log('⛔ Player has no attempts left - ignoring action');
+        return;
+      }
+
       console.log('🎯 Pull bar action detected! Triggering spin...');
 
       // Stop timer
