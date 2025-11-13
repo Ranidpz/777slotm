@@ -251,7 +251,7 @@ class MobileController {
       case 'played':
         // Only show pressed screen if no result yet
         if (!player.lastResult) {
-          this.showPressedScreen();
+          this.showPressedScreen(player);
         }
         break;
 
@@ -440,14 +440,14 @@ class MobileController {
   }
 
   // Show pressed screen
-  showPressedScreen() {
+  showPressedScreen(player) {
     this.stopTimer();
     this.showScreen('pressed-screen');
 
-    // Update attempts left display
+    // Update attempts left display with the updated player data
     const pressedAttemptsLeft = document.getElementById('pressed-attempts-left');
-    if (pressedAttemptsLeft && this.currentPlayer) {
-      pressedAttemptsLeft.textContent = this.currentPlayer.attemptsLeft || 0;
+    if (pressedAttemptsLeft && player) {
+      pressedAttemptsLeft.textContent = player.attemptsLeft || 0;
     }
 
     this.vibrate([200, 100, 200]);
