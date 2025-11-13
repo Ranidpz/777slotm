@@ -21,11 +21,6 @@
     <div id="controller-app">
         <!-- Connection Screen -->
         <div id="connection-screen" class="screen active">
-            <div class="logo-container">
-                <h1>מכונת מזל 777</h1>
-                <p class="subtitle">שליטה מרחוק</p>
-            </div>
-
             <div class="form-container">
                 <label for="player-name-input">הכניסו את שמכם:</label>
                 <input
@@ -144,14 +139,7 @@
             <div class="timeout-container">
                 <div class="timeout-icon">⏰</div>
                 <h2>אופס! הזמן נגמר</h2>
-                <p class="timeout-message">לא לחצת על הכפתור בזמן</p>
-
-                <button id="retry-btn" class="primary-btn">
-                    <span class="btn-icon">🔄</span>
-                    <span>נסה שוב</span>
-                </button>
-
-                <p class="instruction-text">סרוק שוב את ה-QR כדי לשחק</p>
+                <p class="timeout-message">סרקו שוב את הקוד מהמסך לשחק</p>
             </div>
         </div>
 
@@ -159,17 +147,8 @@
         <div id="finished-screen" class="screen">
             <div class="finished-container">
                 <div class="finished-icon">🎉</div>
-                <h2>תודה ששיחקת!</h2>
-                <p class="finished-message">סיימת את כל הנסיונות שלך</p>
-
-                <div class="stats-box">
-                    <p>נסיונות ששימשת: <span id="total-attempts">0</span></p>
-                </div>
-
-                <button id="play-again-btn" class="primary-btn">
-                    <span class="btn-icon">🎰</span>
-                    <span>סרוק QR לשחק שוב</span>
-                </button>
+                <h2>תודה שהשתתפתם!</h2>
+                <p class="finished-message">רוצים שוב?<br>סרקו שוב את הקוד מהמסך</p>
             </div>
         </div>
 

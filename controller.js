@@ -91,16 +91,6 @@ class MobileController {
 
     // Pull bar will be setup when showing playing screen
 
-    // Retry button
-    document.getElementById('retry-btn').addEventListener('click', () => {
-      this.showScreen('connection-screen');
-    });
-
-    // Play again button
-    document.getElementById('play-again-btn').addEventListener('click', () => {
-      this.showScreen('connection-screen');
-    });
-
     // Continue after win button
     document.getElementById('continue-after-win-btn').addEventListener('click', () => {
       this.handleContinueAfterResult();
@@ -616,6 +606,15 @@ class MobileController {
     const targetScreen = document.getElementById(screenId);
     if (targetScreen) {
       targetScreen.classList.add('active');
+    }
+
+    // Reset connect button if showing connection screen
+    if (screenId === 'connection-screen') {
+      const connectBtn = document.getElementById('connect-btn');
+      if (connectBtn) {
+        connectBtn.disabled = false;
+        connectBtn.innerHTML = '<span>התחברו למשחק</span>';
+      }
     }
   }
 
