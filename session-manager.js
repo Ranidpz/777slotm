@@ -318,9 +318,12 @@ class SessionManager {
         const updatedPlayer = snapshot.val();
 
         if (!updatedPlayer || updatedPlayer.attemptsLeft <= 0) {
-          // Remove player - no more attempts
+          // Mark player as finished (don't remove yet - let them see the result)
           console.log('🔚 Player finished all attempts:', playerId);
-          await removePlayer(this.sessionId, playerId);
+          await playerRef.update({
+            status: 'finished'
+          });
+          // Move to next player immediately
           await getNextPlayer(this.sessionId);
         } else {
           // Reset player to waiting status

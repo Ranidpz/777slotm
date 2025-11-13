@@ -251,7 +251,8 @@ class MobileController {
       currentScreen.id === 'loss-result-screen'
     );
 
-    // Check if there's a NEW result to show (and we're not already showing it)
+    // PRIORITY: Check if there's a result to show first (even if status is 'finished')
+    // This ensures the player sees their win/loss before the finished screen
     if (player.lastResult && !isShowingResult) {
       console.log('📊 Showing result screen:', player.lastResult);
       if (player.lastResult === 'win') {
@@ -290,7 +291,10 @@ class MobileController {
         break;
 
       case 'finished':
-        this.showFinishedScreen(player);
+        // Only show finished screen if no result is being shown
+        if (!player.lastResult) {
+          this.showFinishedScreen(player);
+        }
         break;
     }
   }
@@ -575,18 +579,28 @@ class MobileController {
     // Vibrate feedback
     this.vibrate(100);
 
-    // Clear the result in Firebase so it doesn't show again
+    // Get current player status to check if finished
     if (this.sessionId && this.playerId) {
       try {
-        await firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}/lastResult`).remove();
-        console.log('✅ Result cleared, waiting for next turn...');
+        const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`);
+        const snapshot = await playerRef.once('value');
+        const player = snapshot.val();
+
+        // Clear the result in Firebase
+        await playerRef.child('lastResult').remove();
+        console.log('✅ Result cleared');
+
+        // If player is finished (no more attempts), show finished screen
+        if (player && player.status === 'finished') {
+          console.log('🏁 Player finished - showing finished screen');
+          this.showFinishedScreen(player);
+        }
+        // Otherwise, the player state will update automatically via Firebase listener
+        // It will either go back to waiting or active for next attempt
       } catch (error) {
-        console.error('❌ Error clearing result:', error);
+        console.error('❌ Error in handleContinueAfterResult:', error);
       }
     }
-
-    // The player state will update automatically via Firebase listener
-    // It will either go back to waiting or active for next attempt
   }
 
   // Show timeout screen

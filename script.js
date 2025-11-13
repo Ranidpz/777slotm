@@ -671,6 +671,14 @@ function checkWin() {
 
 // הצג QR code אם הוגדר מספר WhatsApp
 function showQRCodeIfNeeded() {
+    // עדכן את הודעת הזכייה עם שם השחקן (אם יש)
+    const winMessage = document.getElementById('win-message');
+    if (winMessage && window.sessionManager && sessionManager.currentPlayer) {
+        const playerName = sessionManager.currentPlayer.name;
+        winMessage.textContent = `🎉 מזל טוב ${playerName}! זכית! 🎉`;
+        console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName}`);
+    }
+
     const whatsappNumber = gameState.whatsappNumber.trim();
 
     if (!whatsappNumber) {
