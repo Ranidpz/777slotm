@@ -1815,10 +1815,10 @@ if (window.dynamicImagesManager) {
 }
 
 loadImagesFromStorage(); // טען תמונות שמורות (מערכת ישנה - לתאימות)
-loadBackgroundColor(); // טען צבע רקע שמור
 loadInventory(); // טען מלאי שמור
 initColorPicker(); // אתחל color picker
 initReels();
+loadBackgroundColor(); // טען צבע רקע שמור - אחרי initReels כדי שהצבע יוחל על הסמלים
 manageTutorial(); // נהל את המדריך
 setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
 setupInventoryInputs(); // הגדר שדות מלאי
