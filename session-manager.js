@@ -84,7 +84,7 @@ class SessionManager {
       return;
     }
 
-    // Clear previous content and show loader
+    // Clear previous content and show loader (but keep the text)
     qrContainer.innerHTML = '';
 
     // Create and show loading spinner
@@ -113,9 +113,15 @@ class SessionManager {
         correctLevel: QRCode.CorrectLevel.H
       });
 
-      // Replace loader with QR code
+      // Replace loader with QR code and add text below
       qrContainer.innerHTML = '';
       qrContainer.appendChild(qrCodeDiv);
+
+      // Add the scan text below the QR code
+      const scanText = document.createElement('p');
+      scanText.className = 'qr-scan-text';
+      scanText.textContent = 'סרקו להפעלה';
+      qrContainer.appendChild(scanText);
     }, 100); // Small delay to ensure smooth transition
   }
 
