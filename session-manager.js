@@ -334,8 +334,9 @@ class SessionManager {
             console.log('🔄 currentSpinPlayerId נוקה - שחקן סיים את כל הנסיונות');
           }
 
-          // Move to next player immediately
-          await getNextPlayer(this.sessionId);
+          // DON'T move to next player yet - let them see the result screen
+          // They will be moved when they click "Continue" button
+          console.log('⏸️ NOT calling getNextPlayer - letting player see result first');
         } else {
           // Reset player to waiting status
           console.log('↩️ Player has', updatedPlayer.attemptsLeft, 'attempts left');

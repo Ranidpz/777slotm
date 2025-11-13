@@ -609,6 +609,12 @@ class MobileController {
         if (player && player.status === 'finished') {
           console.log('🏁 Player finished - showing finished screen');
           this.showFinishedScreen(player);
+
+          // Move to next player in queue (if any)
+          if (typeof getNextPlayer === 'function') {
+            await getNextPlayer(this.sessionId);
+            console.log('🔄 Called getNextPlayer to move queue forward');
+          }
         } else if (player && player.status === 'active') {
           // Player still active - show playing screen
           console.log('🎮 Player still active - showing playing screen');
@@ -635,12 +641,8 @@ class MobileController {
   // Show finished screen
   showFinishedScreen(player) {
     this.stopTimer();
-
-    // After a short delay, show connection screen with notice
-    setTimeout(() => {
-      this.showConnectionScreenWithNotice();
-      this.vibrate(300);
-    }, 500);
+    this.showScreen('finished-screen');
+    this.vibrate([200, 100, 200, 100, 200]);
   }
 
   // Start countdown timer
