@@ -1230,8 +1230,8 @@ function applyBackgroundColor(color) {
         container.style.setProperty('background', `linear-gradient(180deg, ${color} 0%, ${darkenedColor} 100%)`, 'important');
     });
 
-    // החל על כל הסמלים עצמם
-    const symbols = document.querySelectorAll('.symbol');
+    // החל על כל הסמלים עצמם (אבל לא על תמונות מותאמות!)
+    const symbols = document.querySelectorAll('.symbol:not(.custom-image)');
     symbols.forEach(symbol => {
         symbol.style.setProperty('background', `linear-gradient(180deg, ${lighterColor} 0%, ${darkenedColor} 100%)`, 'important');
     });
