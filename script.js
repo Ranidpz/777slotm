@@ -908,6 +908,12 @@ document.getElementById('save-settings').addEventListener('click', () => {
     initReels();
     console.log('🔄 גלגלים אותחלו מחדש עם התמונות החדשות');
 
+    // החל את צבע הרקע המעודכן
+    if (gameState.backgroundColor) {
+        applyBackgroundColor(gameState.backgroundColor);
+        console.log('🎨 צבע רקע הוחל:', gameState.backgroundColor);
+    }
+
     // סגור את מסך ההגדרות
     settingsScreen.classList.add('hidden');
 });
