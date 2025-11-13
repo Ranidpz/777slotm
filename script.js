@@ -677,19 +677,27 @@ function showQRCodeIfNeeded() {
     if (winMessage && window.sessionManager) {
         // קבל את השם מה-currentSpinPlayerId אם קיים
         const playerId = sessionManager.currentSpinPlayerId;
+
+        // בדוק אם הסיבוב הנוכחי באמת התחיל על ידי שחקן מרחוק
+        // אם השחקן לא בסטטוס 'active', זה אומר שהסיבוב היה אנונימי
         if (playerId) {
-            // קרא את פרטי השחקן מה-Firebase
             firebase.database().ref(`sessions/${sessionManager.sessionId}/players/${playerId}`).once('value').then(snapshot => {
                 const player = snapshot.val();
-                if (player && player.name) {
+                // רק אם השחקן קיים וב-status 'active' או 'played', הצג את השם
+                if (player && player.name && (player.status === 'active' || player.status === 'played')) {
                     const playerName = player.name;
                     // הצג את השם בירוק דולק כמו הטיימר
                     winMessage.innerHTML = `🎉 מזל טוב <span style="color: #4ade80; text-shadow: 0 0 20px #4ade80, 0 0 30px #4ade80; font-weight: bold;">${playerName}</span>! זכית! 🎉`;
                     console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName}`);
+                } else {
+                    // שחקן אנונימי - השאר הודעה רגילה
+                    console.log('💭 שחקן אנונימי - משאיר הודעת זכייה רגילה');
                 }
             }).catch(error => {
                 console.error('❌ Error fetching player from Firebase:', error);
             });
+        } else {
+            console.log('💭 אין שחקן מרחוק פעיל - הודעת זכייה רגילה');
         }
     }
 
@@ -772,6 +780,12 @@ function triggerSpin() {
     if (gameState.qrPopupVisible) {
         closeQRPopup();
         return;
+    }
+
+    // נקה את currentSpinPlayerId - זה סיבוב אנונימי (לא דרך שלט מרחוק)
+    if (window.sessionManager) {
+        sessionManager.currentSpinPlayerId = null;
+        console.log('🎰 סיבוב אנונימי - currentSpinPlayerId נוקה');
     }
 
     if (gameState.mode === 'automatic') {
