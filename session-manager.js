@@ -12,6 +12,7 @@ class SessionManager {
     this.timerInterval = null;
     this.timeLeft = 0;
     this.maxWaitTime = 30; // 30 seconds to press button
+    this.isSpinActive = false; // למנוע לחיצות כפולות בזמן spin
   }
 
   // Initialize session manager
@@ -290,6 +291,12 @@ class SessionManager {
     console.log('🎮 Player action received from mobile:', playerId, player);
 
     if (player.lastAction === 'buzz') {
+      // בדוק אם כבר יש spin פעיל - התעלם מלחיצות כפולות
+      if (this.isSpinActive) {
+        console.log('⏳ Spin already active - ignoring duplicate action');
+        return;
+      }
+
       // בדוק אם נותרו נסיונות
       if (!player.attemptsLeft || player.attemptsLeft <= 0) {
         console.log('⛔ Player has no attempts left - ignoring action');
@@ -297,6 +304,9 @@ class SessionManager {
       }
 
       console.log('🎯 Pull bar action detected! Triggering spin...');
+
+      // נעל spin עד שהוא מסתיים
+      this.isSpinActive = true;
 
       // Stop timer
       this.stopPlayerTimer();
@@ -349,6 +359,10 @@ class SessionManager {
           await resetPlayerAction(this.sessionId, playerId);
           await getNextPlayer(this.sessionId);
         }
+
+        // שחרר את הנעילה - spin הסתיים
+        this.isSpinActive = false;
+        console.log('🔓 Spin completed - lock released');
       }, spinDuration + 1000); // Wait for spin animation to complete
     }
   }
