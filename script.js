@@ -196,11 +196,12 @@ function initReels() {
 
     if (window.dynamicImagesManager) {
         const customSymbols = dynamicImagesManager.getGameSymbols();
+        console.log('🔍 getGameSymbols החזיר:', customSymbols);
 
         if (customSymbols && customSymbols.length >= 2) {
             // יש תמונות מותאמות - השתמש רק בהן (ללא אימוג'י!)
             allSymbols = customSymbols;
-            console.log('🖼️ משתמש בתמונות מותאמות בלבד (ללא אימוג\'י)');
+            console.log('🖼️ משתמש בתמונות מותאמות בלבד (ללא אימוג\'י)', allSymbols.length, 'תמונות');
         } else {
             // אין תמונות מותאמות - השתמש רק באימוג'י
             allSymbols = [...gameState.defaultSymbols];
