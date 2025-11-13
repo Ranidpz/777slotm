@@ -30,6 +30,8 @@ function updateRemoteControlState() {
 
 function setupRemoteControlCheckbox() {
     const checkbox = document.getElementById('remote-control-enabled');
+    const attemptsSlider = document.getElementById('max-player-attempts');
+    const attemptsValue = document.getElementById('max-attempts-value');
 
     if (checkbox) {
         // טען מצב שמור או ברירת מחדל (מופעל)
@@ -46,6 +48,20 @@ function setupRemoteControlCheckbox() {
 
             // עדכן מצב השליטה מרחוק
             updateRemoteControlState();
+        });
+    }
+
+    // טיפול בסליידר מספר נסיונות
+    if (attemptsSlider && attemptsValue) {
+        const savedAttempts = localStorage.getItem('maxPlayerAttempts') || '3';
+        attemptsSlider.value = savedAttempts;
+        attemptsValue.textContent = savedAttempts;
+
+        attemptsSlider.addEventListener('input', (e) => {
+            const attempts = e.target.value;
+            attemptsValue.textContent = attempts;
+            localStorage.setItem('maxPlayerAttempts', attempts);
+            console.log(`🎮 מספר נסיונות עודכן: ${attempts}`);
         });
     }
 }
