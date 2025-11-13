@@ -594,6 +594,12 @@ class MobileController {
     // Vibrate feedback
     this.vibrate(100);
 
+    // שחרר את נעילת הסpin במקרה שהיא תקועה
+    if (window.sessionManager) {
+      sessionManager.isSpinActive = false;
+      console.log('🔓 Releasing spin lock on continue');
+    }
+
     // Get current player status to check if finished
     if (this.sessionId && this.playerId) {
       try {
