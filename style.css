@@ -2271,7 +2271,7 @@ button:active {
     border-radius: 20px;
     padding: 15px 15px 12px 15px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 215, 0, 0.2);
+    border: none;
     z-index: 9999;
     font-family: 'Assistant', 'Arial', sans-serif;
     direction: rtl;
@@ -2280,8 +2280,7 @@ button:active {
 }
 
 #qr-container:hover {
-    box-shadow: 0 12px 40px rgba(255, 215, 0, 0.25);
-    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
     background: rgba(26, 26, 46, 0.85);
 }
 
@@ -2357,7 +2356,7 @@ button:active {
     padding: 15px;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
     border-radius: 12px;
-    border: 1px solid rgba(255, 215, 0, 0.2);
+    border: none;
 }
 
 .player-label {
@@ -2429,7 +2428,7 @@ button:active {
 #waiting-queue {
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px solid rgba(255, 215, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .queue-title {
