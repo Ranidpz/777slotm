@@ -63,10 +63,22 @@ function initSounds() {
             new Audio(gameState.customSounds.lose) :
             new Audio('sounds/Buzzer1.mp3');
 
-        // הגדרת ווליום
+        // הגדרת ווליום ו-preload
         sounds.spin.volume = 0.5;
+        sounds.spin.preload = 'auto';
         sounds.win.volume = 0.7;
+        sounds.win.preload = 'auto';
         sounds.lose.volume = 0.5;
+        sounds.lose.preload = 'auto';
+
+        // Event listeners לטיפול בשגיאות
+        Object.keys(sounds).forEach(key => {
+            if (sounds[key] instanceof Audio) {
+                sounds[key].addEventListener('error', (e) => {
+                    console.log(`⚠️ שגיאה בטעינת צליל ${key}:`, e);
+                });
+            }
+        });
     } catch (e) {
         console.log('⚠️ לא ניתן לטעון קבצי סאונד, משתמש בצלילים סינתטיים');
         // אם הטעינה נכשלה, נשתמש בצלילים סינתטיים
@@ -108,17 +120,25 @@ function playSound(soundName) {
         if (sound && sound.play) {
             // אם זה אובייקט Audio רגיל
             if (sound instanceof Audio) {
+                // עצור את הצליל הנוכחי אם הוא מתנגן
+                sound.pause();
                 sound.currentTime = 0; // אתחל מההתחלה
-                sound.play().catch(e => {
-                    console.log(`לא ניתן להפעיל צליל ${soundName}:`, e);
-                });
+
+                // נסה להפעיל את הצליל
+                const playPromise = sound.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        console.log(`לא ניתן להפעיל צליל ${soundName}:`, e.message);
+                    });
+                }
             } else {
                 // צליל סינתטי
                 sound.play();
             }
         }
     } catch (e) {
-        console.log(`שגיאה בהפעלת צליל ${soundName}:`, e);
+        console.log(`שגיאה בהפעלת צליל ${soundName}:`, e.message);
     }
 }
 

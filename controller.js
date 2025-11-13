@@ -123,6 +123,13 @@ class MobileController {
     try {
       this.spinSound = new Audio('sounds/prize-wheel.mp3');
       this.spinSound.volume = 0.5;
+      this.spinSound.preload = 'auto';
+
+      // Event listener לטיפול בשגיאות
+      this.spinSound.addEventListener('error', (e) => {
+        console.error('❌ Error loading spin sound:', e);
+      });
+
       console.log('🔊 Spin sound loaded');
     } catch (e) {
       console.error('❌ Failed to load spin sound:', e);
@@ -132,10 +139,18 @@ class MobileController {
   // Play spin sound
   playSpinSound() {
     if (this.spinSound) {
+      // עצור את הצליל הנוכחי אם הוא מתנגן
+      this.spinSound.pause();
       this.spinSound.currentTime = 0;
-      this.spinSound.play().catch(e => {
-        console.log('Could not play spin sound:', e);
-      });
+
+      // נסה להפעיל את הצליל
+      const playPromise = this.spinSound.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.log('Could not play spin sound:', e.message);
+        });
+      }
     }
   }
 
