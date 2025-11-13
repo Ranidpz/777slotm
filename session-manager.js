@@ -267,6 +267,10 @@ class SessionManager {
 
     this.stopPlayerTimer();
 
+    // נקה את currentSpinPlayerId כשהשחקן מתנתק
+    this.currentSpinPlayerId = null;
+    console.log('🔄 currentSpinPlayerId נוקה בעקבות timeout');
+
     if (this.currentPlayer) {
       // Update player status to disconnected
       await updatePlayerStatus(this.sessionId, this.currentPlayer.id, 'timeout');
@@ -323,6 +327,13 @@ class SessionManager {
           await playerRef.update({
             status: 'finished'
           });
+
+          // נקה את currentSpinPlayerId כשהשחקן מסיים
+          if (this.currentSpinPlayerId === playerId) {
+            this.currentSpinPlayerId = null;
+            console.log('🔄 currentSpinPlayerId נוקה - שחקן סיים את כל הנסיונות');
+          }
+
           // Move to next player immediately
           await getNextPlayer(this.sessionId);
         } else {
