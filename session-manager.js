@@ -166,12 +166,17 @@ class SessionManager {
 
       this.updatePlayerInfo();
 
-      // Only start timer if player is 'active' and not 'played'
-      // Don't start timer if they just pressed the button
-      if (player.status === 'active' && !player.lastAction) {
-        this.startPlayerTimer();
-      } else if (player.status === 'played' || player.lastAction === 'buzz') {
-        // Stop timer if they already played
+      // טיימר פשוט - מתחיל כשהשחקן פעיל ועוצר רק כשלוחצים buzz
+      if (player.status === 'active') {
+        // אם השחקן לחץ buzz - עצור את הטיימר
+        if (player.lastAction === 'buzz') {
+          this.stopPlayerTimer();
+        } else if (!this.timerInterval) {
+          // אם אין טיימר רץ - התחל אחד
+          this.startPlayerTimer();
+        }
+      } else {
+        // שחקן לא פעיל - עצור טיימר
         this.stopPlayerTimer();
       }
     } else {
@@ -259,6 +264,53 @@ class SessionManager {
     if (this.playerTimeout) {
       clearTimeout(this.playerTimeout);
       this.playerTimeout = null;
+    }
+  }
+
+  // Restart timer after spin completes (win or loss)
+  async restartPlayerTimer() {
+    console.log('🔄 Restarting player timer after spin completion');
+
+    // בדוק אם יש שחקן נוכחי
+    if (!this.currentPlayer || !this.currentPlayer.id) {
+      console.log('⚠️ No current player - timer not restarted');
+      return;
+    }
+
+    // קרא את נתוני השחקן העדכניים מ-Firebase
+    try {
+      const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentPlayer.id}`);
+      const snapshot = await playerRef.once('value');
+      const player = snapshot.val();
+
+      if (!player) {
+        console.log('⚠️ Player not found - timer not restarted');
+        return;
+      }
+
+      // אם השחקן סיים או בסטטוס אחר - אל תאתחל טיימר
+      if (player.status !== 'active') {
+        console.log(`⚠️ Player status is ${player.status} - timer not restarted`);
+        return;
+      }
+
+      // אם נגמרו לו הנסיונות - אל תאתחל טיימר
+      if (!player.attemptsLeft || player.attemptsLeft <= 0) {
+        console.log('⚠️ Player has no attempts left - timer not restarted');
+        return;
+      }
+
+      // אם הטיימר כבר רץ - אל תאתחל מחדש
+      if (this.timerInterval) {
+        console.log('⏳ Timer already running - no restart needed');
+        return;
+      }
+
+      // כל התנאים מתקיימים - אתחל את הטיימר
+      this.startPlayerTimer();
+      console.log(`✅ Timer restarted for ${player.name} (${player.attemptsLeft} attempts left)`);
+    } catch (error) {
+      console.error('❌ Error restarting timer:', error);
     }
   }
 
@@ -363,6 +415,11 @@ class SessionManager {
         // שחרר את הנעילה - spin הסתיים
         this.isSpinActive = false;
         console.log('🔓 Spin completed - lock released');
+
+        // אתחל מחדש את הטיימר אם השחקן עדיין פעיל ויש לו נסיונות
+        setTimeout(() => {
+          this.restartPlayerTimer();
+        }, 500);
       }, spinDuration + 1000); // Wait for spin animation to complete
     }
   }
