@@ -1,15 +1,12 @@
 // Remote Control Settings Helper
-// Handles remote control enable/disable based on max attempts value
+// Handles remote control enable/disable with checkbox
 
 function updateRemoteControlState() {
     const qrContainer = document.getElementById('qr-container');
     const qrDisplay = document.getElementById('qr-display');
-    const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
+    const isEnabled = localStorage.getItem('remoteControlEnabled') !== 'false';
 
-    // אם maxAttempts = 0, כבה שליטה מרחוק
-    const isEnabled = maxAttempts > 0;
-
-    // הסתר את כל ה-container וגם את ה-QR display עצמו
+    // הסתר או הצג את ה-QR
     if (qrContainer) {
         qrContainer.style.display = isEnabled ? 'block' : 'none';
     }
@@ -18,7 +15,7 @@ function updateRemoteControlState() {
         qrDisplay.style.display = isEnabled ? 'block' : 'none';
     }
 
-    console.log(`🎮 שליטה מרחוק: ${isEnabled ? 'מופעל' : 'כבוי'} (נסיונות: ${maxAttempts})`);
+    console.log(`🎮 שליטה מרחוק: ${isEnabled ? 'מופעל' : 'כבוי'}`);
 
     // אם כובה - נקה את ה-session manager
     if (!isEnabled && window.sessionManager) {
@@ -31,24 +28,21 @@ function updateRemoteControlState() {
     }
 }
 
-function setupMaxAttemptsControl() {
-    const attemptsSlider = document.getElementById('max-player-attempts');
-    const attemptsValue = document.getElementById('max-attempts-value');
+function setupRemoteControlCheckbox() {
+    const checkbox = document.getElementById('remote-control-enabled');
 
-    if (attemptsSlider && attemptsValue) {
-        // טען ערך שמור או ברירת מחדל
-        const savedValue = localStorage.getItem('maxPlayerAttempts') || '3';
-        attemptsSlider.value = savedValue;
-        attemptsValue.textContent = savedValue;
+    if (checkbox) {
+        // טען מצב שמור או ברירת מחדל (מופעל)
+        const savedState = localStorage.getItem('remoteControlEnabled');
+        checkbox.checked = savedState !== 'false';
 
-        console.log(`🎮 מספר נסיונות לשחקן נטען: ${savedValue}`);
+        console.log(`🎮 שליטה מרחוק נטעןה: ${checkbox.checked ? 'מופעל' : 'כבוי'}`);
 
-        // עדכן בזמן אמת
-        attemptsSlider.addEventListener('input', (e) => {
-            const value = e.target.value;
-            attemptsValue.textContent = value;
-            localStorage.setItem('maxPlayerAttempts', value);
-            console.log(`🎮 מספר נסיונות לשחקן עודכן: ${value}`);
+        // עדכן כשמשנים
+        checkbox.addEventListener('change', (e) => {
+            const isEnabled = e.target.checked;
+            localStorage.setItem('remoteControlEnabled', isEnabled);
+            console.log(`🎮 שליטה מרחוק עודכנה: ${isEnabled ? 'מופעל' : 'כבוי'}`);
 
             // עדכן מצב השליטה מרחוק
             updateRemoteControlState();
@@ -60,7 +54,7 @@ function setupMaxAttemptsControl() {
 window.addEventListener('DOMContentLoaded', () => {
     // Only run on main page (not controller)
     if (!window.location.pathname.includes('controller.html')) {
-        setupMaxAttemptsControl();
+        setupRemoteControlCheckbox();
         updateRemoteControlState();
     }
 });

@@ -150,8 +150,7 @@ class SessionManager {
     if (!qrContainer || !qrDisplay || !playerInfo) return;
 
     // בדוק אם השליטה מרחוק מופעלת
-    const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
-    const isRemoteControlEnabled = maxAttempts > 0;
+    const isRemoteControlEnabled = localStorage.getItem('remoteControlEnabled') !== 'false';
 
     const players = this.currentSession.players || {};
     const currentPlayerId = this.currentSession.currentPlayer;
