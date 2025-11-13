@@ -578,12 +578,10 @@ class MobileController {
     }
   }
 
-  // Press buzz button
+  // Press buzz button (triggered by pull bar)
   async pressBuzzButton() {
-    console.log('🔴 Buzz button pressed!');
-
-    const buzzBtn = document.getElementById('buzz-btn');
-    buzzBtn.disabled = true;
+    console.log('🔴 Pull bar triggered action!');
+    console.log('📡 Sending action to Firebase - Session:', this.sessionId, 'Player:', this.playerId);
 
     // Vibrate strongly
     this.vibrate(300);
@@ -592,11 +590,12 @@ class MobileController {
     const success = await triggerPlayerAction(this.sessionId, this.playerId, 'buzz');
 
     if (!success) {
-      console.error('❌ Failed to trigger action');
-      buzzBtn.disabled = false;
+      console.error('❌ Failed to trigger action in Firebase');
       this.vibrate(100);
       return;
     }
+
+    console.log('✅ Action sent successfully to Firebase');
 
     // Show pressed screen
     this.showPressedScreen();

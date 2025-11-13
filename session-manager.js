@@ -251,9 +251,11 @@ class SessionManager {
 
   // Handle player action (button press)
   async handlePlayerAction(playerId, player) {
-    console.log('🎮 Player action:', playerId, player);
+    console.log('🎮 Player action received from mobile:', playerId, player);
 
     if (player.lastAction === 'buzz') {
+      console.log('🎯 Pull bar action detected! Triggering spin...');
+
       // Stop timer
       this.stopPlayerTimer();
 
@@ -264,7 +266,10 @@ class SessionManager {
 
       // Trigger spin (if in automatic mode)
       if (typeof triggerSpin === 'function' && gameState.mode === 'automatic') {
+        console.log('🎰 Calling triggerSpin() for automatic mode');
         triggerSpin();
+      } else {
+        console.log('⚠️ Manual mode - spin not triggered automatically');
       }
 
       // Wait for spin to complete (automatic mode: ~4-5 seconds)
