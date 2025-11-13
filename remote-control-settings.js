@@ -72,7 +72,10 @@ function setupRemoteControlCheckbox() {
             if (window.sessionManager && sessionManager.sessionId) {
                 const controllerUrl = sessionManager.getControllerUrl();
                 console.log(`🔗 פותח שלט רחוק: ${controllerUrl}`);
-                window.open(controllerUrl, '_blank');
+
+                // פתח בחלון קטן שנראה כמו מסך טלפון
+                const windowFeatures = 'height=700,width=380,left=100,top=100,resizable=yes,scrollbars=yes';
+                window.open(controllerUrl, 'RemoteController', windowFeatures);
             } else {
                 alert('לא ניתן לפתוח שלט רחוק - אין סשן פעיל');
                 console.error('❌ אין sessionManager או sessionId');
