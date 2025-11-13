@@ -479,8 +479,63 @@ class MobileController {
       attemptsLeft.textContent = player.attemptsLeft || 0;
     }
 
+    // Display prize details if available
+    if (player.prizeDetails) {
+      const prizeNameElement = document.getElementById('prize-name');
+      if (prizeNameElement) {
+        const prizeName = player.prizeDetails.prizeName || 'פרס מיוחד';
+        prizeNameElement.textContent = `🎁 ${prizeName}`;
+        console.log('🏆 הצגת פרטי פרס:', player.prizeDetails);
+      }
+    }
+
+    // Setup WhatsApp button if configured
+    this.setupWhatsAppButton(player);
+
     // Vibrate with celebration pattern
     this.vibrate([100, 50, 100, 50, 100, 50, 200]);
+  }
+
+  // Setup WhatsApp button with proper link
+  async setupWhatsAppButton(player) {
+    const whatsappBtn = document.getElementById('whatsapp-btn');
+    if (!whatsappBtn) return;
+
+    try {
+      // Get WhatsApp number from session settings
+      const sessionRef = firebase.database().ref(`sessions/${this.sessionId}/settings/whatsappNumber`);
+      const snapshot = await sessionRef.once('value');
+      const whatsappNumber = snapshot.val();
+
+      if (whatsappNumber && whatsappNumber.trim() !== '') {
+        // Show button
+        whatsappBtn.style.display = 'block';
+
+        // Create message with prize details
+        let message = 'היי! זכיתי במכונת המזל! 🎰🎉';
+        if (player.prizeDetails && player.prizeDetails.prizeName) {
+          message = `היי! זכיתי ב-${player.prizeDetails.prizeName} במכונת המזל! 🎰🎉`;
+        }
+
+        // Create WhatsApp link
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+        // Set click handler
+        whatsappBtn.onclick = () => {
+          window.open(whatsappURL, '_blank');
+          this.vibrate(50);
+        };
+
+        console.log('📱 כפתור ווטסאפ הופעל:', whatsappNumber);
+      } else {
+        // Hide button if no WhatsApp configured
+        whatsappBtn.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('❌ שגיאה בטעינת מספר ווטסאפ:', error);
+      whatsappBtn.style.display = 'none';
+    }
   }
 
   // Show loss result screen

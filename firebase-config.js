@@ -55,16 +55,23 @@ async function createSession(sessionId, maxPlayers = 3, maxAttempts = 3) {
   if (!database) return false;
 
   try {
+    // Get WhatsApp number from localStorage
+    const whatsappNumber = localStorage.getItem('whatsappNumber') || '';
+
     await database.ref(`sessions/${sessionId}`).set({
       status: 'waiting',
       maxPlayers: maxPlayers,
       maxAttempts: maxAttempts,
       createdAt: firebase.database.ServerValue.TIMESTAMP,
       currentPlayer: null,
-      players: {}
+      players: {},
+      settings: {
+        whatsappNumber: whatsappNumber
+      }
     });
 
     console.log('✅ Session created:', sessionId);
+    console.log('📱 WhatsApp number saved to session:', whatsappNumber);
     return true;
   } catch (error) {
     console.error('❌ Error creating session:', error);

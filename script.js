@@ -1152,20 +1152,20 @@ function applyBackgroundColor(color) {
     const darkenedColor = darkenColor(color, 20);
     const lighterColor = lightenColor(color, 8);
 
-    // החל על כל התאים (reel-container)
+    // החל על כל התאים (reel-container) - עם !important כדי לדרוס את ה-CSS
     const reelContainers = document.querySelectorAll('.reel-container');
     reelContainers.forEach(container => {
-        container.style.background = `linear-gradient(180deg, ${color} 0%, ${darkenedColor} 100%)`;
+        container.style.setProperty('background', `linear-gradient(180deg, ${color} 0%, ${darkenedColor} 100%)`, 'important');
     });
 
     // החל על כל הסמלים עצמם
     const symbols = document.querySelectorAll('.symbol');
     symbols.forEach(symbol => {
-        symbol.style.background = `linear-gradient(180deg, ${lighterColor} 0%, ${darkenedColor} 100%)`;
+        symbol.style.setProperty('background', `linear-gradient(180deg, ${lighterColor} 0%, ${darkenedColor} 100%)`, 'important');
     });
 
     // עדכן גם את ה-body background
-    document.body.style.background = `linear-gradient(135deg, ${color} 0%, ${darkenedColor} 100%)`;
+    document.body.style.setProperty('background', `linear-gradient(135deg, ${color} 0%, ${darkenedColor} 100%)`, 'important');
 
     // עדכן את ה-preview
     const colorPreview = document.getElementById('color-preview');
@@ -1652,6 +1652,13 @@ function setupWhatsAppInput() {
             const value = e.target.value.trim();
             gameState.whatsappNumber = value;
             console.log('📱 מספר WhatsApp עודכן:', value);
+
+            // עדכן גם ב-Firebase אם יש session פעיל
+            if (window.sessionManager && sessionManager.sessionId) {
+                firebase.database().ref(`sessions/${sessionManager.sessionId}/settings/whatsappNumber`).set(value)
+                    .then(() => console.log('📱 מספר WhatsApp עודכן ב-Firebase'))
+                    .catch((error) => console.error('❌ שגיאה בעדכון WhatsApp ב-Firebase:', error));
+            }
         });
     }
 
@@ -1662,6 +1669,13 @@ function setupWhatsAppInput() {
                 gameState.whatsappNumber = '';
                 localStorage.removeItem('whatsappNumber');
                 console.log('🗑️ מספר WhatsApp נמחק');
+
+                // מחק גם מ-Firebase
+                if (window.sessionManager && sessionManager.sessionId) {
+                    firebase.database().ref(`sessions/${sessionManager.sessionId}/settings/whatsappNumber`).set('')
+                        .then(() => console.log('🗑️ מספר WhatsApp נמחק מ-Firebase'))
+                        .catch((error) => console.error('❌ שגיאה במחיקת WhatsApp מ-Firebase:', error));
+                }
             }
         });
     }
