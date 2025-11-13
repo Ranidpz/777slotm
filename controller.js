@@ -241,10 +241,19 @@ class MobileController {
 
   // Handle player state change
   handlePlayerStateChange(player) {
-    console.log('🔄 Player state:', player.status);
+    console.log('🔄 Player state:', player.status, 'lastResult:', player.lastResult);
 
-    // Check if there's a result to show
-    if (player.lastResult && player.status === 'played') {
+    // IMPORTANT: Check if we're currently showing a result screen
+    // Don't override it unless user clicked "Continue"
+    const currentScreen = document.querySelector('.screen.active');
+    const isShowingResult = currentScreen && (
+      currentScreen.id === 'win-result-screen' ||
+      currentScreen.id === 'loss-result-screen'
+    );
+
+    // Check if there's a NEW result to show (and we're not already showing it)
+    if (player.lastResult && !isShowingResult) {
+      console.log('📊 Showing result screen:', player.lastResult);
       if (player.lastResult === 'win') {
         this.showWinResultScreen(player);
         return;
@@ -252,6 +261,12 @@ class MobileController {
         this.showLossResultScreen(player);
         return;
       }
+    }
+
+    // If we're showing a result screen, don't change it
+    if (isShowingResult) {
+      console.log('⏸️ Keeping result screen visible');
+      return;
     }
 
     switch (player.status) {
