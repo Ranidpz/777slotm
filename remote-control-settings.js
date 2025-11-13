@@ -76,6 +76,34 @@ function setupRemoteControlCheckbox() {
                 return;
             }
 
+            // פונקציה לפתיחת חלון השלט רחוק
+            const openWindow = () => {
+                try {
+                    if (!window.sessionManager || !sessionManager.sessionId) {
+                        console.error('❌ sessionManager או sessionId לא קיים');
+                        return false;
+                    }
+
+                    const controllerUrl = sessionManager.getControllerUrl();
+                    console.log(`🔗 פותח שלט רחוק: ${controllerUrl}`);
+
+                    // פתח בחלון קטן שנראה כמו מסך טלפון
+                    const windowFeatures = 'height=700,width=380,left=100,top=100,resizable=yes,scrollbars=yes';
+                    const newWindow = window.open(controllerUrl, 'RemoteController', windowFeatures);
+
+                    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                        alert('לא ניתן לפתוח חלון חדש. אנא אפשר חלונות קופצים (pop-ups) בדפדפן.');
+                        return false;
+                    }
+
+                    return true;
+                } catch (error) {
+                    console.error('❌ שגיאה בפתיחת שלט רחוק:', error);
+                    alert('שגיאה בפתיחת שלט רחוק: ' + error.message);
+                    return false;
+                }
+            };
+
             // אם אין sessionId עדיין, חכה רגע
             if (!sessionManager.sessionId) {
                 console.log('⏳ ממתין ל-sessionId...');
@@ -84,40 +112,24 @@ function setupRemoteControlCheckbox() {
                 let attempts = 0;
                 const checkInterval = setInterval(() => {
                     attempts++;
+                    console.log(`🔄 נסיון ${attempts}/20...`);
 
-                    if (sessionManager.sessionId) {
+                    if (window.sessionManager && sessionManager.sessionId) {
                         clearInterval(checkInterval);
-                        openControllerWindow();
+                        console.log('✅ sessionId נמצא!');
+                        openWindow();
                     } else if (attempts >= 20) { // 10 שניות (20 * 500ms)
                         clearInterval(checkInterval);
                         alert('שגיאה: לא ניתן לפתוח שלט רחוק. נא לרענן את הדף.');
-                        console.error('❌ Timeout: sessionId לא נוצר');
+                        console.error('❌ Timeout: sessionId לא נוצר אחרי 10 שניות');
                     }
                 }, 500);
             } else {
                 // sessionId כבר קיים, פתח ישירות
-                openControllerWindow();
+                console.log('✅ sessionId כבר קיים');
+                openWindow();
             }
         });
-    }
-
-    // פונקציה לפתיחת חלון השלט רחוק
-    function openControllerWindow() {
-        try {
-            const controllerUrl = sessionManager.getControllerUrl();
-            console.log(`🔗 פותח שלט רחוק: ${controllerUrl}`);
-
-            // פתח בחלון קטן שנראה כמו מסך טלפון
-            const windowFeatures = 'height=700,width=380,left=100,top=100,resizable=yes,scrollbars=yes';
-            const newWindow = window.open(controllerUrl, 'RemoteController', windowFeatures);
-
-            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                alert('לא ניתן לפתוח חלון חדש. אנא אפשר חלונות קופצים (pop-ups) בדפדפן.');
-            }
-        } catch (error) {
-            console.error('❌ שגיאה בפתיחת שלט רחוק:', error);
-            alert('שגיאה בפתיחת שלט רחוק. נא לבדוק את הקונסול.');
-        }
     }
 }
 
