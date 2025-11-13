@@ -69,19 +69,31 @@ function setupRemoteControlCheckbox() {
     // כפתור שיתוף לינק לשלט רחוק
     if (shareBtn) {
         shareBtn.addEventListener('click', () => {
+            let retryCount = 0;
+            const maxRetries = 10; // מקסימום 5 שניות (10 * 500ms)
+
             // המתן קצר אם ה-sessionManager עדיין לא מוכן
             const tryOpenController = () => {
+                retryCount++;
+
                 if (window.sessionManager && sessionManager.sessionId) {
                     const controllerUrl = sessionManager.getControllerUrl();
                     console.log(`🔗 פותח שלט רחוק: ${controllerUrl}`);
 
                     // פתח בחלון קטן שנראה כמו מסך טלפון
                     const windowFeatures = 'height=700,width=380,left=100,top=100,resizable=yes,scrollbars=yes';
-                    window.open(controllerUrl, 'RemoteController', windowFeatures);
-                } else {
-                    console.warn('⏳ SessionManager עדיין לא מוכן, מנסה שוב...');
+                    const newWindow = window.open(controllerUrl, 'RemoteController', windowFeatures);
+
+                    if (!newWindow) {
+                        alert('לא ניתן לפתוח חלון חדש. אנא אפשר חלונות קופצים (pop-ups) בדפדפן.');
+                    }
+                } else if (retryCount < maxRetries) {
+                    console.warn(`⏳ SessionManager עדיין לא מוכן, מנסה שוב... (${retryCount}/${maxRetries})`);
                     // נסה שוב אחרי 500ms
                     setTimeout(tryOpenController, 500);
+                } else {
+                    alert('שגיאה: לא ניתן לפתוח שלט רחוק. נא לרענן את הדף ולנסות שוב.');
+                    console.error('❌ Timeout: SessionManager לא הצליח להתאתחל');
                 }
             };
 
