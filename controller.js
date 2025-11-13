@@ -645,10 +645,33 @@ class MobileController {
   }
 
   // Show finished screen
-  showFinishedScreen(player) {
+  async showFinishedScreen(player) {
     this.stopTimer();
     this.showScreen('finished-screen');
     this.vibrate([200, 100, 200, 100, 200]);
+
+    console.log('🏁 Player finished - auto-removing from session in 3 seconds');
+
+    // אחרי 3 שניות, הסר את השחקן מה-session והעבר לשחקן הבא
+    setTimeout(async () => {
+      if (this.sessionId && this.playerId) {
+        try {
+          console.log('🗑️ Removing finished player from session:', this.playerId);
+
+          // הסר את השחקן מה-session
+          await firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`).remove();
+          console.log('✅ Player removed from session');
+
+          // קרא לשחקן הבא בתור (אם יש)
+          if (typeof getNextPlayer === 'function') {
+            await getNextPlayer(this.sessionId);
+            console.log('🔄 Next player called');
+          }
+        } catch (error) {
+          console.error('❌ Error removing finished player:', error);
+        }
+      }
+    }, 3000);
   }
 
   // Start countdown timer
