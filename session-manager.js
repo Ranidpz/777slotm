@@ -143,6 +143,10 @@ class SessionManager {
 
     if (!qrContainer || !qrDisplay || !playerInfo) return;
 
+    // בדוק אם השליטה מרחוק מופעלת
+    const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
+    const isRemoteControlEnabled = maxAttempts > 0;
+
     const players = this.currentSession.players || {};
     const currentPlayerId = this.currentSession.currentPlayer;
 
@@ -165,10 +169,17 @@ class SessionManager {
         this.stopPlayerTimer();
       }
     } else {
-      // Show QR code
+      // Show QR code only if remote control is enabled
       this.currentPlayer = null;
-      qrDisplay.style.display = 'block';
-      playerInfo.style.display = 'none';
+
+      if (isRemoteControlEnabled) {
+        qrDisplay.style.display = 'block';
+        playerInfo.style.display = 'none';
+      } else {
+        // אם השליטה מרחוק כבויה, הסתר הכל
+        qrDisplay.style.display = 'none';
+        playerInfo.style.display = 'none';
+      }
 
       this.stopPlayerTimer();
     }

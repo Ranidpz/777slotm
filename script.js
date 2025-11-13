@@ -1150,12 +1150,22 @@ function loadBackgroundColor() {
 function applyBackgroundColor(color) {
     // יצירת גרדיאנט מהצבע שנבחר
     const darkenedColor = darkenColor(color, 20);
+    const lighterColor = lightenColor(color, 8);
 
     // החל על כל התאים (reel-container)
     const reelContainers = document.querySelectorAll('.reel-container');
     reelContainers.forEach(container => {
         container.style.background = `linear-gradient(180deg, ${color} 0%, ${darkenedColor} 100%)`;
     });
+
+    // החל על כל הסמלים עצמם
+    const symbols = document.querySelectorAll('.symbol');
+    symbols.forEach(symbol => {
+        symbol.style.background = `linear-gradient(180deg, ${lighterColor} 0%, ${darkenedColor} 100%)`;
+    });
+
+    // עדכן גם את ה-body background
+    document.body.style.background = `linear-gradient(135deg, ${color} 0%, ${darkenedColor} 100%)`;
 
     // עדכן את ה-preview
     const colorPreview = document.getElementById('color-preview');
