@@ -1218,6 +1218,10 @@ function saveBackgroundColor(color) {
     try {
         localStorage.setItem('backgroundColor', color);
         gameState.backgroundColor = color;
+        // עדכן גם את tempSettings כדי שהצבע לא יתאפס אם יוצאים בלי לשמור
+        if (typeof tempSettings !== 'undefined' && tempSettings) {
+            tempSettings.backgroundColor = color;
+        }
         console.log('💾 צבע רקע נשמר:', color);
     } catch (e) {
         console.error('❌ שגיאה בשמירת צבע רקע:', e);
@@ -1229,8 +1233,7 @@ function initColorPicker() {
     const colorPicker = document.getElementById('background-color-picker');
     const colorInput = document.getElementById('background-color-input');
     const colorPreview = document.getElementById('color-preview');
-    const resetBtn = document.getElementById('reset-background-color');
-    
+
     // color picker
     if (colorPicker) {
         colorPicker.addEventListener('input', (e) => {
@@ -1279,17 +1282,6 @@ function initColorPicker() {
     if (colorPreview) {
         colorPreview.addEventListener('click', () => {
             if (colorPicker) colorPicker.click();
-        });
-    }
-    
-    // כפתור איפוס
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            const defaultColor = '#667eea';
-            applyBackgroundColor(defaultColor);
-            updateColorPicker(defaultColor);
-            saveBackgroundColor(defaultColor);
-            console.log('🔄 צבע רקע אופס לברירת מחדל');
         });
     }
 }
