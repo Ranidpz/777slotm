@@ -68,7 +68,7 @@ function setupRemoteControlCheckbox() {
 
     // כפתור שיתוף לינק לשלט רחוק
     if (shareBtn) {
-        shareBtn.addEventListener('click', () => {
+        shareBtn.addEventListener('click', async () => {
             // בדוק אם sessionManager קיים ומוכן
             if (!window.sessionManager) {
                 alert('שגיאה: מערכת השליטה מרחוק לא מוכנה. נא לרענן את הדף.');
@@ -76,30 +76,33 @@ function setupRemoteControlCheckbox() {
                 return;
             }
 
-            // פונקציה לפתיחת חלון השלט רחוק
-            const openWindow = () => {
+            // פונקציה להעתקת הלינק ללוח
+            const copyToClipboard = async () => {
                 try {
                     if (!window.sessionManager || !sessionManager.sessionId) {
                         console.error('❌ sessionManager או sessionId לא קיים');
+                        alert('שגיאה: לא ניתן ליצור לינק. נא לרענן את הדף.');
                         return false;
                     }
 
                     const controllerUrl = sessionManager.getControllerUrl();
-                    console.log(`🔗 פותח שלט רחוק: ${controllerUrl}`);
+                    console.log(`🔗 לינק שלט רחוק: ${controllerUrl}`);
 
-                    // פתח בחלון קטן שנראה כמו מסך טלפון
-                    const windowFeatures = 'height=700,width=380,left=100,top=100,resizable=yes,scrollbars=yes';
-                    const newWindow = window.open(controllerUrl, 'RemoteController', windowFeatures);
+                    // העתק ללוח
+                    await navigator.clipboard.writeText(controllerUrl);
 
-                    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                        alert('לא ניתן לפתוח חלון חדש. אנא אפשר חלונות קופצים (pop-ups) בדפדפן.');
-                        return false;
-                    }
+                    // הודעת הצלחה
+                    alert('✅ הלינק הועתק ללוח!\n\nהדבק אותו בדפדפן כדי לפתוח את השלט רחוק.');
+                    console.log('✅ לינק הועתק בהצלחה');
 
                     return true;
                 } catch (error) {
-                    console.error('❌ שגיאה בפתיחת שלט רחוק:', error);
-                    alert('שגיאה בפתיחת שלט רחוק: ' + error.message);
+                    console.error('❌ שגיאה בהעתקת לינק:', error);
+
+                    // אם ההעתקה נכשלה, הצג את הלינק בהודעה
+                    const controllerUrl = sessionManager.getControllerUrl();
+                    prompt('העתק את הלינק הזה:', controllerUrl);
+
                     return false;
                 }
             };
@@ -117,17 +120,17 @@ function setupRemoteControlCheckbox() {
                     if (window.sessionManager && sessionManager.sessionId) {
                         clearInterval(checkInterval);
                         console.log('✅ sessionId נמצא!');
-                        openWindow();
+                        copyToClipboard();
                     } else if (attempts >= 20) { // 10 שניות (20 * 500ms)
                         clearInterval(checkInterval);
-                        alert('שגיאה: לא ניתן לפתוח שלט רחוק. נא לרענן את הדף.');
+                        alert('שגיאה: לא ניתן ליצור לינק. נא לרענן את הדף.');
                         console.error('❌ Timeout: sessionId לא נוצר אחרי 10 שניות');
                     }
                 }, 500);
             } else {
-                // sessionId כבר קיים, פתח ישירות
+                // sessionId כבר קיים, העתק ישירות
                 console.log('✅ sessionId כבר קיים');
-                openWindow();
+                copyToClipboard();
             }
         });
     }
