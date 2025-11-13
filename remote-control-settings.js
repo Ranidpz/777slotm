@@ -1,57 +1,27 @@
 // Remote Control Settings Helper
-// Handles remote control enable/disable and max attempts
+// Handles remote control enable/disable based on max attempts value
 
-function setupRemoteControlToggle() {
-    const remoteControlCheckbox = document.getElementById('remote-control-enabled');
+function updateRemoteControlState() {
     const qrContainer = document.getElementById('qr-container');
-    const attemptsContainer = document.getElementById('remote-attempts-container');
+    const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
 
-    if (remoteControlCheckbox) {
-        // טען הגדרה שמורה
-        const savedEnabled = localStorage.getItem('remoteControlEnabled');
-        const isEnabled = savedEnabled === null ? true : savedEnabled === 'true';
+    // אם maxAttempts = 0, כבה שליטה מרחוק
+    const isEnabled = maxAttempts > 0;
 
-        remoteControlCheckbox.checked = isEnabled;
+    if (qrContainer) {
+        qrContainer.style.display = isEnabled ? 'block' : 'none';
+    }
 
-        // הצג או הסתר את ה-QR container
-        if (qrContainer) {
-            qrContainer.style.display = isEnabled ? 'block' : 'none';
-        }
+    console.log(`🎮 שליטה מרחוק: ${isEnabled ? 'מופעל' : 'כבוי'} (נסיונות: ${maxAttempts})`);
 
-        // הצג או הסתר את הסליידר של ניסיונות
-        if (attemptsContainer) {
-            attemptsContainer.style.display = isEnabled ? 'block' : 'none';
-        }
+    // אם כובה - נקה את ה-session manager
+    if (!isEnabled && window.sessionManager) {
+        sessionManager.destroy();
+    }
 
-        console.log(`🎮 שליטה מרחוק: ${isEnabled ? 'מופעל' : 'כבוי'}`);
-
-        // מאזין לשינויים
-        remoteControlCheckbox.addEventListener('change', (e) => {
-            const enabled = e.target.checked;
-            localStorage.setItem('remoteControlEnabled', enabled);
-
-            // הצג או הסתר את ה-QR container
-            if (qrContainer) {
-                qrContainer.style.display = enabled ? 'block' : 'none';
-            }
-
-            // הצג או הסתר את הסליידר של ניסיונות
-            if (attemptsContainer) {
-                attemptsContainer.style.display = enabled ? 'block' : 'none';
-            }
-
-            console.log(`🎮 שליטה מרחוק ${enabled ? 'הופעל' : 'כובה'}`);
-
-            // אם כובה - נקה את ה-session manager
-            if (!enabled && window.sessionManager) {
-                sessionManager.destroy();
-            }
-
-            // אם הופעל - אתחל מחדש
-            if (enabled && window.sessionManager) {
-                sessionManager.init();
-            }
-        });
+    // אם הופעל - אתחל מחדש
+    if (isEnabled && window.sessionManager) {
+        sessionManager.init();
     }
 }
 
@@ -73,6 +43,9 @@ function setupMaxAttemptsControl() {
             attemptsValue.textContent = value;
             localStorage.setItem('maxPlayerAttempts', value);
             console.log(`🎮 מספר נסיונות לשחקן עודכן: ${value}`);
+
+            // עדכן מצב השליטה מרחוק
+            updateRemoteControlState();
         });
     }
 }
@@ -81,7 +54,7 @@ function setupMaxAttemptsControl() {
 window.addEventListener('DOMContentLoaded', () => {
     // Only run on main page (not controller)
     if (!window.location.pathname.includes('controller.html')) {
-        setupRemoteControlToggle();
         setupMaxAttemptsControl();
+        updateRemoteControlState();
     }
 });

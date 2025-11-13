@@ -18,6 +18,13 @@ class SessionManager {
   async init() {
     console.log('🚀 Initializing Session Manager...');
 
+    // Check if remote control is enabled (maxAttempts > 0)
+    const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
+    if (maxAttempts === 0) {
+      console.log('🎮 Remote control disabled (maxAttempts = 0)');
+      return false;
+    }
+
     // Initialize Firebase
     const db = initFirebase();
     if (!db) {
@@ -33,7 +40,6 @@ class SessionManager {
     console.log('📱 Session ID:', this.sessionId);
 
     // Create session in Firebase
-    const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
     await createSession(this.sessionId, 3, maxAttempts);
 
     // Generate QR code

@@ -443,6 +443,13 @@ class MobileController {
   showPressedScreen() {
     this.stopTimer();
     this.showScreen('pressed-screen');
+
+    // Update attempts left display
+    const pressedAttemptsLeft = document.getElementById('pressed-attempts-left');
+    if (pressedAttemptsLeft && this.currentPlayer) {
+      pressedAttemptsLeft.textContent = this.currentPlayer.attemptsLeft || 0;
+    }
+
     this.vibrate([200, 100, 200]);
   }
 
