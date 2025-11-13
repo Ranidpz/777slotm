@@ -100,7 +100,9 @@ async function cleanupOldSessions() {
       });
     }
   } catch (error) {
-    console.error('❌ Error cleaning sessions:', error);
+    // Silent fail - this is not critical functionality
+    // The error happens if Firebase rules don't allow listing all sessions
+    console.warn('⚠️ Could not clean old sessions (permissions). This is not critical.');
   }
 }
 
