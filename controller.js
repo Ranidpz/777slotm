@@ -647,31 +647,33 @@ class MobileController {
 
     console.log('🏁 Player finished - showing thank you screen');
 
-    // הסר את השחקן מיד כשמופיע מסך "תודה שהשתתפתם!"
-    // המשתמש כבר ראה את כל התוצאות שלו במסך הקודם
-    if (this.sessionId && this.playerId) {
-      try {
-        console.log('🗑️ Removing finished player from session:', this.playerId);
+    // המתן 5 שניות לפני הסרת השחקן
+    // זה נותן זמן למסך הראשי להציג את הזכייה עם השם
+    setTimeout(async () => {
+      if (this.sessionId && this.playerId) {
+        try {
+          console.log('🗑️ Removing finished player from session after delay:', this.playerId);
 
-        // נקה את currentSpinPlayerId אם זה השחקן הנוכחי
-        if (window.sessionManager && sessionManager.currentSpinPlayerId === this.playerId) {
-          sessionManager.currentSpinPlayerId = null;
-          console.log('🔄 currentSpinPlayerId cleared for finished player');
+          // נקה את currentSpinPlayerId אם זה השחקן הנוכחי
+          if (window.sessionManager && sessionManager.currentSpinPlayerId === this.playerId) {
+            sessionManager.currentSpinPlayerId = null;
+            console.log('🔄 currentSpinPlayerId cleared for finished player');
+          }
+
+          // הסר את השחקן מה-session
+          await firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`).remove();
+          console.log('✅ Player removed from session');
+
+          // קרא לשחקן הבא בתור (אם יש)
+          if (typeof getNextPlayer === 'function') {
+            await getNextPlayer(this.sessionId);
+            console.log('🔄 Next player called');
+          }
+        } catch (error) {
+          console.error('❌ Error removing finished player:', error);
         }
-
-        // הסר את השחקן מה-session
-        await firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`).remove();
-        console.log('✅ Player removed from session');
-
-        // קרא לשחקן הבא בתור (אם יש)
-        if (typeof getNextPlayer === 'function') {
-          await getNextPlayer(this.sessionId);
-          console.log('🔄 Next player called');
-        }
-      } catch (error) {
-        console.error('❌ Error removing finished player:', error);
       }
-    }
+    }, 5000); // 5 שניות - זמן מספיק למסך הראשי להציג את הזכייה
   }
 
   // Start countdown timer
