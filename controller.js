@@ -13,6 +13,18 @@ class MobileController {
     this.timeLeft = 30;
     this.maxWaitTime = 30;
     this.hasVibration = 'vibrate' in navigator;
+
+    // Pull bar state
+    this.pullBarHandle = null;
+    this.pullBarFill = null;
+    this.isDragging = false;
+    this.startY = 0;
+    this.currentY = 0;
+    this.pullBarTrackHeight = 0;
+    this.pullThreshold = 0.7; // 70% pull required
+
+    // Spin sound
+    this.spinSound = null;
   }
 
   // Initialize controller
@@ -77,10 +89,7 @@ class MobileController {
       }
     });
 
-    // Buzz button
-    document.getElementById('buzz-btn').addEventListener('click', () => {
-      this.pressBuzzButton();
-    });
+    // Pull bar will be setup when showing playing screen
 
     // Retry button
     document.getElementById('retry-btn').addEventListener('click', () => {
@@ -107,6 +116,9 @@ class MobileController {
       location.reload();
     });
 
+    // Load spin sound
+    this.loadSpinSound();
+
     // Prevent accidental navigation
     window.addEventListener('beforeunload', (e) => {
       if (this.playerId) {
@@ -114,6 +126,27 @@ class MobileController {
         e.returnValue = '';
       }
     });
+  }
+
+  // Load spin sound
+  loadSpinSound() {
+    try {
+      this.spinSound = new Audio('sounds/prize-wheel.mp3');
+      this.spinSound.volume = 0.5;
+      console.log('🔊 Spin sound loaded');
+    } catch (e) {
+      console.error('❌ Failed to load spin sound:', e);
+    }
+  }
+
+  // Play spin sound
+  playSpinSound() {
+    if (this.spinSound) {
+      this.spinSound.currentTime = 0;
+      this.spinSound.play().catch(e => {
+        console.log('Could not play spin sound:', e);
+      });
+    }
   }
 
   // Connect to game
@@ -285,17 +318,135 @@ class MobileController {
       attemptsCount.textContent = player.attemptsLeft || 0;
     }
 
-    // Re-enable buzz button
-    const buzzBtn = document.getElementById('buzz-btn');
-    if (buzzBtn) {
-      buzzBtn.disabled = false;
-    }
+    // Setup pull bar
+    this.setupPullBar();
 
     // Start countdown timer
     this.startTimer();
 
     // Vibrate to notify player
     this.vibrate([100, 50, 100]);
+  }
+
+  // Setup pull bar interaction
+  setupPullBar() {
+    this.pullBarHandle = document.getElementById('pull-bar-handle');
+    this.pullBarFill = document.getElementById('pull-bar-fill');
+
+    if (!this.pullBarHandle || !this.pullBarFill) return;
+
+    // Get track height
+    const track = document.querySelector('.pull-bar-track');
+    this.pullBarTrackHeight = track ? track.offsetHeight : 350;
+
+    // Remove old listeners if any
+    this.pullBarHandle.replaceWith(this.pullBarHandle.cloneNode(true));
+    this.pullBarHandle = document.getElementById('pull-bar-handle');
+
+    // Touch events
+    this.pullBarHandle.addEventListener('touchstart', (e) => this.handlePullStart(e), { passive: false });
+    document.addEventListener('touchmove', (e) => this.handlePullMove(e), { passive: false });
+    document.addEventListener('touchend', (e) => this.handlePullEnd(e), { passive: false });
+
+    // Mouse events (for testing)
+    this.pullBarHandle.addEventListener('mousedown', (e) => this.handlePullStart(e));
+    document.addEventListener('mousemove', (e) => this.handlePullMove(e));
+    document.addEventListener('mouseup', (e) => this.handlePullEnd(e));
+
+    console.log('🎮 Pull bar setup complete');
+  }
+
+  // Handle pull start
+  handlePullStart(e) {
+    e.preventDefault();
+
+    this.isDragging = true;
+    this.pullBarHandle.classList.add('dragging');
+
+    const touch = e.touches ? e.touches[0] : e;
+    this.startY = touch.clientY;
+    this.currentY = 0;
+
+    // Vibrate on grab
+    this.vibrate(50);
+
+    console.log('🎯 Pull started');
+  }
+
+  // Handle pull move
+  handlePullMove(e) {
+    if (!this.isDragging) return;
+
+    e.preventDefault();
+
+    const touch = e.touches ? e.touches[0] : e;
+    const deltaY = Math.max(0, touch.clientY - this.startY); // Only allow downward drag
+    const maxPull = this.pullBarTrackHeight - 80; // Account for handle size
+
+    this.currentY = Math.min(deltaY, maxPull);
+
+    // Update handle position
+    this.pullBarHandle.style.top = this.currentY + 'px';
+
+    // Update fill bar
+    const fillPercentage = (this.currentY / maxPull) * 100;
+    this.pullBarFill.style.height = fillPercentage + '%';
+
+    // Add class when near bottom
+    if (fillPercentage > this.pullThreshold * 100) {
+      this.pullBarHandle.classList.add('at-bottom');
+    } else {
+      this.pullBarHandle.classList.remove('at-bottom');
+    }
+
+    // Vibrate at milestones
+    if (fillPercentage >= 50 && fillPercentage < 55) {
+      this.vibrate(30);
+    } else if (fillPercentage >= this.pullThreshold * 100 && fillPercentage < this.pullThreshold * 100 + 5) {
+      this.vibrate(50);
+    }
+  }
+
+  // Handle pull end (release)
+  handlePullEnd(e) {
+    if (!this.isDragging) return;
+
+    e.preventDefault();
+
+    this.isDragging = false;
+    this.pullBarHandle.classList.remove('dragging');
+    this.pullBarHandle.classList.remove('at-bottom');
+
+    const maxPull = this.pullBarTrackHeight - 80;
+    const pullPercentage = this.currentY / maxPull;
+
+    console.log(`🎯 Pull released at ${Math.round(pullPercentage * 100)}%`);
+
+    // Check if pulled enough
+    if (pullPercentage >= this.pullThreshold) {
+      console.log('✅ Pull threshold reached! Triggering action...');
+
+      // Play spin sound
+      this.playSpinSound();
+
+      // Strong vibration on success
+      this.vibrate([100, 50, 100, 50, 200]);
+
+      // Trigger the action
+      this.pressBuzzButton();
+    } else {
+      console.log('❌ Pull not strong enough');
+      this.vibrate(100);
+    }
+
+    // Animate back to top
+    this.pullBarHandle.style.transition = 'top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    this.pullBarHandle.style.top = '0px';
+    this.pullBarFill.style.height = '0%';
+
+    setTimeout(() => {
+      this.pullBarHandle.style.transition = '';
+    }, 300);
   }
 
   // Show pressed screen
