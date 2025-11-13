@@ -672,13 +672,25 @@ function checkWin() {
 
 // הצג QR code אם הוגדר מספר WhatsApp
 function showQRCodeIfNeeded() {
-    // עדכן את הודעת הזכייה עם שם השחקן (אם יש)
+    // עדכן את הודעת הזכייה עם שם השחקן (אם יש שחקן מרחוק פעיל)
     const winMessage = document.getElementById('win-message');
-    if (winMessage && window.sessionManager && sessionManager.currentPlayer) {
-        const playerName = sessionManager.currentPlayer.name;
-        // הצג את השם בירוק דולק כמו הטיימר
-        winMessage.innerHTML = `🎉 מזל טוב <span style="color: #4ade80; text-shadow: 0 0 20px #4ade80, 0 0 30px #4ade80; font-weight: bold;">${playerName}</span>! זכית! 🎉`;
-        console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName}`);
+    if (winMessage && window.sessionManager) {
+        // קבל את השם מה-currentSpinPlayerId אם קיים
+        const playerId = sessionManager.currentSpinPlayerId;
+        if (playerId) {
+            // קרא את פרטי השחקן מה-Firebase
+            firebase.database().ref(`sessions/${sessionManager.sessionId}/players/${playerId}`).once('value').then(snapshot => {
+                const player = snapshot.val();
+                if (player && player.name) {
+                    const playerName = player.name;
+                    // הצג את השם בירוק דולק כמו הטיימר
+                    winMessage.innerHTML = `🎉 מזל טוב <span style="color: #4ade80; text-shadow: 0 0 20px #4ade80, 0 0 30px #4ade80; font-weight: bold;">${playerName}</span>! זכית! 🎉`;
+                    console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName}`);
+                }
+            });
+        } else {
+            console.log('💭 אין שחקן מרחוק פעיל - משאיר הודעה רגילה');
+        }
     }
 
     const whatsappNumber = gameState.whatsappNumber.trim();

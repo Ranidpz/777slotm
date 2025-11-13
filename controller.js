@@ -498,6 +498,9 @@ class MobileController {
 
   // Show win result screen
   showWinResultScreen(player) {
+    console.log('🎉🎉🎉 SHOWING WIN RESULT SCREEN! 🎉🎉🎉');
+    console.log('📦 Player data:', JSON.stringify(player, null, 2));
+
     this.stopTimer();
     this.showScreen('win-result-screen');
 
@@ -505,6 +508,7 @@ class MobileController {
     const attemptsLeft = document.getElementById('win-attempts-left');
     if (attemptsLeft) {
       attemptsLeft.textContent = player.attemptsLeft || 0;
+      console.log(`📊 Attempts left updated: ${player.attemptsLeft || 0}`);
     }
 
     // Display prize details if available
@@ -515,6 +519,8 @@ class MobileController {
         prizeNameElement.textContent = `🎁 ${prizeName}`;
         console.log('🏆 הצגת פרטי פרס:', player.prizeDetails);
       }
+    } else {
+      console.log('⚠️ No prize details available');
     }
 
     // Setup WhatsApp button if configured

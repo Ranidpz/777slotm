@@ -32,6 +32,7 @@ function setupRemoteControlCheckbox() {
     const checkbox = document.getElementById('remote-control-enabled');
     const attemptsSlider = document.getElementById('max-player-attempts');
     const attemptsValue = document.getElementById('max-attempts-value');
+    const shareBtn = document.getElementById('share-controller-link-btn');
 
     if (checkbox) {
         // טען מצב שמור או ברירת מחדל (מופעל)
@@ -62,6 +63,20 @@ function setupRemoteControlCheckbox() {
             attemptsValue.textContent = attempts;
             localStorage.setItem('maxPlayerAttempts', attempts);
             console.log(`🎮 מספר נסיונות עודכן: ${attempts}`);
+        });
+    }
+
+    // כפתור שיתוף לינק לשלט רחוק
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            if (window.sessionManager && sessionManager.sessionId) {
+                const controllerUrl = sessionManager.getControllerUrl();
+                console.log(`🔗 פותח שלט רחוק: ${controllerUrl}`);
+                window.open(controllerUrl, '_blank');
+            } else {
+                alert('לא ניתן לפתוח שלט רחוק - אין סשן פעיל');
+                console.error('❌ אין sessionManager או sessionId');
+            }
         });
     }
 }

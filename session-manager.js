@@ -365,6 +365,18 @@ class SessionManager {
     }
   }
 
+  // Get controller URL for sharing
+  getControllerUrl() {
+    if (!this.sessionId) {
+      console.error('❌ No session ID available');
+      return null;
+    }
+
+    const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+    const controllerUrl = `${baseUrl}controller.html?session=${this.sessionId}`;
+    return controllerUrl;
+  }
+
   // Update waiting queue display
   updateWaitingQueue() {
     const queueContainer = document.getElementById('waiting-queue');
