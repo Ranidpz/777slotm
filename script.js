@@ -775,17 +775,19 @@ function closeQRPopup() {
 }
 
 // פונקציה להפעלת המכונה
-function triggerSpin() {
+function triggerSpin(fromRemotePlayer = false) {
     // אם QR popup מוצג, סגור אותו במקום להתחיל סיבוב חדש
     if (gameState.qrPopupVisible) {
         closeQRPopup();
         return;
     }
 
-    // נקה את currentSpinPlayerId - זה סיבוב אנונימי (לא דרך שלט מרחוק)
-    if (window.sessionManager) {
+    // נקה את currentSpinPlayerId רק אם זה סיבוב אנונימי (לא מרחוק)
+    if (!fromRemotePlayer && window.sessionManager) {
         sessionManager.currentSpinPlayerId = null;
         console.log('🎰 סיבוב אנונימי - currentSpinPlayerId נוקה');
+    } else if (fromRemotePlayer) {
+        console.log('🎮 סיבוב משחקן מרחוק - שומר currentSpinPlayerId');
     }
 
     if (gameState.mode === 'automatic') {

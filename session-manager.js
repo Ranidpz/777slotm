@@ -305,8 +305,8 @@ class SessionManager {
 
       // Trigger spin (if in automatic mode)
       if (typeof triggerSpin === 'function' && gameState.mode === 'automatic') {
-        console.log('🎰 Calling triggerSpin() for automatic mode');
-        triggerSpin();
+        console.log('🎰 Calling triggerSpin() for remote player');
+        triggerSpin(true); // Pass true to indicate this is from a remote player
       } else {
         console.log('⚠️ Manual mode - spin not triggered automatically');
       }
