@@ -84,8 +84,14 @@ class SessionManager {
       return;
     }
 
-    // Clear previous content
+    // Clear previous content and show loader
     qrContainer.innerHTML = '';
+
+    // Create and show loading spinner
+    const loaderDiv = document.createElement('div');
+    loaderDiv.className = 'qr-loader';
+    loaderDiv.innerHTML = '<div class="qr-spinner"></div>';
+    qrContainer.appendChild(loaderDiv);
 
     // Create QR code URL
     const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
@@ -93,20 +99,24 @@ class SessionManager {
 
     console.log('🔗 Controller URL:', controllerUrl);
 
-    // Generate QR code using qrcode.js library
-    const qrCodeDiv = document.createElement('div');
-    qrCodeDiv.id = 'qr-code-image';
+    // Generate QR code using qrcode.js library (after a brief delay to show loader)
+    setTimeout(() => {
+      const qrCodeDiv = document.createElement('div');
+      qrCodeDiv.id = 'qr-code-image';
 
-    new QRCode(qrCodeDiv, {
-      text: controllerUrl,
-      width: 124,
-      height: 124,
-      colorDark: '#000000',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
+      new QRCode(qrCodeDiv, {
+        text: controllerUrl,
+        width: 124,
+        height: 124,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
 
-    qrContainer.appendChild(qrCodeDiv);
+      // Replace loader with QR code
+      qrContainer.innerHTML = '';
+      qrContainer.appendChild(qrCodeDiv);
+    }, 100); // Small delay to ensure smooth transition
   }
 
   // Start listening to Firebase changes
