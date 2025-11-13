@@ -631,18 +631,9 @@ function checkWin() {
             }
 
             // שלח הודעה לשלט מרחוק עם פרטי הפרס
-            console.log('🔍 DEBUG: Checking sessionManager:', !!window.sessionManager);
-            console.log('🔍 DEBUG: prizeDetails:', JSON.stringify(prizeDetails));
             if (window.sessionManager) {
-                console.log('🔍 DEBUG: About to call storeSpinResult');
-                try {
-                    sessionManager.storeSpinResult(true, prizeDetails);
-                    console.log(`📡 נשלח לשלט מרחוק: זכייה בפרס ${prizeDetails.prizeName}`);
-                } catch (error) {
-                    console.error('❌ Error in storeSpinResult:', error);
-                }
-            } else {
-                console.error('❌ window.sessionManager לא זמין!');
+                sessionManager.storeSpinResult(true, prizeDetails);
+                console.log(`📡 נשלח לשלט מרחוק: זכייה בפרס ${prizeDetails.prizeName}`);
             }
         } else {
             console.warn(`⚠️ לא הצלחנו לזהות את הסמל שזכה: ${displayedSymbols[0]}`);
@@ -681,34 +672,24 @@ function checkWin() {
 
 // הצג QR code אם הוגדר מספר WhatsApp
 function showQRCodeIfNeeded() {
-    console.log('🔍 DEBUG showQRCodeIfNeeded called');
     // עדכן את הודעת הזכייה עם שם השחקן (אם יש שחקן מרחוק פעיל)
     const winMessage = document.getElementById('win-message');
-    console.log('🔍 DEBUG winMessage element:', !!winMessage);
-    console.log('🔍 DEBUG window.sessionManager:', !!window.sessionManager);
     if (winMessage && window.sessionManager) {
         // קבל את השם מה-currentSpinPlayerId אם קיים
         const playerId = sessionManager.currentSpinPlayerId;
-        console.log('🔍 DEBUG playerId:', playerId);
         if (playerId) {
             // קרא את פרטי השחקן מה-Firebase
-            console.log('🔍 DEBUG Fetching player from Firebase:', `sessions/${sessionManager.sessionId}/players/${playerId}`);
             firebase.database().ref(`sessions/${sessionManager.sessionId}/players/${playerId}`).once('value').then(snapshot => {
                 const player = snapshot.val();
-                console.log('🔍 DEBUG player data from Firebase:', player);
                 if (player && player.name) {
                     const playerName = player.name;
                     // הצג את השם בירוק דולק כמו הטיימר
                     winMessage.innerHTML = `🎉 מזל טוב <span style="color: #4ade80; text-shadow: 0 0 20px #4ade80, 0 0 30px #4ade80; font-weight: bold;">${playerName}</span>! זכית! 🎉`;
                     console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName}`);
-                } else {
-                    console.error('❌ Player or player.name not found in snapshot');
                 }
             }).catch(error => {
                 console.error('❌ Error fetching player from Firebase:', error);
             });
-        } else {
-            console.log('💭 אין שחקן מרחוק פעיל - משאיר הודעה רגילה');
         }
     }
 
@@ -918,6 +899,11 @@ let tempSettings = {
     initialInventory: [...gameState.initialInventory],
     whatsappNumber: gameState.whatsappNumber
 };
+
+// לוח זוכים
+document.getElementById('scoreboard-btn').addEventListener('click', () => {
+    window.open('scoreboard.html', '_blank');
+});
 
 // שמירת הגדרות
 document.getElementById('save-settings').addEventListener('click', () => {

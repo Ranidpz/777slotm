@@ -360,8 +360,47 @@ class SessionManager {
 
       await firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`).update(updateData);
 
+      // אם זכייה - שמור ברשימת זוכים גלובלית
+      if (isWin) {
+        await this.saveWinnerToScoreboard(prizeDetails);
+      }
+
     } catch (error) {
       console.error('❌ Error storing spin result:', error);
+    }
+  }
+
+  // Save winner to global scoreboard
+  async saveWinnerToScoreboard(prizeDetails) {
+    try {
+      // קבל את פרטי השחקן
+      const playerSnapshot = await firebase.database()
+        .ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`)
+        .once('value');
+
+      const player = playerSnapshot.val();
+      if (!player) {
+        console.error('❌ Player not found for scoreboard');
+        return;
+      }
+
+      // צור רשומת זוכה
+      const winnerEntry = {
+        playerName: player.name,
+        prizeName: prizeDetails?.prizeName || 'פרס',
+        prizeSymbol: prizeDetails?.symbolDisplay || '🎁',
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        sessionId: this.sessionId,
+        playerId: this.currentSpinPlayerId
+      };
+
+      // שמור ברשימת זוכים גלובלית
+      const winnersRef = firebase.database().ref('winners');
+      await winnersRef.push(winnerEntry);
+
+      console.log('🏆 Winner saved to scoreboard:', winnerEntry);
+    } catch (error) {
+      console.error('❌ Error saving winner to scoreboard:', error);
     }
   }
 
