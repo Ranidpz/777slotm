@@ -237,8 +237,8 @@ body {
 .pull-bar-container {
     width: 100%;
     max-width: 120px;
-    height: 350px;
-    margin: 30px auto;
+    height: 300px;
+    margin: 15px auto 20px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -408,16 +408,16 @@ body {
 
 .player-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
 .player-header h2 {
-    font-size: 1.8em;
-    margin-bottom: 10px;
+    font-size: 1.5em;
+    margin-bottom: 8px;
 }
 
 .attempts-left {
-    font-size: 1.2em;
+    font-size: 1.1em;
     color: #ffd700;
     font-weight: 600;
 }
@@ -426,7 +426,7 @@ body {
 .timer-bar-container {
     width: 100%;
     max-width: 400px;
-    margin: 30px auto;
+    margin: 15px auto;
     position: relative;
 }
 
@@ -466,9 +466,9 @@ body {
 
 .instruction-text {
     text-align: center;
-    font-size: 1.1em;
+    font-size: 1em;
     color: rgba(255, 255, 255, 0.8);
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 /* ============================================
@@ -762,7 +762,7 @@ body {
     }
 
     .pull-bar-container {
-        height: 300px;
+        height: 260px;
         max-width: 100px;
     }
 
@@ -783,7 +783,7 @@ body {
 
 @media (max-width: 360px) {
     .pull-bar-container {
-        height: 260px;
+        height: 230px;
         max-width: 90px;
     }
 
