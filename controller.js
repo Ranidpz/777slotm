@@ -609,9 +609,16 @@ class MobileController {
         if (player && player.status === 'finished') {
           console.log('🏁 Player finished - showing finished screen');
           this.showFinishedScreen(player);
+        } else if (player && player.status === 'active') {
+          // Player still active - show playing screen
+          console.log('🎮 Player still active - showing playing screen');
+          this.showPlayingScreen(player);
+        } else if (player && player.status === 'waiting') {
+          // Player waiting for turn - show waiting screen
+          console.log('⏳ Player waiting - showing waiting screen');
+          this.showWaitingScreen(player);
         }
-        // Otherwise, the player state will update automatically via Firebase listener
-        // It will either go back to waiting or active for next attempt
+        // If status changes, Firebase listener will update automatically
       } catch (error) {
         console.error('❌ Error in handleContinueAfterResult:', error);
       }
