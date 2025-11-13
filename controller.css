@@ -721,24 +721,26 @@ body {
 }
 
 /* ============================================
-   FOOTER
+   POWERED BY (inside form)
    ============================================ */
 
-.footer-powered-by {
+.form-powered-by {
     text-align: center;
-    padding: 20px 0;
-    font-size: 0.9em;
-    color: rgba(255, 255, 255, 0.6);
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.footer-powered-by a {
+.form-powered-by a {
     color: #ffd700;
     text-decoration: none;
     font-weight: 600;
     margin-left: 5px;
 }
 
-.footer-powered-by a:hover {
+.form-powered-by a:hover {
     text-decoration: underline;
 }
 
