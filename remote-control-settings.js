@@ -4,7 +4,7 @@
 function updateRemoteControlState() {
     const qrContainer = document.getElementById('qr-container');
     const qrDisplay = document.getElementById('qr-display');
-    const isEnabled = localStorage.getItem('remoteControlEnabled') !== 'false';
+    const isEnabled = localStorage.getItem('remoteControlEnabled') === 'true';
 
     // הסתר או הצג את ה-QR
     if (qrContainer) {
@@ -35,9 +35,9 @@ function setupRemoteControlCheckbox() {
     const shareBtn = document.getElementById('share-controller-link-btn');
 
     if (checkbox) {
-        // טען מצב שמור או ברירת מחדל (מופעל)
+        // טען מצב שמור או ברירת מחדל (כבוי)
         const savedState = localStorage.getItem('remoteControlEnabled');
-        checkbox.checked = savedState !== 'false';
+        checkbox.checked = savedState === 'true';
 
         console.log(`🎮 שליטה מרחוק נטעןה: ${checkbox.checked ? 'מופעל' : 'כבוי'}`);
 

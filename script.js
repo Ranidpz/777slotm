@@ -10,7 +10,7 @@ const gameState = {
     winFrequency: 3, // זכייה כל כמה נסיונות (0 = רנדומלי לגמרי)
     totalSymbols: 9, // מספר כולל של סמלים במשחק
     soundEnabled: true, // האם צלילים מופעלים
-    backgroundColor: '#667eea', // צבע הרקע ברירת מחדל
+    backgroundColor: '#242424', // צבע הרקע ברירת מחדל
     whatsappNumber: '', // מספר WhatsApp להצגת QR code בזכייה
     customSounds: { // צלילים מותאמים אישית
         spin: null,
