@@ -614,13 +614,8 @@ class MobileController {
         // If player is finished (no more attempts), show finished screen
         if (player && player.status === 'finished') {
           console.log('🏁 Player finished - showing finished screen');
+          // showFinishedScreen() יטפל בהכל - כולל הסרה והעברה לשחקן הבא
           this.showFinishedScreen(player);
-
-          // Move to next player in queue (if any)
-          if (typeof getNextPlayer === 'function') {
-            await getNextPlayer(this.sessionId);
-            console.log('🔄 Called getNextPlayer to move queue forward');
-          }
         } else if (player && player.status === 'active') {
           // Player still active - show playing screen
           console.log('🎮 Player still active - showing playing screen');
@@ -657,6 +652,12 @@ class MobileController {
       if (this.sessionId && this.playerId) {
         try {
           console.log('🗑️ Removing finished player from session:', this.playerId);
+
+          // נקה את currentSpinPlayerId אם זה השחקן הנוכחי
+          if (window.sessionManager && sessionManager.currentSpinPlayerId === this.playerId) {
+            sessionManager.currentSpinPlayerId = null;
+            console.log('🔄 currentSpinPlayerId cleared for finished player');
+          }
 
           // הסר את השחקן מה-session
           await firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`).remove();

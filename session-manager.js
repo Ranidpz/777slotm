@@ -396,11 +396,9 @@ class SessionManager {
             status: 'finished'
           });
 
-          // נקה את currentSpinPlayerId כשהשחקן מסיים
-          if (this.currentSpinPlayerId === playerId) {
-            this.currentSpinPlayerId = null;
-            console.log('🔄 currentSpinPlayerId נוקה - שחקן סיים את כל הנסיונות');
-          }
+          // אל תנקה את currentSpinPlayerId כאן - צריך אותו כדי להציג את השם בהודעת הזכייה
+          // הוא ינוקה מאוחר יותר כשהשחקן יוסר מה-session
+          console.log('⚠️ Player finished but keeping currentSpinPlayerId for win message display');
 
           // DON'T move to next player yet - let them see the result screen
           // They will be moved when they click "Continue" button
