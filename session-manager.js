@@ -178,18 +178,19 @@ class SessionManager {
 
       this.updatePlayerInfo();
 
-      // טיימר פשוט - מתחיל כשהשחקן פעיל ועוצר רק כשלוחצים buzz
-      if (player.status === 'active') {
-        // אם השחקן לחץ buzz - עצור את הטיימר
-        if (player.lastAction === 'buzz') {
-          this.stopPlayerTimer();
-        } else if (!this.timerInterval) {
-          // אם אין טיימר רץ - התחל אחד
-          this.startPlayerTimer();
-        }
-      } else {
-        // שחקן לא פעיל - עצור טיימר
+      // טיימר - רץ תמיד! רק מתאפס כשהשחקן לוחץ
+      // עוצר רק כשהשחקן מנותק (finished/timeout)
+      if (player.status === 'finished' || player.status === 'timeout') {
+        // רק כאן עוצרים את הטיימר
         this.stopPlayerTimer();
+        console.log('⏹️ טיימר נעצר - שחקן מנותק');
+      } else {
+        // בכל מצב אחר (active, spinning, showing_result) - הטיימר רץ
+        if (!this.timerInterval) {
+          this.startPlayerTimer();
+          console.log('⏰ טיימר הופעל - סטטוס:', player.status);
+        }
+        // אם הטיימר כבר רץ - פשוט תן לו להמשיך
       }
     } else {
       // Show QR code only if remote control is enabled
@@ -382,6 +383,10 @@ class SessionManager {
 
       console.log('🎯 Pull bar action detected! Triggering spin...');
 
+      // ⏰ אפס את הטיימר (התחל מחדש מ-30 שניות)
+      this.timeLeft = this.maxWaitTime;
+      console.log('🔄 טיימר אופס לשחקן');
+
       // נעל spin עד שהוא מסתיים
       this.isSpinActive = true;
 
@@ -393,8 +398,7 @@ class SessionManager {
         attemptsLeft: player.attemptsLeft - 1  // הפחת נסיון
       });
 
-      // Stop timer
-      this.stopPlayerTimer();
+      console.log('🎰 Spinning started - טיימר ממשיך לרוץ');
 
       // Play spin sound on main screen
       if (typeof playSound === 'function') {
@@ -561,8 +565,8 @@ class SessionManager {
           prizeDetails: null
         });
 
-        // הפעל מחדש את הטיימר
-        this.restartPlayerTimer();
+        // הטיימר ימשיך לרוץ אוטומטית (לא צריך restart)
+        console.log('⏰ Player back to active - טיימר ממשיך לרוץ');
 
         // שחרר את הנעילה
         this.isSpinActive = false;

@@ -674,13 +674,8 @@ function checkWin() {
     delete gameState.firstSymbol;
     delete gameState.winningSymbol;
 
-    // אתחל מחדש את הטיימר אחרי שהגלגלים נעצרו (זכייה או הפסד)
-    if (window.sessionManager && sessionManager.currentPlayer) {
-        setTimeout(() => {
-            sessionManager.restartPlayerTimer();
-            console.log('🔄 Timer restart triggered after checkWin completion');
-        }, 2000); // המתן לאחר אפקט הזכייה/הפסד
-    }
+    // ⏰ הטיימר ממשיך לרוץ אוטומטית - לא צריך restart
+    console.log('⏰ טיימר ממשיך לרוץ אחרי checkWin');
 }
 
 // הצג QR code אם הוגדר מספר WhatsApp
