@@ -190,11 +190,11 @@ body {
 }
 
 @keyframes scroll-rtl {
-    0% {
-        transform: translateX(-100%);  /* התחל משמאל מחוץ למסך */
+    from {
+        transform: translateX(100%);  /* התחל מימין למסך */
     }
-    100% {
-        transform: translateX(100%);  /* גלול ימינה עד שהטקסט נעלם מימין */
+    to {
+        transform: translateX(-100%);  /* גלול שמאלה מחוץ למסך */
     }
 }
 
