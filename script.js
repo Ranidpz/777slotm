@@ -1818,7 +1818,7 @@ function setupScrollingBannerInput() {
 }
 
 // עדכון פס מתגלגל
-function updateScrollingBanner() {
+async function updateScrollingBanner() {
     const banner = document.getElementById('scrolling-banner');
     const scrollingText = document.getElementById('scrolling-text');
 
@@ -1833,8 +1833,42 @@ function updateScrollingBanner() {
         return;
     }
 
+    // טען רשימת זוכים מ-Firebase
+    let winnersText = '';
+    try {
+        const winnersRef = firebase.database().ref(`sessions/${sessionId}/winners`);
+        const snapshot = await winnersRef.once('value');
+        const winnersData = snapshot.val();
+
+        if (winnersData) {
+            const winnersArray = Object.values(winnersData);
+            // המר לפורמט: שם הזוכה פרס תאריך ושעה
+            const winnersList = winnersArray.map(winner => {
+                const date = new Date(winner.timestamp);
+                const dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+                const timeStr = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                return `${winner.playerName || 'לחץ בבאזר'} - ${winner.prizeName || 'פרס'} - ${dateStr} ${timeStr}`;
+            }).join(' | ');
+
+            if (winnersList.length > 0) {
+                winnersText = ` והזוכים הם: ${winnersList} | `;
+            }
+        }
+    } catch (error) {
+        console.error('❌ שגיאה בטעינת זוכים:', error);
+    }
+
+    // שלב טקסט מותאם + זוכים
+    let combinedText = '';
     if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
-        scrollingText.textContent = gameState.scrollingBannerText;
+        combinedText = gameState.scrollingBannerText;
+        if (winnersText) {
+            combinedText += winnersText + gameState.scrollingBannerText; // חזור על הטקסט
+        }
+    }
+
+    if (combinedText.length > 0) {
+        scrollingText.textContent = combinedText;
         scrollingText.style.fontSize = gameState.scrollingBannerFontSize + 'px';
 
         // התאם את גובה הפס לגודל הגופן (גופן + 28px padding)
@@ -1842,9 +1876,8 @@ function updateScrollingBanner() {
         banner.style.height = bannerHeight + 'px';
 
         banner.classList.remove('hidden');
-        console.log('✅ פס מתגלגל מוצג - טקסט:', gameState.scrollingBannerText);
+        console.log('✅ פס מתגלגל מוצג - טקסט:', combinedText.substring(0, 100) + '...');
         console.log('✅ גובה פס:', bannerHeight + 'px');
-        console.log('✅ hidden class הוסר, classes:', banner.className);
     } else {
         banner.classList.add('hidden');
         console.log('🚫 פס מתגלגל מוסתר - אין טקסט');

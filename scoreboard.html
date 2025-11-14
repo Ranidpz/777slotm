@@ -397,7 +397,7 @@
                             <div class="winner-card">
                                 <div class="winner-rank">#${rank}</div>
                                 <div class="winner-info">
-                                    <div class="winner-name">${winner.playerName || 'שחקן אלמוני'}</div>
+                                    <div class="winner-name">${winner.playerName || 'לחץ בבאזר'}</div>
                                     <div class="winner-time">${timeStr}</div>
                                 </div>
                                 <div class="winner-prize">
@@ -449,22 +449,20 @@
             if (!timestamp) return 'לא ידוע';
 
             const date = new Date(timestamp);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
 
-            if (diffMins < 1) return 'עכשיו';
-            if (diffMins < 60) return `לפני ${diffMins} דקות`;
-            if (diffHours < 24) return `לפני ${diffHours} שעות`;
-            if (diffDays < 7) return `לפני ${diffDays} ימים`;
-
-            return date.toLocaleDateString('he-IL', {
+            // תאריך ושעה מלאים בעברית
+            const dateStr = date.toLocaleDateString('he-IL', {
                 day: 'numeric',
-                month: 'short',
+                month: 'numeric',
                 year: 'numeric'
             });
+
+            const timeStr = date.toLocaleTimeString('he-IL', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            return `${dateStr} ${timeStr}`;
         }
 
         // Initialize on page load

@@ -481,7 +481,7 @@ class SessionManager {
   async saveWinnerToScoreboard(prizeDetails) {
     try {
       // קבל את פרטי השחקן (אם יש)
-      let playerName = 'שחקן אנונימי';
+      let playerName = 'לחץ בבאזר';
       let playerId = null;
 
       if (this.currentSpinPlayerId) {
@@ -533,6 +533,12 @@ class SessionManager {
       await winnersRef.push(winnerEntry);
 
       console.log('🏆 Winner saved to session scoreboard:', winnerEntry);
+
+      // עדכן את הפס הגלילה עם הזוכה החדש
+      if (typeof updateScrollingBanner === 'function') {
+        updateScrollingBanner();
+        console.log('📜 פס גלילה עודכן עם זוכה חדש');
+      }
     } catch (error) {
       console.error('❌ Error saving winner to scoreboard:', error);
     }
