@@ -58,20 +58,31 @@ async function createSession(sessionId, maxPlayers = 3, maxAttempts = 3) {
     // Get WhatsApp number from localStorage
     const whatsappNumber = localStorage.getItem('whatsappNumber') || '';
 
-    await database.ref(`sessions/${sessionId}`).set({
+    // ✅ בדוק אם session כבר קיים - אם כן, שמור את הזוכים
+    const sessionRef = database.ref(`sessions/${sessionId}`);
+    const snapshot = await sessionRef.once('value');
+    const existingData = snapshot.val();
+    const existingWinners = existingData && existingData.winners ? existingData.winners : {};
+
+    console.log('📊 Session קיים? ', !!existingData);
+    console.log('🏆 זוכים קיימים:', Object.keys(existingWinners).length);
+
+    await sessionRef.set({
       status: 'waiting',
       maxPlayers: maxPlayers,
       maxAttempts: maxAttempts,
-      createdAt: firebase.database.ServerValue.TIMESTAMP,
+      createdAt: existingData?.createdAt || firebase.database.ServerValue.TIMESTAMP,
       currentPlayer: null,
       players: {},
+      winners: existingWinners,  // ✅ שמור את הזוכים הקיימים!
       settings: {
         whatsappNumber: whatsappNumber
       }
     });
 
-    console.log('✅ Session created:', sessionId);
+    console.log('✅ Session created/updated:', sessionId);
     console.log('📱 WhatsApp number saved to session:', whatsappNumber);
+    console.log('🏆 Winners preserved:', Object.keys(existingWinners).length);
     return true;
   } catch (error) {
     console.error('❌ Error creating session:', error);

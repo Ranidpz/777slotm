@@ -868,18 +868,44 @@ function triggerSpin(fromRemotePlayer = false) {
 
 // טיפול במקלדת
 document.addEventListener('keydown', (e) => {
+    // Debug: הצג כל לחיצה על מקש
+    console.log('⌨️ Key pressed:', e.key, 'Code:', e.code);
+
     // Enter - התחל סיבוב
     if (e.key === 'Enter') {
         triggerSpin();
     }
-    
-    // ד/ס או S - פתח הגדרות (עברית ואנגלית)
+
+    // ד/ס או S - פתח/סגור הגדרות (עברית ואנגלית)
     if (e.key === 'ד' || e.key === 'ס' || e.key === 's' || e.key === 'S') {
         if (!gameState.isSpinning) {
-            openSettings();
+            // Toggle: אם ההגדרות פתוחות - סגור אותן, אחרת פתח אותן
+            const settingsScreen = document.getElementById('settings-screen');
+            if (settingsScreen.classList.contains('hidden')) {
+                openSettings();
+            } else {
+                settingsScreen.classList.add('hidden');
+                console.log('⚙️ הגדרות נסגרו');
+            }
         }
     }
-    
+
+    // ג/G/D - מעבר ללוח זוכים (עברית ואנגלית)
+    if (e.key === 'ג' || e.key === 'd' || e.key === 'D' || e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        console.log('✅ קיצור מקלדת ללוח זוכים זוהה!');
+
+        // קבל sessionId מהמנהל
+        if (window.sessionManager && sessionManager.sessionId) {
+            const scoreboardURL = `scoreboard.html?session=${sessionManager.sessionId}`;
+            console.log('🔗 Navigating to:', scoreboardURL);
+            window.location.href = scoreboardURL;
+        } else {
+            console.error('❌ אין sessionId זמין');
+            alert('אין סשן פעיל - אנא פתח הגדרות תחילה');
+        }
+    }
+
     // Escape - סגור הגדרות
     if (e.key === 'Escape') {
         settingsScreen.classList.add('hidden');
@@ -1001,52 +1027,7 @@ document.getElementById('save-settings').addEventListener('click', () => {
     settingsScreen.classList.add('hidden');
 });
 
-// סגירה בלי שמירה - כפתור X
-document.getElementById('close-settings-x').addEventListener('click', () => {
-    // החזר את ההגדרות הקודמות
-    gameState.winFrequency = tempSettings.winFrequency;
-    gameState.soundEnabled = tempSettings.soundEnabled;
-    gameState.mode = tempSettings.mode;
-    gameState.guaranteedWinMode = tempSettings.guaranteedWinMode;
-    gameState.inventory = [...tempSettings.inventory];
-    gameState.initialInventory = [...tempSettings.initialInventory];
-    gameState.whatsappNumber = tempSettings.whatsappNumber;
-
-    // עדכן את האלמנטים בממשק
-    const winFreqSlider = document.getElementById('win-frequency');
-    const winFreqValue = document.getElementById('win-frequency-value');
-    const winFreqText = document.getElementById('win-frequency-text');
-    const soundCheckbox = document.getElementById('sound-enabled');
-    const guaranteedWinCheckbox = document.getElementById('guaranteed-win-mode');
-    const whatsappInput = document.getElementById('whatsapp-number');
-
-    if (winFreqSlider) winFreqSlider.value = gameState.winFrequency;
-    if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
-    if (winFreqText) winFreqText.textContent = gameState.winFrequency;
-    if (soundCheckbox) soundCheckbox.checked = gameState.soundEnabled;
-    if (guaranteedWinCheckbox) guaranteedWinCheckbox.checked = gameState.guaranteedWinMode;
-    if (whatsappInput) whatsappInput.value = gameState.whatsappNumber;
-
-    // עדכן את הרדיו של מצב המשחק
-    document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
-        radio.checked = radio.value === gameState.mode;
-    });
-
-    // החזר צבע רקע אם שונה
-    if (tempSettings.backgroundColor) {
-        applyBackgroundColor(tempSettings.backgroundColor);
-        updateColorPicker(tempSettings.backgroundColor);
-    }
-
-    // החזר מלאי
-    updateInventoryDisplay();
-    updateAllCounters();
-
-    console.log('❌ ההגדרות לא נשמרו - חזרה להגדרות הקודמות');
-
-    // סגור את מסך ההגדרות
-    settingsScreen.classList.add('hidden');
-});
+// הסרנו את כפתור ה-X - סגירה רק דרך קיצור מקלדת ד/ס/S או Escape
 
 // כשפותחים את ההגדרות, שמור את המצב הנוכחי
 function openSettings() {
@@ -1986,22 +1967,6 @@ console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
 console.log('Press ד/ס/S for settings');
 console.log('Press ג/G/D for scoreboard toggle');
-
-// ============================================
-// KEYBOARD SHORTCUT: ג/G/D for Scoreboard Toggle
-// ============================================
-document.addEventListener('keydown', (e) => {
-    // לחיצה על 'ג' (עברית) או 'd'/'D' או 'g'/'G' (אנגלית) - מעבר למסך הזוכים
-    if (e.key === 'ג' || e.key === 'd' || e.key === 'D' || e.key === 'g' || e.key === 'G') {
-        e.preventDefault();
-
-        // פתח את מסך הזוכים באותו טאב
-        const scoreboardURL = `scoreboard.html?session=${sessionId}`;
-        window.location.href = scoreboardURL;
-
-        console.log('🏆 עובר למסך זוכים');
-    }
-});
 
 // ============================================
 // FIREBASE REMOTE CONTROL INTEGRATION
