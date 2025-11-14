@@ -600,16 +600,18 @@ function checkWin() {
             }
         }
 
+        // הכן פרטי פרס לשלט מרחוק (תמיד עם כל השדות)
+        let prizeDetails = {
+            symbolIndex: symbolIndex !== undefined && symbolIndex >= 0 ? symbolIndex : -1,
+            symbolDisplay: displayedSymbols[0],
+            prizeName: 'לא זוהה',
+            remainingInventory: null
+        };
+
         // עדכן מלאי ושלח הודעה לשלט מרחוק עם פרטי הפרס
         if (symbolIndex !== undefined && symbolIndex >= 0) {
             // עדכן את הפרס האחרון שזכה (למניעת חזרות)
             gameState.lastWinningSymbol = symbolIndex;
-
-            // הכן פרטי פרס לשלט מרחוק
-            let prizeDetails = {
-                symbolIndex: symbolIndex,
-                symbolDisplay: displayedSymbols[0]
-            };
 
             // עדכן מלאי לפי סוג המשחק
             if (isUsingCustomImages() && window.dynamicImagesManager) {
@@ -617,8 +619,8 @@ function checkWin() {
                 const img = dynamicImagesManager.images[symbolIndex];
                 if (img && img.imageData !== null) {
                     dynamicImagesManager.decrementInventoryBySymbolIndex(symbolIndex);
-                    const remaining = img.inventory === null ? 'אינסוף' : img.inventory;
-                    console.log(`📦 מלאי תמונה ${symbolIndex} הופחת. נותר: ${remaining}`);
+                    const remaining = img.inventory === null ? null : img.inventory;
+                    console.log(`📦 מלאי תמונה ${symbolIndex} הופחת. נותר: ${remaining === null ? 'אינסוף' : remaining}`);
 
                     prizeDetails.prizeName = img.label || `תמונה ${symbolIndex + 1}`;
                     prizeDetails.remainingInventory = remaining;
@@ -627,21 +629,17 @@ function checkWin() {
                 // אימוג'ים - אין צורך בעדכון מלאי
                 console.log(`🎯 זכייה באימוג'י ${symbolIndex} (ללא הגבלת מלאי)`);
                 prizeDetails.prizeName = displayedSymbols[0];
-                prizeDetails.remainingInventory = 'אינסוף';
-            }
-
-            // שלח הודעה לשלט מרחוק עם פרטי הפרס
-            if (window.sessionManager) {
-                sessionManager.storeSpinResult(true, prizeDetails);
-                console.log(`📡 נשלח לשלט מרחוק: זכייה בפרס ${prizeDetails.prizeName}`);
+                prizeDetails.remainingInventory = null; // null במקום 'אינסוף'
             }
         } else {
             console.warn(`⚠️ לא הצלחנו לזהות את הסמל שזכה: ${displayedSymbols[0]}`);
+            prizeDetails.prizeName = displayedSymbols[0] || 'פרס';
+        }
 
-            // שלח הודעת זכייה כללית גם אם לא זיהינו את הסמל
-            if (window.sessionManager) {
-                sessionManager.storeSpinResult(true, { symbolDisplay: displayedSymbols[0] });
-            }
+        // שלח הודעה לשלט מרחוק עם פרטי הפרס
+        if (window.sessionManager) {
+            sessionManager.storeSpinResult(true, prizeDetails);
+            console.log(`📡 נשלח לשלט מרחוק: זכייה בפרס ${prizeDetails.prizeName}`, prizeDetails);
         }
 
         playSound('win');

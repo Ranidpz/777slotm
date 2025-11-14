@@ -302,6 +302,30 @@ const dynamicImagesManager = {
         return inventory;
     },
 
+    // חפש את האינדקס של סמל לפי ה-URL של התמונה
+    findSymbolIndexByImageUrl(imageUrl) {
+        if (!imageUrl) return undefined;
+
+        // נרמל את ה-URL (הסר רווחים וקווים חדשים)
+        const normalizedUrl = imageUrl.trim();
+
+        // חפש את האינדקס של התמונה במערך
+        const imageIndex = this.images.findIndex(img => {
+            if (!img.imageData) return false;
+
+            // השווה את ה-URLs (בין אם זה base64 או blob)
+            return img.imageData.trim() === normalizedUrl;
+        });
+
+        if (imageIndex >= 0) {
+            console.log(`🔍 נמצא symbolIndex ${imageIndex} עבור URL: ${normalizedUrl.substring(0, 50)}...`);
+            return imageIndex;
+        }
+
+        console.warn(`⚠️ לא נמצא symbolIndex עבור URL: ${normalizedUrl.substring(0, 50)}...`);
+        return undefined;
+    },
+
     // הפחת מלאי לפי אינדקס סמל (0-8)
     decrementInventoryBySymbolIndex(symbolIndex) {
         const uploadedImages = this.images.filter(img => img.imageData !== null);
