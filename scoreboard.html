@@ -289,11 +289,43 @@
     <script src="firebase-config.js"></script>
     <script>
         let winnersData = [];
+        let currentSessionId = null;
+
+        // Get sessionId from URL or localStorage
+        function getSessionId() {
+            // Try URL parameter first
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionFromUrl = urlParams.get('session');
+
+            if (sessionFromUrl) {
+                // Save to localStorage for next time
+                localStorage.setItem('currentSessionId', sessionFromUrl);
+                return sessionFromUrl;
+            }
+
+            // Try localStorage
+            const sessionFromStorage = localStorage.getItem('currentSessionId');
+            if (sessionFromStorage) {
+                return sessionFromStorage;
+            }
+
+            return null;
+        }
 
         // Load and display winners
         async function loadWinners() {
             try {
-                const winnersRef = firebase.database().ref('winners');
+                currentSessionId = getSessionId();
+
+                if (!currentSessionId) {
+                    document.getElementById('winners-container').innerHTML =
+                        '<div class="no-winners">⚠️ לא נמצא מזהה משחק<br><br>פתח את הלוח דרך המשחק או הוסף ?session=SESSION_ID לכתובת</div>';
+                    return;
+                }
+
+                console.log(`📊 Loading winners for session: ${currentSessionId}`);
+
+                const winnersRef = firebase.database().ref(`sessions/${currentSessionId}/winners`);
 
                 winnersRef.on('value', (snapshot) => {
                     const data = snapshot.val();
@@ -315,7 +347,7 @@
                     updateStats();
                 });
 
-                console.log('✅ Winners listener set up');
+                console.log('✅ Winners listener set up for session');
             } catch (error) {
                 console.error('❌ Error loading winners:', error);
                 document.getElementById('winners-container').innerHTML =

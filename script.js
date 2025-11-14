@@ -941,7 +941,12 @@ let tempSettings = {
 
 // לוח זוכים
 document.getElementById('scoreboard-btn').addEventListener('click', () => {
-    window.open('scoreboard.html', '_blank');
+    // פתח את לוח הזוכים עם ה-sessionId הנוכחי
+    if (window.sessionManager && sessionManager.sessionId) {
+        window.open(`scoreboard.html?session=${sessionManager.sessionId}`, '_blank');
+    } else {
+        window.open('scoreboard.html', '_blank');
+    }
 });
 
 // שמירת הגדרות
@@ -967,6 +972,12 @@ document.getElementById('save-settings').addEventListener('click', () => {
 
     // שמור מלאי
     saveInventory();
+
+    // ✅ שמור פרסים גם ב-Firebase (גיבוי!)
+    if (window.dynamicImagesManager && window.sessionManager && sessionManager.sessionId) {
+        dynamicImagesManager.saveToFirebase(sessionManager.sessionId);
+        console.log('☁️ פרסים נשמרו גם ב-Firebase');
+    }
 
     console.log('✅ ההגדרות נשמרו בהצלחה!');
 

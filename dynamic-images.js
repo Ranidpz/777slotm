@@ -28,16 +28,19 @@ const dynamicImagesManager = {
 
     // הוסף תא תמונה חדש (ריק)
     addEmptySlot() {
+        const prizeIndex = this.images.length;
         const newImage = {
             id: Date.now() + Math.random(), // ID ייחודי
+            code: `PRIZE_${String(prizeIndex + 1).padStart(3, '0')}`, // ✅ קוד ייחודי: PRIZE_001, PRIZE_002...
             imageData: null, // base64 של התמונה
             inventory: null, // null = אינסוף, מספר = כמות מוגבלת
             initialInventory: null,
-            label: `תמונה ${this.images.length + 1}` // תווית
+            label: `תמונה ${prizeIndex + 1}`, // תווית
+            symbolIndex: prizeIndex // מיקום בגלגלים
         };
 
         this.images.push(newImage);
-        console.log(`➕ נוסף תא תמונה: ${newImage.label}`);
+        console.log(`➕ נוסף תא תמונה: ${newImage.label} (קוד: ${newImage.code})`);
     },
 
     // מחק תמונה
@@ -351,11 +354,93 @@ const dynamicImagesManager = {
             const saved = localStorage.getItem('dynamicImages');
             if (saved) {
                 this.images = JSON.parse(saved);
-                console.log(`📂 נטענו ${this.images.length} תמונות`);
+                // וודא שלכל תמונה יש קוד ייחודי (לתאימות עם גרסאות ישנות)
+                this.images.forEach((img, index) => {
+                    if (!img.code) {
+                        img.code = `PRIZE_${String(index + 1).padStart(3, '0')}`;
+                    }
+                    if (img.symbolIndex === undefined) {
+                        img.symbolIndex = index;
+                    }
+                });
+                console.log(`📂 נטענו ${this.images.length} תמונות מ-localStorage`);
             }
         } catch (e) {
             console.error('❌ שגיאה בטעינת תמונות:', e);
             this.images = [];
+        }
+    },
+
+    // ✅ שמור ב-Firebase (גיבוי!)
+    async saveToFirebase(sessionId) {
+        if (!sessionId) {
+            console.warn('⚠️ אין sessionId - לא ניתן לשמור ב-Firebase');
+            return;
+        }
+
+        try {
+            const prizesRef = firebase.database().ref(`sessions/${sessionId}/prizes`);
+
+            // שמור כל פרס
+            const prizesData = {};
+            this.images.forEach((img) => {
+                if (img.imageData) { // שמור רק תמונות שהועלו
+                    prizesData[img.code] = {
+                        code: img.code,
+                        name: img.label,
+                        symbol: img.imageData ? '🖼️' : '🎁', // סמל ברירת מחדל
+                        imageUrl: img.imageData, // base64 או blob URL
+                        inventory: img.inventory,
+                        initialInventory: img.initialInventory,
+                        symbolIndex: img.symbolIndex,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    };
+                }
+            });
+
+            await prizesRef.set(prizesData);
+            console.log(`☁️ ${Object.keys(prizesData).length} פרסים נשמרו ב-Firebase`);
+        } catch (error) {
+            console.error('❌ שגיאה בשמירת פרסים ב-Firebase:', error);
+        }
+    },
+
+    // ✅ טען מ-Firebase (שחזור!)
+    async loadFromFirebase(sessionId) {
+        if (!sessionId) {
+            console.warn('⚠️ אין sessionId - לא ניתן לטעון מ-Firebase');
+            return false;
+        }
+
+        try {
+            const prizesRef = firebase.database().ref(`sessions/${sessionId}/prizes`);
+            const snapshot = await prizesRef.once('value');
+            const prizesData = snapshot.val();
+
+            if (prizesData) {
+                // המר מאובייקט למערך
+                this.images = Object.values(prizesData).map(prize => ({
+                    id: Date.now() + Math.random(),
+                    code: prize.code,
+                    imageData: prize.imageUrl,
+                    inventory: prize.inventory,
+                    initialInventory: prize.initialInventory,
+                    label: prize.name,
+                    symbolIndex: prize.symbolIndex
+                }));
+
+                console.log(`☁️ ${this.images.length} פרסים נטענו מ-Firebase`);
+
+                // שמור גם ב-localStorage כגיבוי מקומי
+                this.saveToStorage();
+                return true;
+            } else {
+                console.log('📭 אין פרסים שמורים ב-Firebase');
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ שגיאה בטעינת פרסים מ-Firebase:', error);
+            return false;
         }
     }
 };

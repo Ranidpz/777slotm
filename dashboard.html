@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דשבורד מנהל אירועים - 777</title>
+
+    <!-- Google Fonts - Assistant for Hebrew -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Dashboard Styles -->
+    <link rel="stylesheet" href="dashboard.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>🎰 מערכת ניהול אירועים 777</h1>
+                <p>התחבר כדי לנהל את האירועים שלך</p>
+            </div>
+
+            <button id="google-signin-btn" class="google-signin-btn" onclick="authManager.signInWithGoogle()">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span>התחבר עם Google</span>
+            </button>
+
+            <div class="login-footer">
+                <p>מערכת ניהול מאובטחת עם Firebase</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div id="dashboard-container" class="dashboard hidden">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="dashboard-title">🎰 דשבורד ניהול אירועים</h1>
+                </div>
+
+                <div class="header-right">
+                    <!-- User Profile -->
+                    <div class="user-profile">
+                        <img id="user-photo" src="https://via.placeholder.com/40" alt="User" class="user-avatar">
+                        <div class="user-info">
+                            <span id="user-name" class="user-name">משתמש</span>
+                            <span id="user-role-badge" class="role-badge manager">מנהל אירועים</span>
+                        </div>
+                    </div>
+
+                    <!-- Logout Button -->
+                    <button class="btn-logout" onclick="authManager.signOut()">
+                        <span>🚪</span>
+                        <span>התנתק</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Stats Cards (Admin Only) -->
+            <div id="stats-section" class="stats-section admin-only hidden">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <h3 id="total-users">0</h3>
+                        <p>סך המשתמשים</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-content">
+                        <h3 id="total-events">0</h3>
+                        <p>סך האירועים</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-content">
+                        <h3 id="total-winners">0</h3>
+                        <p>סך הזוכים</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3 id="active-events">0</h3>
+                        <p>אירועים פעילים</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <button class="btn-primary" onclick="eventsManager.showCreateEventModal()">
+                        <span>➕</span>
+                        <span>אירוע חדש</span>
+                    </button>
+
+                    <!-- Admin Only: Manage Users -->
+                    <button class="btn-secondary admin-only hidden" onclick="eventsManager.showUsersModal()">
+                        <span>👥</span>
+                        <span>ניהול משתמשים</span>
+                    </button>
+                </div>
+
+                <div class="toolbar-right">
+                    <!-- Search -->
+                    <input
+                        type="text"
+                        id="search-events"
+                        class="search-input"
+                        placeholder="🔍 חפש אירוע..."
+                        oninput="eventsManager.filterEvents(this.value)"
+                    >
+
+                    <!-- Filter -->
+                    <select id="filter-status" class="filter-select" onchange="eventsManager.filterByStatus(this.value)">
+                        <option value="all">כל האירועים</option>
+                        <option value="active">פעילים</option>
+                        <option value="closed">סגורים</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Events Grid -->
+            <div id="events-container" class="events-grid">
+                <div class="loading">⏳ טוען אירועים...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Create/Edit Event -->
+    <div id="event-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">אירוע חדש</h2>
+                <button class="modal-close" onclick="eventsManager.closeModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="event-name">שם האירוע *</label>
+                    <input type="text" id="event-name" placeholder="לדוגמה: חתונת דני ושרה" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event-location">מיקום האירוע</label>
+                    <input type="text" id="event-location" placeholder="לדוגמה: אולם אירועים כלנית">
+                </div>
+
+                <div class="form-group">
+                    <label for="event-date">תאריך האירוע</label>
+                    <input type="date" id="event-date">
+                </div>
+
+                <div class="form-group">
+                    <label for="event-description">תיאור</label>
+                    <textarea id="event-description" rows="3" placeholder="תיאור קצר של האירוע"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="eventsManager.closeModal()">ביטול</button>
+                <button class="btn-primary" onclick="eventsManager.saveEvent()">שמור אירוע</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Manage Users (Admin Only) -->
+    <div id="users-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>ניהול משתמשים</h2>
+                <button class="modal-close" onclick="eventsManager.closeUsersModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div id="users-container" class="users-list">
+                    <div class="loading">⏳ טוען משתמשים...</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="eventsManager.closeUsersModal()">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Config & Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="auth-manager.js"></script>
+    <script src="events-manager.js"></script>
+</body>
+</html>

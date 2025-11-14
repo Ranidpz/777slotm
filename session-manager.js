@@ -43,6 +43,18 @@ class SessionManager {
     // Create session in Firebase
     await createSession(this.sessionId, 3, maxAttempts);
 
+    // ✅ נסה לטעון פרסים מ-Firebase (שחזור אוטומטי!)
+    if (window.dynamicImagesManager) {
+      const loaded = await dynamicImagesManager.loadFromFirebase(this.sessionId);
+      if (loaded) {
+        console.log('☁️ פרסים נטענו מ-Firebase בהצלחה');
+        // עדכן את הגלגלים אם צריך
+        if (typeof applyDynamicImages === 'function') {
+          applyDynamicImages();
+        }
+      }
+    }
+
     // Generate QR code
     this.generateQRCode();
 
@@ -471,21 +483,43 @@ class SessionManager {
         return;
       }
 
+      // קבל את קוד הפרס מהמערכת
+      let prizeCode = null;
+      let prizeName = prizeDetails?.prizeName || 'פרס';
+      let prizeSymbol = prizeDetails?.symbolDisplay || '🎁';
+
+      // אם יש dynamicImagesManager וסמל אינדקס - קבל את הקוד
+      if (window.dynamicImagesManager && prizeDetails?.symbolIndex !== undefined) {
+        const prize = dynamicImagesManager.images[prizeDetails.symbolIndex];
+        if (prize) {
+          prizeCode = prize.code; // ✅ PRIZE_001, PRIZE_002...
+          prizeName = prize.label || prizeName;
+          console.log(`🎫 קוד פרס: ${prizeCode}`);
+        }
+      }
+
       // צור רשומת זוכה
       const winnerEntry = {
         playerName: player.name,
-        prizeName: prizeDetails?.prizeName || 'פרס',
-        prizeSymbol: prizeDetails?.symbolDisplay || '🎁',
+        prizeCode: prizeCode,           // ✅ קוד ייחודי לפרס
+        prizeName: prizeName,            // שם לתצוגה
+        prizeSymbol: prizeSymbol,        // סמל לתצוגה
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         sessionId: this.sessionId,
-        playerId: this.currentSpinPlayerId
+        playerId: this.currentSpinPlayerId,
+
+        // לעתיד - פדיון
+        redemptionCode: null,  // יווצר כשנוסיף מערכת פדיון
+        redeemed: false,
+        redeemedAt: null,
+        redeemedBy: null
       };
 
-      // שמור ברשימת זוכים גלובלית
-      const winnersRef = firebase.database().ref('winners');
+      // שמור ברשימת זוכים של הסשן הספציפי
+      const winnersRef = firebase.database().ref(`sessions/${this.sessionId}/winners`);
       await winnersRef.push(winnerEntry);
 
-      console.log('🏆 Winner saved to scoreboard:', winnerEntry);
+      console.log('🏆 Winner saved to session scoreboard:', winnerEntry);
     } catch (error) {
       console.error('❌ Error saving winner to scoreboard:', error);
     }
