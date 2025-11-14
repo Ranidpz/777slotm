@@ -1963,6 +1963,23 @@ if (guaranteedWinCheckbox) {
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
 console.log('Press ד or S for settings');
+console.log('Press D for scoreboard toggle');
+
+// ============================================
+// KEYBOARD SHORTCUT: D for Scoreboard Toggle
+// ============================================
+document.addEventListener('keydown', (e) => {
+    // לחיצה על 'd' או 'D' (אנגלית) - מעבר למסך הזוכים
+    if (e.key === 'd' || e.key === 'D') {
+        e.preventDefault();
+
+        // פתח את מסך הזוכים באותו טאב
+        const scoreboardURL = `scoreboard.html?session=${sessionId}`;
+        window.location.href = scoreboardURL;
+
+        console.log('🏆 עובר למסך זוכים');
+    }
+});
 
 // ============================================
 // FIREBASE REMOTE CONTROL INTEGRATION

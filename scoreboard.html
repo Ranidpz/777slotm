@@ -501,6 +501,24 @@
 
             loadWinners();
         });
+
+        // KEYBOARD SHORTCUT: D to return to game
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'd' || e.key === 'D') {
+                e.preventDefault();
+                console.log('🎰 חוזר למסך משחק מלוח הזוכים');
+
+                // Get sessionId to preserve it in URL
+                const currentSessionId = getSessionId();
+                if (currentSessionId) {
+                    window.location.href = `index.html?session=${currentSessionId}`;
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
+
+        console.log('⌨️ לחץ D כדי לחזור למסך המשחק');
     </script>
 </body>
 </html>
