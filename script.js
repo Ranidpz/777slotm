@@ -1877,9 +1877,9 @@ async function updateScrollingBanner() {
         console.log('🏆 מציג רק זוכים (אין טקסט מותאם)');
     }
 
-    // ✅ כפול את הטקסט 3 פעמים כדי שלא יהיו הפסקות בגלילה
+    // ✅ כפול את הטקסט 5 פעמים כדי שלא יהיו הפסקות בגלילה
     if (combinedText.length > 0) {
-        combinedText = combinedText + ' ' + combinedText + ' ' + combinedText;
+        combinedText = combinedText + ' ' + combinedText + ' ' + combinedText + ' ' + combinedText + ' ' + combinedText;
     }
 
     console.log('📋 טקסט סופי משולב (מכופל):', combinedText.substring(0, 150));
