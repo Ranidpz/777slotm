@@ -1819,35 +1819,41 @@ async function updateScrollingBanner() {
     // טען רשימת זוכים מ-Firebase
     let winnersText = '';
     try {
-        console.log('🔍 מנסה לטעון זוכים מ-Firebase, sessionId:', sessionId);
-        const winnersRef = firebase.database().ref(`sessions/${sessionId}/winners`);
-        const snapshot = await winnersRef.once('value');
-        const winnersData = snapshot.val();
-
-        console.log('📊 נתוני זוכים מ-Firebase:', winnersData);
-
-        if (winnersData) {
-            const winnersArray = Object.values(winnersData);
-            console.log('📋 מערך זוכים:', winnersArray);
-
-            // המר לפורמט: שם הזוכה פרס תאריך ושעה
-            const winnersList = winnersArray.map(winner => {
-                const date = new Date(winner.timestamp);
-                const dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
-                const timeStr = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                return `${winner.playerName || 'לחץ בבאזר'} - ${winner.prizeName || 'פרס'} - ${dateStr} ${timeStr}`;
-            }).join(' | ');
-
-            console.log('📝 רשימת זוכים מעוצבת:', winnersList);
-
-            if (winnersList.length > 0) {
-                winnersText = ` והזוכים הם: ${winnersList} | `;
-                console.log('✅ טקסט זוכים נוצר:', winnersText);
-            } else {
-                console.log('⚠️ רשימת זוכים ריקה');
-            }
+        // בדוק אם יש sessionManager עם sessionId
+        if (!window.sessionManager || !sessionManager.sessionId) {
+            console.log('⚠️ אין sessionId - מדלג על טעינת זוכים');
+            winnersText = '';
         } else {
-            console.log('⚠️ אין נתוני זוכים ב-Firebase');
+            console.log('🔍 מנסה לטעון זוכים מ-Firebase, sessionId:', sessionManager.sessionId);
+            const winnersRef = firebase.database().ref(`sessions/${sessionManager.sessionId}/winners`);
+            const snapshot = await winnersRef.once('value');
+            const winnersData = snapshot.val();
+
+            console.log('📊 נתוני זוכים מ-Firebase:', winnersData);
+
+            if (winnersData) {
+                const winnersArray = Object.values(winnersData);
+                console.log('📋 מערך זוכים:', winnersArray);
+
+                // המר לפורמט: שם הזוכה פרס תאריך ושעה
+                const winnersList = winnersArray.map(winner => {
+                    const date = new Date(winner.timestamp);
+                    const dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+                    const timeStr = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                    return `${winner.playerName || 'לחץ בבאזר'} - ${winner.prizeName || 'פרס'} - ${dateStr} ${timeStr}`;
+                }).join(' | ');
+
+                console.log('📝 רשימת זוכים מעוצבת:', winnersList);
+
+                if (winnersList.length > 0) {
+                    winnersText = ` והזוכים הם: ${winnersList} | `;
+                    console.log('✅ טקסט זוכים נוצר:', winnersText);
+                } else {
+                    console.log('⚠️ רשימת זוכים ריקה');
+                }
+            } else {
+                console.log('⚠️ אין נתוני זוכים ב-Firebase');
+            }
         }
     } catch (error) {
         console.error('❌ שגיאה בטעינת זוכים:', error);
