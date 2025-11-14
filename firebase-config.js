@@ -266,6 +266,12 @@ async function getNextPlayer(sessionId) {
       return { playerId, ...playerData };
     }
 
+    // אין שחקנים ממתינים - נקה את currentPlayer
+    await sessionRef.update({
+      currentPlayer: null
+    });
+    console.log('✅ No waiting players - currentPlayer cleared');
+
     return null;
   } catch (error) {
     console.error('❌ Error getting next player:', error);
