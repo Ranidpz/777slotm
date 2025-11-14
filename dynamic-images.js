@@ -304,25 +304,43 @@ const dynamicImagesManager = {
 
     // חפש את האינדקס של סמל לפי ה-URL של התמונה
     findSymbolIndexByImageUrl(imageUrl) {
-        if (!imageUrl) return undefined;
+        if (!imageUrl) {
+            console.warn('⚠️ findSymbolIndexByImageUrl: imageUrl is empty');
+            return undefined;
+        }
 
         // נרמל את ה-URL (הסר רווחים וקווים חדשים)
         const normalizedUrl = imageUrl.trim();
 
-        // חפש את האינדקס של התמונה במערך
-        const imageIndex = this.images.findIndex(img => {
-            if (!img.imageData) return false;
+        console.log(`🔍 מחפש תמונה עבור URL: ${normalizedUrl.substring(0, 80)}...`);
+        console.log(`📂 יש ${this.images.length} תמונות במערך`);
 
-            // השווה את ה-URLs (בין אם זה base64 או blob)
-            return img.imageData.trim() === normalizedUrl;
+        // חפש את האינדקס של התמונה במערך
+        const imageIndex = this.images.findIndex((img, idx) => {
+            if (!img.imageData) {
+                console.log(`  [${idx}] אין imageData - מדלג`);
+                return false;
+            }
+
+            const imgUrlNormalized = img.imageData.trim();
+            const matches = imgUrlNormalized === normalizedUrl;
+
+            if (!matches) {
+                // הצג את 80 התווים הראשונים לדיבאג
+                console.log(`  [${idx}] לא תואם: ${imgUrlNormalized.substring(0, 80)}...`);
+            } else {
+                console.log(`  [${idx}] ✅ תואם!`);
+            }
+
+            return matches;
         });
 
         if (imageIndex >= 0) {
-            console.log(`🔍 נמצא symbolIndex ${imageIndex} עבור URL: ${normalizedUrl.substring(0, 50)}...`);
+            console.log(`✅ נמצא symbolIndex ${imageIndex}`);
             return imageIndex;
         }
 
-        console.warn(`⚠️ לא נמצא symbolIndex עבור URL: ${normalizedUrl.substring(0, 50)}...`);
+        console.warn(`❌ לא נמצא symbolIndex עבור URL`);
         return undefined;
     },
 

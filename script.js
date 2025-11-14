@@ -584,8 +584,9 @@ function checkWin() {
         if (symbolIndex === undefined) {
             const winningSymbolDisplay = displayedSymbols[0];
 
-            // אם זה תמונה (URL), חפש אותה במערכת התמונות הדינמיות
-            if (window.dynamicImagesManager && winningSymbolDisplay && winningSymbolDisplay.includes('blob:')) {
+            // אם זה תמונה (URL - blob או data:image), חפש אותה במערכת התמונות הדינמיות
+            if (window.dynamicImagesManager && winningSymbolDisplay &&
+                (winningSymbolDisplay.includes('blob:') || winningSymbolDisplay.includes('data:image'))) {
                 symbolIndex = dynamicImagesManager.findSymbolIndexByImageUrl(winningSymbolDisplay);
                 console.log(`🔍 זוהה סמל ${symbolIndex} לפי URL התמונה`);
             }
