@@ -628,7 +628,9 @@ function checkWin() {
                     const remaining = img.inventory === null ? null : img.inventory;
                     console.log(`📦 מלאי תמונה ${symbolIndex} (תמונה מקורית: ${actualImageIndex}) הופחת. נותר: ${remaining === null ? 'אינסוף' : remaining}`);
 
-                    prizeDetails.prizeName = img.label || `תמונה ${actualImageIndex + 1}`;
+                    // אם ה-label הוא ברירת מחדל ("תמונה X"), השתמש ב-"פרס" במקום
+                    const defaultLabelPattern = /^תמונה \d+$/;
+                    prizeDetails.prizeName = (img.label && !defaultLabelPattern.test(img.label)) ? img.label : 'פרס';
                     prizeDetails.remainingInventory = remaining;
                     prizeDetails.symbolDisplay = img.imageData; // ✅ שים את התמונה המקורית
                 }
