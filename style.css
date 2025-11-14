@@ -185,7 +185,7 @@ body {
     font-size: 32px;
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
-    animation: scroll-rtl 120s linear infinite;
+    animation: scroll-rtl 180s linear infinite;  /* האטה ל-180 שניות (3 דקות) */
     will-change: transform;
 }
 
