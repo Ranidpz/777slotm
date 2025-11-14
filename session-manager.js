@@ -64,6 +64,12 @@ class SessionManager {
     // Add click handler to skip current player
     this.setupPlayerInfoClickHandler();
 
+    // ✅ עדכן את הפס הנגלל עם זוכים (אחרי שיש sessionId)
+    if (typeof updateScrollingBanner === 'function') {
+      updateScrollingBanner();
+      console.log('📜 פס גלילה עודכן עם sessionId');
+    }
+
     return true;
   }
 
