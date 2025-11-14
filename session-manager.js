@@ -436,30 +436,31 @@ class SessionManager {
 
   // Store spin result for current player
   async storeSpinResult(isWin, prizeDetails = null) {
-    if (!this.currentSpinPlayerId) return;
-
     try {
-      const updateData = {
-        lastResult: isWin ? 'win' : 'loss',
-        lastResultTime: firebase.database.ServerValue.TIMESTAMP
-      };
-
-      // הוסף פרטי פרס אם זכייה
-      if (isWin && prizeDetails) {
-        updateData.prizeDetails = {
-          prizeName: prizeDetails.prizeName || 'לא זוהה',
-          symbolIndex: prizeDetails.symbolIndex,
-          symbolDisplay: prizeDetails.symbolDisplay,
-          remainingInventory: prizeDetails.remainingInventory
+      // אם יש שחקן מרחוק - עדכן את פרטיו
+      if (this.currentSpinPlayerId) {
+        const updateData = {
+          lastResult: isWin ? 'win' : 'loss',
+          lastResultTime: firebase.database.ServerValue.TIMESTAMP
         };
-        console.log(`📊 Stored WIN with prize details:`, updateData.prizeDetails);
-      } else {
-        console.log(`📊 Stored ${isWin ? 'WIN' : 'LOSS'} result for player:`, this.currentSpinPlayerId);
+
+        // הוסף פרטי פרס אם זכייה
+        if (isWin && prizeDetails) {
+          updateData.prizeDetails = {
+            prizeName: prizeDetails.prizeName || 'לא זוהה',
+            symbolIndex: prizeDetails.symbolIndex,
+            symbolDisplay: prizeDetails.symbolDisplay,
+            remainingInventory: prizeDetails.remainingInventory
+          };
+          console.log(`📊 Stored WIN with prize details:`, updateData.prizeDetails);
+        } else {
+          console.log(`📊 Stored ${isWin ? 'WIN' : 'LOSS'} result for player:`, this.currentSpinPlayerId);
+        }
+
+        await firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`).update(updateData);
       }
 
-      await firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`).update(updateData);
-
-      // אם זכייה - שמור ברשימת זוכים גלובלית
+      // אם זכייה - שמור ברשימת זוכים (גם אם אין שחקן מרחוק!)
       if (isWin) {
         await this.saveWinnerToScoreboard(prizeDetails);
       }
@@ -472,15 +473,20 @@ class SessionManager {
   // Save winner to global scoreboard
   async saveWinnerToScoreboard(prizeDetails) {
     try {
-      // קבל את פרטי השחקן
-      const playerSnapshot = await firebase.database()
-        .ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`)
-        .once('value');
+      // קבל את פרטי השחקן (אם יש)
+      let playerName = 'שחקן אנונימי';
+      let playerId = null;
 
-      const player = playerSnapshot.val();
-      if (!player) {
-        console.error('❌ Player not found for scoreboard');
-        return;
+      if (this.currentSpinPlayerId) {
+        const playerSnapshot = await firebase.database()
+          .ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`)
+          .once('value');
+
+        const player = playerSnapshot.val();
+        if (player) {
+          playerName = player.name;
+          playerId = this.currentSpinPlayerId;
+        }
       }
 
       // קבל את קוד הפרס מהמערכת
@@ -500,13 +506,13 @@ class SessionManager {
 
       // צור רשומת זוכה
       const winnerEntry = {
-        playerName: player.name,
+        playerName: playerName,
         prizeCode: prizeCode,           // ✅ קוד ייחודי לפרס
         prizeName: prizeName,            // שם לתצוגה
         prizeSymbol: prizeSymbol,        // סמל לתצוגה
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         sessionId: this.sessionId,
-        playerId: this.currentSpinPlayerId,
+        playerId: playerId,              // null אם שחקן אנונימי
 
         // לעתיד - פדיון
         redemptionCode: null,  // יווצר כשנוסיף מערכת פדיון
