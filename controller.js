@@ -618,9 +618,8 @@ class MobileController {
       }
 
       // Firebase listener will trigger handlePlayerStateChange automatically
-      } catch (error) {
-        console.error('❌ Error in handleContinueAfterResult:', error);
-      }
+    } catch (error) {
+      console.error('❌ Error in handleContinueAfterResult:', error);
     }
   }
 
