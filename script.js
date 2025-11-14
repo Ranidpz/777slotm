@@ -680,35 +680,39 @@ function checkWin() {
 
 // הצג QR code אם הוגדר מספר WhatsApp
 function showQRCodeIfNeeded() {
-    // עדכן את הודעת הזכייה עם שם השחקן (אם יש שחקן מרחוק פעיל)
-    const winMessage = document.getElementById('win-message');
-    if (winMessage && window.sessionManager) {
+    // הצג את שם השחקן בירוק למעלה (אם יש שחקן מרחוק פעיל)
+    const winnerNameDisplay = document.getElementById('winner-name-display');
+    if (winnerNameDisplay && window.sessionManager) {
         // קבל את השם מה-currentSpinPlayerId אם קיים
         const playerId = sessionManager.currentSpinPlayerId;
 
         // בדוק אם הסיבוב הנוכחי באמת התחיל על ידי שחקן מרחוק
-        // אם השחקן לא בסטטוס 'active', זה אומר שהסיבוב היה אנונימי
         if (playerId) {
             firebase.database().ref(`sessions/${sessionManager.sessionId}/players/${playerId}`).once('value').then(snapshot => {
                 const player = snapshot.val();
-                // רק אם השחקן קיים וב-status 'active', 'played', או 'finished', הצג את השם
-                if (player && player.name && (player.status === 'active' || player.status === 'played' || player.status === 'finished')) {
+                // רק אם השחקן קיים וב-status 'showing_result' או 'finished', הצג את השם
+                if (player && player.name && (player.status === 'showing_result' || player.status === 'finished')) {
                     const playerName = player.name;
-                    // הצג את השם בירוק דולק כמו הטיימר
-                    winMessage.innerHTML = `🎉 מזל טוב <span style="color: #4ade80; text-shadow: 0 0 20px #4ade80, 0 0 30px #4ade80; font-weight: bold;">${playerName}</span>! זכית! 🎉`;
-                    console.log(`🏆 עדכון הודעת זכייה עם שם: ${playerName} (status: ${player.status})`);
+                    // הצג את השם בירוק דולק למעלה
+                    winnerNameDisplay.textContent = playerName;
+                    winnerNameDisplay.style.display = 'block';
+                    console.log(`🏆 מציג שם זוכה: ${playerName} (status: ${player.status})`);
                 } else {
-                    // שחקן לא פעיל (timeout/etc) - אפס להודעה רגילה
-                    winMessage.innerHTML = '🎉 מזל טוב! זכית! 🎉';
-                    console.log(`💭 שחקן ${player ? `בסטטוס ${player.status}` : 'לא קיים'} - אופסה הודעת זכייה לדיפולט`);
+                    // שחקן לא במצב מתאים - הסתר את תצוגת השם
+                    winnerNameDisplay.textContent = '';
+                    winnerNameDisplay.style.display = 'none';
+                    console.log(`💭 שחקן ${player ? `בסטטוס ${player.status}` : 'לא קיים'} - מסתיר שם`);
                 }
             }).catch(error => {
                 console.error('❌ Error fetching player from Firebase:', error);
+                winnerNameDisplay.textContent = '';
+                winnerNameDisplay.style.display = 'none';
             });
         } else {
-            // אין שחקן מרחוק - אפס להודעה דיפולטיבית
-            winMessage.innerHTML = '🎉 מזל טוב! זכית! 🎉';
-            console.log('💭 אין שחקן מרחוק פעיל - אופסה הודעת זכייה לדיפולט');
+            // אין שחקן מרחוק - הסתר את תצוגת השם
+            winnerNameDisplay.textContent = '';
+            winnerNameDisplay.style.display = 'none';
+            console.log('💭 אין שחקן מרחוק פעיל - מסתיר שם');
         }
     }
 
