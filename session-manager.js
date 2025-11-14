@@ -416,10 +416,16 @@ class SessionManager {
           // They will be moved when they click "Continue" button
           console.log('⏸️ NOT calling getNextPlayer - letting player see result first');
         } else {
-          // Reset player to waiting status
+          // Reset player to waiting status - but give controller time to show result first!
           console.log('↩️ Player has', updatedPlayer.attemptsLeft, 'attempts left');
-          await resetPlayerAction(this.sessionId, playerId);
-          await getNextPlayer(this.sessionId);
+          console.log('⏳ Waiting 3 seconds for controller to display result...');
+
+          // Wait 3 seconds before resetting - lets controller show win/loss screen
+          setTimeout(async () => {
+            await resetPlayerAction(this.sessionId, playerId);
+            await getNextPlayer(this.sessionId);
+            console.log('✅ Player reset to waiting, next player selected');
+          }, 3000);
         }
 
         // שחרר את הנעילה - spin הסתיים
