@@ -1841,12 +1841,13 @@ async function updateScrollingBanner() {
                     const dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
                     const timeStr = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
                     return `${winner.playerName || 'לחץ בבאזר'} - ${winner.prizeName || 'פרס'} - ${dateStr} ${timeStr}`;
-                }).join(' | ');
+                }).join(' ⭐ ');  // אימוג'י כוכב בין זוכים
 
                 console.log('📝 רשימת זוכים מעוצבת:', winnersList);
 
                 if (winnersList.length > 0) {
-                    winnersText = ` והזוכים הם: ${winnersList} | `;
+                    // צבע ירוק ל"והזוכים הם" עם span
+                    winnersText = ` <span style="color: #00ff00; font-weight: bold;">🏆 והזוכים הם:</span> ${winnersList} ⭐ `;
                     console.log('✅ טקסט זוכים נוצר:', winnersText);
                 } else {
                     console.log('⚠️ רשימת זוכים ריקה');
@@ -1867,7 +1868,7 @@ async function updateScrollingBanner() {
     if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
         combinedText = gameState.scrollingBannerText;
         if (winnersText) {
-            combinedText += winnersText + gameState.scrollingBannerText; // חזור על הטקסט
+            combinedText += winnersText; // הוסף זוכים
             console.log('🔗 שילבתי טקסט + זוכים');
         }
     } else if (winnersText) {
@@ -1876,10 +1877,16 @@ async function updateScrollingBanner() {
         console.log('🏆 מציג רק זוכים (אין טקסט מותאם)');
     }
 
-    console.log('📋 טקסט סופי משולב:', combinedText.substring(0, 150));
+    // ✅ כפול את הטקסט 3 פעמים כדי שלא יהיו הפסקות בגלילה
+    if (combinedText.length > 0) {
+        combinedText = combinedText + ' ' + combinedText + ' ' + combinedText;
+    }
+
+    console.log('📋 טקסט סופי משולב (מכופל):', combinedText.substring(0, 150));
 
     if (combinedText.length > 0) {
-        scrollingText.textContent = combinedText;
+        // ✅ השתמש ב-innerHTML במקום textContent כדי שה-HTML יוצג (עבור הצבע הירוק)
+        scrollingText.innerHTML = combinedText;
         scrollingText.style.fontSize = gameState.scrollingBannerFontSize + 'px';
 
         // התאם את גובה הפס לגודל הגופן (גופן + 28px padding)

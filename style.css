@@ -185,15 +185,15 @@ body {
     font-size: 32px;
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
-    animation: scroll-rtl 30s linear infinite;
+    animation: scroll-rtl 60s linear infinite;  /* האטה ל-60 שניות */
 }
 
 @keyframes scroll-rtl {
     0% {
-        transform: translateX(-100%);
+        transform: translateX(100%);  /* התחל מימין */
     }
     100% {
-        transform: translateX(100%);
+        transform: translateX(-100%);  /* סיים בשמאל */
     }
 }
 
