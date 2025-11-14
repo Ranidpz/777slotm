@@ -384,6 +384,15 @@
 
                         const timeStr = formatTime(winner.timestamp);
 
+                        // בדוק אם prizeSymbol הוא תמונה (data:image או blob:)
+                        const isImage = winner.prizeSymbol &&
+                                       (winner.prizeSymbol.includes('data:image') ||
+                                        winner.prizeSymbol.includes('blob:'));
+
+                        const prizeSymbolHTML = isImage
+                            ? `<img src="${winner.prizeSymbol}" alt="${winner.prizeName || 'פרס'}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 10px;">`
+                            : `<div class="prize-symbol">${winner.prizeSymbol || '🎁'}</div>`;
+
                         return `
                             <div class="winner-card">
                                 <div class="winner-rank">#${rank}</div>
@@ -392,7 +401,7 @@
                                     <div class="winner-time">${timeStr}</div>
                                 </div>
                                 <div class="winner-prize">
-                                    <div class="prize-symbol">${winner.prizeSymbol || '🎁'}</div>
+                                    ${prizeSymbolHTML}
                                     <div class="prize-name">${winner.prizeName || 'פרס'}</div>
                                 </div>
                                 <div class="trophy-icon ${trophyClass}">${trophyIcon}</div>
