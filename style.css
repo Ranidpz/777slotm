@@ -191,10 +191,10 @@ body {
 
 @keyframes scroll-rtl {
     from {
-        transform: translateX(-100%);  /* התחל משמאל מחוץ למסך */
+        transform: translateX(0);  /* התחל מהמיקום הרגיל (נראה במסך) */
     }
     to {
-        transform: translateX(100%);  /* גלול ימינה מחוץ למסך */
+        transform: translateX(100%);  /* גלול ימינה ונעלם */
     }
 }
 
