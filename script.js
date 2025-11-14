@@ -873,8 +873,8 @@ document.addEventListener('keydown', (e) => {
         triggerSpin();
     }
     
-    // ד או S - פתח הגדרות
-    if (e.key === 'ד' || e.key === 's' || e.key === 'S') {
+    // ד/ס או S - פתח הגדרות (עברית ואנגלית)
+    if (e.key === 'ד' || e.key === 'ס' || e.key === 's' || e.key === 'S') {
         if (!gameState.isSpinning) {
             openSettings();
         }
@@ -1838,12 +1838,17 @@ async function updateScrollingBanner() {
     // טען רשימת זוכים מ-Firebase
     let winnersText = '';
     try {
+        console.log('🔍 מנסה לטעון זוכים מ-Firebase, sessionId:', sessionId);
         const winnersRef = firebase.database().ref(`sessions/${sessionId}/winners`);
         const snapshot = await winnersRef.once('value');
         const winnersData = snapshot.val();
 
+        console.log('📊 נתוני זוכים מ-Firebase:', winnersData);
+
         if (winnersData) {
             const winnersArray = Object.values(winnersData);
+            console.log('📋 מערך זוכים:', winnersArray);
+
             // המר לפורמט: שם הזוכה פרס תאריך ושעה
             const winnersList = winnersArray.map(winner => {
                 const date = new Date(winner.timestamp);
@@ -1852,9 +1857,16 @@ async function updateScrollingBanner() {
                 return `${winner.playerName || 'לחץ בבאזר'} - ${winner.prizeName || 'פרס'} - ${dateStr} ${timeStr}`;
             }).join(' | ');
 
+            console.log('📝 רשימת זוכים מעוצבת:', winnersList);
+
             if (winnersList.length > 0) {
                 winnersText = ` והזוכים הם: ${winnersList} | `;
+                console.log('✅ טקסט זוכים נוצר:', winnersText);
+            } else {
+                console.log('⚠️ רשימת זוכים ריקה');
             }
+        } else {
+            console.log('⚠️ אין נתוני זוכים ב-Firebase');
         }
     } catch (error) {
         console.error('❌ שגיאה בטעינת זוכים:', error);
@@ -1862,12 +1874,22 @@ async function updateScrollingBanner() {
 
     // שלב טקסט מותאם + זוכים
     let combinedText = '';
+    console.log('📝 טקסט נגלל נוכחי:', gameState.scrollingBannerText);
+    console.log('🏆 טקסט זוכים:', winnersText);
+
     if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
         combinedText = gameState.scrollingBannerText;
         if (winnersText) {
             combinedText += winnersText + gameState.scrollingBannerText; // חזור על הטקסט
+            console.log('🔗 שילבתי טקסט + זוכים');
         }
+    } else if (winnersText) {
+        // אם אין טקסט מותאם אבל יש זוכים - הצג רק את הזוכים
+        combinedText = winnersText;
+        console.log('🏆 מציג רק זוכים (אין טקסט מותאם)');
     }
+
+    console.log('📋 טקסט סופי משולב:', combinedText.substring(0, 150));
 
     if (combinedText.length > 0) {
         scrollingText.textContent = combinedText;
@@ -1962,15 +1984,15 @@ if (guaranteedWinCheckbox) {
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
-console.log('Press ד or S for settings');
-console.log('Press D for scoreboard toggle');
+console.log('Press ד/ס/S for settings');
+console.log('Press ג/G/D for scoreboard toggle');
 
 // ============================================
-// KEYBOARD SHORTCUT: D for Scoreboard Toggle
+// KEYBOARD SHORTCUT: ג/G/D for Scoreboard Toggle
 // ============================================
 document.addEventListener('keydown', (e) => {
-    // לחיצה על 'd' או 'D' (אנגלית) - מעבר למסך הזוכים
-    if (e.key === 'd' || e.key === 'D') {
+    // לחיצה על 'ג' (עברית) או 'd'/'D' או 'g'/'G' (אנגלית) - מעבר למסך הזוכים
+    if (e.key === 'ג' || e.key === 'd' || e.key === 'D' || e.key === 'g' || e.key === 'G') {
         e.preventDefault();
 
         // פתח את מסך הזוכים באותו טאב

@@ -502,9 +502,9 @@
             loadWinners();
         });
 
-        // KEYBOARD SHORTCUT: D to return to game
+        // KEYBOARD SHORTCUT: ג/G/D to return to game
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'd' || e.key === 'D') {
+            if (e.key === 'ג' || e.key === 'd' || e.key === 'D' || e.key === 'g' || e.key === 'G') {
                 e.preventDefault();
                 console.log('🎰 חוזר למסך משחק מלוח הזוכים');
 
@@ -518,7 +518,7 @@
             }
         });
 
-        console.log('⌨️ לחץ D כדי לחזור למסך המשחק');
+        console.log('⌨️ לחץ ג/G/D כדי לחזור למסך המשחק');
     </script>
 </body>
 </html>
