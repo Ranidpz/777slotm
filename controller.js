@@ -243,36 +243,7 @@ class MobileController {
   handlePlayerStateChange(player) {
     console.log('🔄 Player state:', player.status, 'lastResult:', player.lastResult, 'attemptsLeft:', player.attemptsLeft);
 
-    // IMPORTANT: Check if we're currently showing a result screen
-    // Don't override it unless user clicked "Continue"
-    const currentScreen = document.querySelector('.screen.active');
-    const isShowingResult = currentScreen && (
-      currentScreen.id === 'win-result-screen' ||
-      currentScreen.id === 'loss-result-screen'
-    );
-    console.log('📺 Current screen:', currentScreen?.id, 'isShowingResult:', isShowingResult);
-
-    // PRIORITY: Check if there's a result to show first (even if status is 'finished')
-    // This ensures the player sees their win/loss before the finished screen
-    if (player.lastResult && !isShowingResult) {
-      console.log('📊 ✅ HAS RESULT! Showing result screen:', player.lastResult);
-      if (player.lastResult === 'win') {
-        console.log('🎉 Calling showWinResultScreen()');
-        this.showWinResultScreen(player);
-        return;
-      } else if (player.lastResult === 'loss') {
-        console.log('😔 Calling showLossResultScreen()');
-        this.showLossResultScreen(player);
-        return;
-      }
-    }
-
-    // If we're showing a result screen, don't change it
-    if (isShowingResult) {
-      console.log('⏸️ Keeping result screen visible');
-      return;
-    }
-
+    // טיפול במצבים לפי State Machine
     console.log('💫 Switching to status-based screen:', player.status);
     switch (player.status) {
       case 'waiting':
@@ -283,12 +254,19 @@ class MobileController {
         this.showPlayingScreen(player);
         break;
 
-      case 'played':
-        // Only show pressed screen if no result yet
-        if (!player.lastResult) {
-          this.showPressedScreen(player);
-        } else {
-          console.log('⚠️ played status but has result - waiting for result screen');
+      case 'spinning':
+        // הצג מסך "מסתובב..." או השאר את מסך המשחק
+        this.showPressedScreen(player);
+        break;
+
+      case 'showing_result':
+        // הצג מסך זכייה/הפסד
+        if (player.lastResult === 'win') {
+          console.log('🎉 Showing WIN result screen');
+          this.showWinResultScreen(player);
+        } else if (player.lastResult === 'loss') {
+          console.log('😔 Showing LOSS result screen');
+          this.showLossResultScreen(player);
         }
         break;
 
@@ -297,14 +275,12 @@ class MobileController {
         break;
 
       case 'finished':
-        // Only show finished screen if no result is being shown
-        if (!player.lastResult) {
-          console.log('🏁 No result, showing finished screen');
-          this.showFinishedScreen(player);
-        } else {
-          console.log('⚠️ finished status but has result - result should be shown above');
-        }
+        console.log('🏁 Player finished - showing finished screen');
+        this.showFinishedScreen(player);
         break;
+
+      default:
+        console.warn(`⚠️ Unknown status: ${player.status}`);
     }
   }
 
@@ -594,38 +570,54 @@ class MobileController {
     // Vibrate feedback
     this.vibrate(100);
 
-    // שחרר את נעילת הסpin במקרה שהיא תקועה
-    if (window.sessionManager) {
-      sessionManager.isSpinActive = false;
-      console.log('🔓 Releasing spin lock on continue');
+    if (!this.sessionId || !this.playerId) {
+      console.error('❌ Missing sessionId or playerId');
+      return;
     }
 
-    // Get current player status to check if finished
-    if (this.sessionId && this.playerId) {
-      try {
-        const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`);
-        const snapshot = await playerRef.once('value');
-        const player = snapshot.val();
+    try {
+      const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${this.playerId}`);
+      const snapshot = await playerRef.once('value');
+      const player = snapshot.val();
 
-        // Clear the result in Firebase
-        await playerRef.child('lastResult').remove();
-        console.log('✅ Result cleared');
+      if (!player) {
+        console.error('❌ Player not found');
+        return;
+      }
 
-        // If player is finished (no more attempts), show finished screen
-        if (player && player.status === 'finished') {
-          console.log('🏁 Player finished - showing finished screen');
-          // showFinishedScreen() יטפל בהכל - כולל הסרה והעברה לשחקן הבא
-          this.showFinishedScreen(player);
-        } else if (player && player.status === 'active') {
-          // Player still active - show playing screen
-          console.log('🎮 Player still active - showing playing screen');
-          this.showPlayingScreen(player);
-        } else if (player && player.status === 'waiting') {
-          // Player waiting for turn - show waiting screen
-          console.log('⏳ Player waiting - showing waiting screen');
-          this.showWaitingScreen(player);
-        }
-        // If status changes, Firebase listener will update automatically
+      console.log(`📊 Player has ${player.attemptsLeft} attempts left`);
+
+      // בדוק אם נותרו נסיונות
+      if (player.attemptsLeft > 0) {
+        // יש עוד נסיונות - חזור ל-active
+        console.log('↩️ Player has attempts left - returning to active');
+
+        await playerRef.update({
+          status: 'active',
+          lastResult: null,
+          lastAction: 'continue',  // סמן שהמשתמש לחץ המשך
+          prizeDetails: null
+        });
+
+        // המסך הראשי יקלוט את השינוי ב-status דרך ה-listener
+        console.log('✅ Status updated to active - main screen will handle');
+
+      } else {
+        // אין עוד נסיונות - סיים את השחקן
+        console.log('🔚 No attempts left - finishing player');
+
+        await playerRef.update({
+          status: 'finished',
+          lastResult: null,
+          lastAction: 'continue',
+          prizeDetails: null
+        });
+
+        // המסך הראשי יקלוט את status: finished ויסיר את השחקן
+        console.log('✅ Status updated to finished - main screen will remove player');
+      }
+
+      // Firebase listener will trigger handlePlayerStateChange automatically
       } catch (error) {
         console.error('❌ Error in handleContinueAfterResult:', error);
       }

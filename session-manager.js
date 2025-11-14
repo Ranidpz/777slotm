@@ -354,10 +354,23 @@ class SessionManager {
   async handlePlayerAction(playerId, player) {
     console.log('🎮 Player action received from mobile:', playerId, player);
 
+    // טיפול בלחיצת "המשך" אחרי תוצאה
+    if (player.lastAction === 'continue') {
+      console.log('▶️ Continue action detected - handling...');
+      await this.handleContinueAfterResult(playerId);
+      return;
+    }
+
     if (player.lastAction === 'buzz') {
       // בדוק אם כבר יש spin פעיל - התעלם מלחיצות כפולות
       if (this.isSpinActive) {
         console.log('⏳ Spin already active - ignoring duplicate action');
+        return;
+      }
+
+      // בדוק אם השחקן במצב active בלבד
+      if (player.status !== 'active') {
+        console.log(`⛔ Player status is "${player.status}" - only "active" can spin`);
         return;
       }
 
@@ -371,6 +384,13 @@ class SessionManager {
 
       // נעל spin עד שהוא מסתיים
       this.isSpinActive = true;
+
+      // עדכן סטטוס ל-spinning
+      const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${playerId}`);
+      await playerRef.update({
+        status: 'spinning',
+        lastAction: null  // נקה את הפעולה
+      });
 
       // Stop timer
       this.stopPlayerTimer();
@@ -391,52 +411,8 @@ class SessionManager {
         console.log('❌ triggerSpin function not available');
       }
 
-      // Wait for spin to complete (automatic mode: ~4-5 seconds)
-      const spinDuration = gameState.mode === 'automatic' ? 5000 : 8000;
-
-      // Wait for spin to complete, then check result and update player
-      setTimeout(async () => {
-        // Get updated player data to check actual attempts left
-        const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${playerId}`);
-        const snapshot = await playerRef.once('value');
-        const updatedPlayer = snapshot.val();
-
-        if (!updatedPlayer || updatedPlayer.attemptsLeft <= 0) {
-          // Mark player as finished (don't remove yet - let them see the result)
-          console.log('🔚 Player finished all attempts:', playerId);
-          await playerRef.update({
-            status: 'finished'
-          });
-
-          // אל תנקה את currentSpinPlayerId כאן - צריך אותו כדי להציג את השם בהודעת הזכייה
-          // הוא ינוקה מאוחר יותר כשהשחקן יוסר מה-session
-          console.log('⚠️ Player finished but keeping currentSpinPlayerId for win message display');
-
-          // DON'T move to next player yet - let them see the result screen
-          // They will be moved when they click "Continue" button
-          console.log('⏸️ NOT calling getNextPlayer - letting player see result first');
-        } else {
-          // Reset player to waiting status - but give controller time to show result first!
-          console.log('↩️ Player has', updatedPlayer.attemptsLeft, 'attempts left');
-          console.log('⏳ Waiting 3 seconds for controller to display result...');
-
-          // Wait 3 seconds before resetting - lets controller show win/loss screen
-          setTimeout(async () => {
-            await resetPlayerAction(this.sessionId, playerId);
-            await getNextPlayer(this.sessionId);
-            console.log('✅ Player reset to waiting, next player selected');
-          }, 3000);
-        }
-
-        // שחרר את הנעילה - spin הסתיים
-        this.isSpinActive = false;
-        console.log('🔓 Spin completed - lock released');
-
-        // אתחל מחדש את הטיימר אם השחקן עדיין פעיל ויש לו נסיונות
-        setTimeout(() => {
-          this.restartPlayerTimer();
-        }, 500);
-      }, spinDuration + 1000); // Wait for spin animation to complete
+      // ⚠️ הסיבוב הסתיים - storeSpinResult תשנה את הסטטוס ל-showing_result
+      // ⚠️ לא משחררים את isSpinActive כאן - רק כשלוחצים "המשך"
     }
   }
 
@@ -445,9 +421,22 @@ class SessionManager {
     try {
       // אם יש שחקן מרחוק - עדכן את פרטיו
       if (this.currentSpinPlayerId) {
+        const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`);
+
+        // קבל את הנתונים העדכניים כדי לבדוק נסיונות
+        const snapshot = await playerRef.once('value');
+        const player = snapshot.val();
+
+        if (!player) {
+          console.error('❌ Player not found when storing result');
+          return;
+        }
+
         const updateData = {
+          status: 'showing_result',  // ✅ שנה ל-showing_result
           lastResult: isWin ? 'win' : 'loss',
-          lastResultTime: firebase.database.ServerValue.TIMESTAMP
+          lastResultTime: firebase.database.ServerValue.TIMESTAMP,
+          attemptsLeft: player.attemptsLeft  // שמור את הנסיונות הנוכחיים
         };
 
         // הוסף פרטי פרס אם זכייה
@@ -463,7 +452,8 @@ class SessionManager {
           console.log(`📊 Stored ${isWin ? 'WIN' : 'LOSS'} result for player:`, this.currentSpinPlayerId);
         }
 
-        await firebase.database().ref(`sessions/${this.sessionId}/players/${this.currentSpinPlayerId}`).update(updateData);
+        await playerRef.update(updateData);
+        console.log(`✅ Player status changed to "showing_result" (${player.attemptsLeft} attempts left)`);
       }
 
       // אם זכייה - שמור ברשימת זוכים (גם אם אין שחקן מרחוק!)
@@ -534,6 +524,65 @@ class SessionManager {
       console.log('🏆 Winner saved to session scoreboard:', winnerEntry);
     } catch (error) {
       console.error('❌ Error saving winner to scoreboard:', error);
+    }
+  }
+
+  // Handle "Continue" button click after showing result
+  async handleContinueAfterResult(playerId) {
+    console.log('▶️ handleContinueAfterResult called for player:', playerId);
+
+    try {
+      const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${playerId}`);
+      const snapshot = await playerRef.once('value');
+      const player = snapshot.val();
+
+      if (!player) {
+        console.error('❌ Player not found when continuing');
+        return;
+      }
+
+      console.log(`📊 Player has ${player.attemptsLeft} attempts left`);
+
+      // בדוק אם נותרו נסיונות
+      if (player.attemptsLeft > 0) {
+        // יש עוד נסיונות - חזור ל-active
+        console.log('↩️ Player has attempts left - returning to active');
+
+        await playerRef.update({
+          status: 'active',
+          lastResult: null,
+          prizeDetails: null
+        });
+
+        // הפעל מחדש את הטיימר
+        this.restartPlayerTimer();
+
+        // שחרר את הנעילה
+        this.isSpinActive = false;
+        console.log('🔓 Spin lock released - player can spin again');
+
+      } else {
+        // אין עוד נסיונות - סיים את השחקן
+        console.log('🔚 No attempts left - finishing player');
+
+        await playerRef.update({
+          status: 'finished'
+        });
+
+        // שחרר נעילה
+        this.isSpinActive = false;
+
+        // הסר את השחקן ועבור לבא
+        setTimeout(async () => {
+          await removePlayer(this.sessionId, playerId);
+          await getNextPlayer(this.sessionId);
+          this.currentSpinPlayerId = null;
+          console.log('✅ Player removed, next player selected');
+        }, 2000);
+      }
+
+    } catch (error) {
+      console.error('❌ Error in handleContinueAfterResult:', error);
     }
   }
 
