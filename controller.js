@@ -330,8 +330,8 @@ class MobileController {
     // Setup pull bar
     this.setupPullBar();
 
-    // Start countdown timer
-    this.startTimer();
+    // ⏰ טיימר מוצג רק על המסך הראשי - לא על הטלפון
+    // Timer removed from remote controller - only shown on main screen
 
     // Vibrate to notify player
     this.vibrate([100, 50, 100]);
@@ -460,7 +460,7 @@ class MobileController {
 
   // Show pressed screen
   showPressedScreen(player) {
-    this.stopTimer();
+    // this.stopTimer(); // Timer removed from remote controller
     this.showScreen('pressed-screen');
 
     // Update attempts left display with the updated player data
@@ -477,7 +477,7 @@ class MobileController {
     console.log('🎉🎉🎉 SHOWING WIN RESULT SCREEN! 🎉🎉🎉');
     console.log('📦 Player data:', JSON.stringify(player, null, 2));
 
-    this.stopTimer();
+    // this.stopTimer(); // Timer removed from remote controller
     this.showScreen('win-result-screen');
 
     // Update attempts left display
@@ -550,7 +550,7 @@ class MobileController {
 
   // Show loss result screen
   showLossResultScreen(player) {
-    this.stopTimer();
+    // this.stopTimer(); // Timer removed from remote controller
     this.showScreen('loss-result-screen');
 
     // Update attempts left display
@@ -625,14 +625,14 @@ class MobileController {
 
   // Show timeout screen
   showTimeoutScreen() {
-    this.stopTimer();
+    // this.stopTimer(); // Timer removed from remote controller
     this.showScreen('timeout-screen');
     this.vibrate([100, 50, 100, 50, 100]);
   }
 
   // Show finished screen
   async showFinishedScreen(player) {
-    this.stopTimer();
+    // this.stopTimer(); // Timer removed from remote controller
     this.showScreen('finished-screen');
     this.vibrate([200, 100, 200, 100, 200]);
 
@@ -813,7 +813,7 @@ class MobileController {
       this.unsubscribeSession = null;
     }
 
-    this.stopTimer();
+    // this.stopTimer(); // Timer removed from remote controller
   }
 
   // Destroy controller

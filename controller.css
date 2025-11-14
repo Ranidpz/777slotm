@@ -424,7 +424,7 @@ body {
     font-weight: 600;
 }
 
-/* Timer Bar */
+/* Timer Bar - REMOVED (timer only on main screen)
 .timer-bar-container {
     width: 100%;
     max-width: 400px;
@@ -465,6 +465,7 @@ body {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     z-index: 2;
 }
+*/'
 
 .instruction-text {
     text-align: center;
