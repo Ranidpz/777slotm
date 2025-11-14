@@ -617,14 +617,20 @@ function checkWin() {
             // עדכן מלאי לפי סוג המשחק
             if (isUsingCustomImages() && window.dynamicImagesManager) {
                 // תמונות מותאמות - עדכן דרך dynamicImagesManager
-                const img = dynamicImagesManager.images[symbolIndex];
+                // ⚠️ symbolIndex עלול להיות גדול מכמות התמונות (כי התמונות חוזרות על עצמן)
+                // נשתמש ב-modulo כדי למצוא את התמונה המקורית
+                const uploadedImages = dynamicImagesManager.images.filter(img => img.imageData !== null);
+                const actualImageIndex = symbolIndex % uploadedImages.length;
+                const img = uploadedImages[actualImageIndex];
+
                 if (img && img.imageData !== null) {
                     dynamicImagesManager.decrementInventoryBySymbolIndex(symbolIndex);
                     const remaining = img.inventory === null ? null : img.inventory;
-                    console.log(`📦 מלאי תמונה ${symbolIndex} הופחת. נותר: ${remaining === null ? 'אינסוף' : remaining}`);
+                    console.log(`📦 מלאי תמונה ${symbolIndex} (תמונה מקורית: ${actualImageIndex}) הופחת. נותר: ${remaining === null ? 'אינסוף' : remaining}`);
 
-                    prizeDetails.prizeName = img.label || `תמונה ${symbolIndex + 1}`;
+                    prizeDetails.prizeName = img.label || `תמונה ${actualImageIndex + 1}`;
                     prizeDetails.remainingInventory = remaining;
+                    prizeDetails.symbolDisplay = img.imageData; // ✅ שים את התמונה המקורית
                 }
             } else {
                 // אימוג'ים - אין צורך בעדכון מלאי
