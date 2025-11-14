@@ -442,12 +442,18 @@ class SessionManager {
 
         // הוסף פרטי פרס אם זכייה
         if (isWin && prizeDetails) {
-          updateData.prizeDetails = {
+          const prizeData = {
             prizeName: prizeDetails.prizeName || 'לא זוהה',
             symbolIndex: prizeDetails.symbolIndex,
-            symbolDisplay: prizeDetails.symbolDisplay,
-            remainingInventory: prizeDetails.remainingInventory
+            symbolDisplay: prizeDetails.symbolDisplay
           };
+
+          // הוסף remainingInventory רק אם הוא מוגדר (לא undefined)
+          if (prizeDetails.remainingInventory !== undefined && prizeDetails.remainingInventory !== null) {
+            prizeData.remainingInventory = prizeDetails.remainingInventory;
+          }
+
+          updateData.prizeDetails = prizeData;
           console.log(`📊 Stored WIN with prize details:`, updateData.prizeDetails);
         } else {
           console.log(`📊 Stored ${isWin ? 'WIN' : 'LOSS'} result for player:`, this.currentSpinPlayerId);
