@@ -185,17 +185,16 @@ body {
     font-size: 32px;
     font-weight: 700;
     font-family: 'Assistant', sans-serif;
-    animation: scroll-rtl 120s linear infinite;  /* האטה ל-120 שניות (2 דקות!) */
-    padding-right: 100%;  /* מרווח כדי שהטקסט יתחיל מחוץ למסך */
-    will-change: transform;  /* אופטימיזציה */
+    animation: scroll-rtl 120s linear infinite;
+    will-change: transform;
 }
 
 @keyframes scroll-rtl {
     0% {
-        transform: translateX(0);  /* התחל מהמיקום הנוכחי (מימין) */
+        transform: translateX(100%);  /* התחל מימין למסך */
     }
     100% {
-        transform: translateX(-100%);  /* גלול שמאלה עד הסוף */
+        transform: translateX(-100%);  /* גלול שמאלה עד שהטקסט נעלם לגמרי */
     }
 }
 
