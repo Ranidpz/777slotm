@@ -189,19 +189,11 @@ async function triggerPlayerAction(sessionId, playerId, action = 'buzz') {
   try {
     const playerRef = database.ref(`sessions/${sessionId}/players/${playerId}`);
 
+    // רק עדכן lastAction - session-manager.js יטפל בשאר
     await playerRef.update({
       lastAction: action,
-      lastActionTime: firebase.database.ServerValue.TIMESTAMP,
-      status: 'played'
+      lastActionTime: firebase.database.ServerValue.TIMESTAMP
     });
-
-    // Decrement attempts
-    const snapshot = await playerRef.child('attemptsLeft').once('value');
-    const attemptsLeft = snapshot.val();
-
-    if (attemptsLeft > 0) {
-      await playerRef.child('attemptsLeft').set(attemptsLeft - 1);
-    }
 
     console.log('✅ Player action triggered:', playerId, action);
     return true;

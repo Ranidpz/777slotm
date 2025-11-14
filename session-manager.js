@@ -385,11 +385,12 @@ class SessionManager {
       // נעל spin עד שהוא מסתיים
       this.isSpinActive = true;
 
-      // עדכן סטטוס ל-spinning
+      // עדכן סטטוס ל-spinning והפחת נסיון
       const playerRef = firebase.database().ref(`sessions/${this.sessionId}/players/${playerId}`);
       await playerRef.update({
         status: 'spinning',
-        lastAction: null  // נקה את הפעולה
+        lastAction: null,  // נקה את הפעולה
+        attemptsLeft: player.attemptsLeft - 1  // הפחת נסיון
       });
 
       // Stop timer
