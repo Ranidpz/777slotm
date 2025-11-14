@@ -70,7 +70,41 @@ class SessionManager {
       console.log('📜 פס גלילה עודכן עם sessionId');
     }
 
+    // ✅ טען הגדרות משחק מ-Firebase (אם קיימות)
+    this.loadGameSettingsFromFirebase();
+
     return true;
+  }
+
+  // טען הגדרות משחק מ-Firebase
+  async loadGameSettingsFromFirebase() {
+    try {
+      const snapshot = await firebase.database().ref(`sessions/${this.sessionId}/gameSettings`).once('value');
+      const settings = snapshot.val();
+
+      if (settings) {
+        console.log('☁️ טוען הגדרות משחק מ-Firebase:', settings);
+
+        // עדכן את gameState רק אם יש הגדרות ב-Firebase
+        if (typeof window.gameState !== 'undefined') {
+          if (settings.winFrequency !== undefined) gameState.winFrequency = settings.winFrequency;
+          if (settings.soundEnabled !== undefined) gameState.soundEnabled = settings.soundEnabled;
+          if (settings.gameMode !== undefined) gameState.mode = settings.gameMode;
+          if (settings.guaranteedWinMode !== undefined) gameState.guaranteedWinMode = settings.guaranteedWinMode;
+          if (settings.backgroundColor) gameState.backgroundColor = settings.backgroundColor;
+          if (settings.whatsappNumber) gameState.whatsappNumber = settings.whatsappNumber;
+          if (settings.qrCustomText) gameState.qrCustomText = settings.qrCustomText;
+          if (settings.scrollingBannerText) gameState.scrollingBannerText = settings.scrollingBannerText;
+          if (settings.scrollingBannerFontSize) gameState.scrollingBannerFontSize = settings.scrollingBannerFontSize;
+
+          console.log('✅ הגדרות משחק עודכנו מ-Firebase');
+        }
+      } else {
+        console.log('📭 אין הגדרות שמורות ב-Firebase - משתמש בהגדרות localStorage');
+      }
+    } catch (error) {
+      console.error('❌ שגיאה בטעינת הגדרות מ-Firebase:', error);
+    }
   }
 
   // Setup click handler for player info area

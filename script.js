@@ -1011,6 +1011,26 @@ document.getElementById('save-settings').addEventListener('click', () => {
         console.log('☁️ פרסים נשמרו גם ב-Firebase');
     }
 
+    // ✅ שמור הגדרות משחק ב-Firebase (גיבוי!)
+    if (window.sessionManager && sessionManager.sessionId) {
+        const gameSettings = {
+            winFrequency: gameState.winFrequency,
+            soundEnabled: gameState.soundEnabled,
+            gameMode: gameState.mode,
+            guaranteedWinMode: gameState.guaranteedWinMode,
+            backgroundColor: gameState.backgroundColor || '#000000',
+            whatsappNumber: gameState.whatsappNumber || '',
+            qrCustomText: gameState.qrCustomText || '',
+            scrollingBannerText: gameState.scrollingBannerText || '',
+            scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,
+            lastUpdated: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        firebase.database().ref(`sessions/${sessionManager.sessionId}/gameSettings`).set(gameSettings)
+            .then(() => console.log('☁️ הגדרות משחק נשמרו ב-Firebase'))
+            .catch(error => console.error('❌ שגיאה בשמירת הגדרות ב-Firebase:', error));
+    }
+
     console.log('✅ ההגדרות נשמרו בהצלחה!');
 
     // רענן את הגלגלים עם התמונות החדשות
