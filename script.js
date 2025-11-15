@@ -214,20 +214,24 @@ function initReels() {
         console.warn('⚠️ מנהל תמונות לא נטען, משתמש באימוג\'י');
     }
     
-    // צור מערך בסיסי של סמלים שיהיה זהה לכל הגלילים
+    // צור מערך בסיסי של סמלים - מוקטן במובייל לביצועים
+    const isMobile = window.innerWidth <= 768;
+    const symbolsPerReel = isMobile ? 30 : 100;
+    console.log(`📱 מכשיר: ${isMobile ? 'מובייל' : 'דסקטופ'}, סמלים לגליל: ${symbolsPerReel}`);
+
     const baseSymbols = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < symbolsPerReel; i++) {
         const symbolIndex = i % allSymbols.length;
         baseSymbols.push(allSymbols[symbolIndex]);
     }
-    
+
     reels.forEach((reel, reelIndex) => {
         let symbolsHTML = '';
-        
+
         // כל גליל מתחיל מהיסט שונה כדי שייראה אחרת, אבל הסדר זהה
         const offset = reelIndex * 2; // כל גליל מוסט ב-2 סמלים
-        
-        for (let i = 0; i < 100; i++) {
+
+        for (let i = 0; i < symbolsPerReel; i++) {
             const symbolIndex = (i + offset) % baseSymbols.length;
             const symbol = baseSymbols[symbolIndex];
             
@@ -249,6 +253,7 @@ function initReels() {
     
     // עדכן את מספר הסמלים הזמינים למשחק
     gameState.totalSymbols = allSymbols.length;
+    gameState.symbolsPerReel = symbolsPerReel; // שמור את מספר הסמלים לגליל
 }
 
 // התחל סיבוב
@@ -282,22 +287,26 @@ function startSpin() {
         reel.style.transform = 'translateY(0)';
     });
     
-    // kick מיידי - תנו לגלילים קצת תאוצה ראשונית
-    setTimeout(() => {
-        reels.forEach(reel => {
-            reel.style.transition = 'transform 0.1s ease-out';
-            reel.style.transform = 'translateY(-50px)';
+    // kick מיידי - תנו לגלילים קצת תאוצה ראשונית (requestAnimationFrame)
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            reels.forEach(reel => {
+                reel.style.transition = 'transform 0.1s ease-out';
+                reel.style.transform = 'translateY(-50px)';
+            });
         });
-    }, 10);
-    
-    // ואז הוסף את מחלקת הסיבוב המלא
-    setTimeout(() => {
-        reels.forEach(reel => {
-            reel.style.transition = 'none';
-            reel.classList.add('spinning');
-        });
-    }, 120);
-    
+    });
+
+    // ואז הוסף את מחלקת הסיבוב המלא (requestAnimationFrame)
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            reels.forEach(reel => {
+                reel.style.transition = 'none';
+                reel.classList.add('spinning');
+            });
+        }, 110);
+    });
+
     if (gameState.mode === 'automatic') {
         // במצב אוטומטי - עצור את הגלילים אחד אחד עם האטה טבעית
         setTimeout(() => stopReelSmooth(0, shouldWin), 2000);
@@ -536,24 +545,25 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
     
     // חשב את המיקום היעד - תוך התחשבות בהיסט של הגליל
     const reelOffset = reelIndex * 2; // כל גליל מתחיל עם היסט של 2 סמלים
-    const basePosition = 30; // מיקום בסיסי באמצע מערך הסמלים (מתוך 100)
-    
+    const symbolsPerReel = gameState.symbolsPerReel || 100; // קבל את מספר הסמלים לגליל
+    const basePosition = Math.floor(symbolsPerReel / 3); // מיקום בסיסי באמצע מערך הסמלים
+
     // כל גליל נוצר כך: symbol[i] = allSymbols[(i + reelOffset) % numSymbols]
     // אז כדי למצוא את המיקום שבו נמצא targetSymbolIndex:
     // (i + reelOffset) % numSymbols = targetSymbolIndex
     // i = (targetSymbolIndex - reelOffset + numSymbols) % numSymbols + k*numSymbols
-    
+
     // נמצא את המופע הקרוב ביותר ל-basePosition
     const targetPosition = (targetSymbolIndex - reelOffset + numSymbols) % numSymbols;
-    
+
     // מצא את המופע של הסמל הזה שהכי קרוב ל-basePosition
     const cycleNumber = Math.floor(basePosition / numSymbols);
     let symbolPosition = cycleNumber * numSymbols + targetPosition;
-    
+
     // אם זה מחוץ לטווח, קח את המחזור הקודם או הבא
     if (symbolPosition < 0) {
         symbolPosition += numSymbols;
-    } else if (symbolPosition >= 100) {
+    } else if (symbolPosition >= symbolsPerReel) {
         symbolPosition -= numSymbols;
     }
     
@@ -574,20 +584,22 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
     // קבע את המיקום הנוכחי בדיוק
     reel.style.transition = 'none';
     reel.style.transform = `translateY(${currentY}px)`;
-    
-    // אחרי רגע קצר, התחל את ההאטה למיקום הסופי
-    setTimeout(() => {
-        // שלב 1: האטה והגעה למיקום (עובר קצת מעבר)
-        const overshoot = symbolHeight * 0.3; // עובר 30% מסמל אחד
-        reel.style.transition = 'transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        reel.style.transform = `translateY(${finalY - overshoot}px)`;
-        
-        // שלב 2: bounce אחורה למיקום המדויק
-        setTimeout(() => {
-            reel.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            reel.style.transform = `translateY(${finalY}px)`;
-        }, 1500);
-    }, 50);
+
+    // אחרי רגע קצר, התחל את ההאטה למיקום הסופי (requestAnimationFrame)
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            // שלב 1: האטה והגעה למיקום (עובר קצת מעבר)
+            const overshoot = symbolHeight * 0.3; // עובר 30% מסמל אחד
+            reel.style.transition = 'transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            reel.style.transform = `translateY(${finalY - overshoot}px)`;
+
+            // שלב 2: bounce אחורה למיקום המדויק
+            setTimeout(() => {
+                reel.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                reel.style.transform = `translateY(${finalY}px)`;
+            }, 1500);
+        });
+    });
     
     gameState.manualStops[reelIndex] = true;
     

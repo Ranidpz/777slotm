@@ -62,16 +62,18 @@ body {
         0 0 60px rgba(255, 215, 0, 0.2);
 }
 
-/* רספונסיבי למובייל */
+/* רספונסיבי למובייל - text-shadow מופחת לביצועים */
 @media (max-width: 768px) {
     .symbol {
         font-size: clamp(40px, 15vw, 120px);
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
     }
 }
 
 @media (max-width: 480px) {
     .symbol {
         font-size: clamp(30px, 18vw, 100px);
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
     }
 }
 
@@ -83,14 +85,20 @@ body {
     padding: 5%;
 }
 
-/* אנימציית סיבוב - מהירות מלאה מהתחלה */
+/* אנימציית סיבוב - מהירות מלאה מהתחלה + GPU acceleration */
 @keyframes spin {
     0% {
-        transform: translateY(0);
+        transform: translate3d(0, 0, 0);
     }
     100% {
-        transform: translateY(-300vh);
+        transform: translate3d(0, -300vh, 0);
     }
+}
+
+/* הוסף האצת GPU לגלילים */
+.reel {
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .reel.spinning {
@@ -98,17 +106,15 @@ body {
     /* מהירות קבועה וחזקה - כולם מסתובבים באותו קצב מלא */
 }
 
-/* אפקט blur דינמי - חזק יותר במהירות גבוהה */
+/* אפקט תנועה - opacity בלבד (ביצועים טובים במובייל) */
 .reel.spinning .symbol {
-    filter: blur(2px);
-    opacity: 0.95;
-    transition: filter 0.2s ease, opacity 0.2s ease;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
 }
 
 .reel:not(.spinning) .symbol {
-    filter: blur(0);
     opacity: 1;
-    transition: filter 0.4s ease, opacity 0.4s ease;
+    transition: opacity 0.4s ease;
 }
 
 /* אפקט מיוחד לגלילים בזמן סיבוב */
@@ -176,6 +182,15 @@ body {
     display: flex;
     align-items: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ביטול backdrop-filter במובייל לביצועים */
+@media (max-width: 768px) {
+    .scrolling-banner {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.8);
+    }
 }
 
 .scrolling-text {
@@ -1326,6 +1341,14 @@ input:checked + .toggle-slider:before {
     backdrop-filter: blur(20px) saturate(180%);
 }
 
+/* ביטול backdrop-filter במובייל */
+@media (max-width: 768px) {
+    .tutorial-overlay {
+        backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.97);
+    }
+}
+
 .tutorial-content {
     background: #0a0a0a;
     background-image:
@@ -1373,6 +1396,14 @@ input:checked + .toggle-slider:before {
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
+}
+
+/* ביטול backdrop-filter במובייל */
+@media (max-width: 768px) {
+    .tutorial-section {
+        backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.7);
+    }
 }
 
 .tutorial-section h3 {
@@ -2189,6 +2220,14 @@ input:checked + .toggle-slider:before {
     animation: fadeIn 0.5s ease-out forwards;
 }
 
+/* ביטול backdrop-filter במובייל */
+@media (max-width: 768px) {
+    #qr-popup {
+        backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.92);
+    }
+}
+
 #qr-popup.hidden {
     display: none;
     animation: none;
@@ -2619,6 +2658,15 @@ input:checked + .toggle-slider:before {
     direction: rtl;
     text-align: center;
     transition: all 0.3s ease;
+}
+
+/* ביטול backdrop-filter במובייל */
+@media (max-width: 768px) {
+    #qr-container {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(26, 26, 46, 0.9);
+    }
 }
 
 #qr-container:hover {
