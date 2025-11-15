@@ -74,12 +74,17 @@ const eventsManager = {
             const date = event.eventDate ? new Date(event.eventDate).toLocaleDateString('he-IL') : 'לא צוין';
             const statusText = event.status === 'active' ? 'פעיל' : 'סגור';
 
+            // ✅ הצג שם בעל האירוע (רק למנהל על)
+            const ownerBadge = authManager.isSuperAdmin() && event.ownerName ?
+                `<div class="event-owner-badge">👤 ${event.ownerName}</div>` : '';
+
             return `
                 <div class="event-card" data-event-id="${event.id}">
                     <div class="event-header">
                         <h3>${event.name || 'אירוע ללא שם'}</h3>
                         <span class="event-status ${event.status || 'active'}">${statusText}</span>
                     </div>
+                    ${ownerBadge}
                     <div class="event-details">
                         <p>📍 ${event.location || 'לא צוין מקום'}</p>
                         <p>📅 ${date}</p>

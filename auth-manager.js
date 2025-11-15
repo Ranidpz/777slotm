@@ -81,17 +81,20 @@ const authManager = {
                 email: user.email,
                 displayName: user.displayName || 'משתמש חדש',
                 photoURL: user.photoURL || null,
-                role: 'event_manager', // ברירת מחדל
+                role: 'event_manager', // ברירת מחדל - מפיק
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 lastLogin: firebase.database.ServerValue.TIMESTAMP,
                 permissions: {
                     canCreateEvents: true,
-                    canDeleteEvents: false,
+                    canDeleteEvents: true,  // ✅ מפיקים יכולים למחוק אירועים שלהם
+                    canManageInventory: true,
+                    canEditEvents: true,
                     maxActiveSessions: 10
                 },
                 stats: {
                     totalEvents: 0,
-                    totalWinners: 0
+                    totalWinners: 0,
+                    totalSpins: 0
                 }
             };
 

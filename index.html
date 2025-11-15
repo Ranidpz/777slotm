@@ -12,6 +12,7 @@
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <!-- QR Code Library -->
@@ -344,7 +345,7 @@
             <div class="settings-sticky-footer">
                 <div style="display: flex; gap: 10px; width: 100%; align-items: stretch;">
                     <!-- Save Button - Large on the right -->
-                    <button id="save-settings" class="save-btn-main" style="flex: 2; padding: 15px 30px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; border: none; border-radius: 12px; font-size: 1.2em; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <button id="save-settings" class="save-btn-main settings-action-btn" style="flex: 2; padding: 15px 30px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; border: none; border-radius: 12px; font-size: 1.2em; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px; position: relative;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                             <polyline points="17 21 17 13 7 13 7 21"></polyline>
@@ -354,7 +355,7 @@
                     </button>
 
                     <!-- Scoreboard Button -->
-                    <button id="scoreboard-btn" class="scoreboard-btn" style="flex: 1; padding: 12px 20px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a2e; border: none; border-radius: 12px; font-size: 1em; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <button id="scoreboard-btn" class="scoreboard-btn" style="flex: 1; padding: 12px 20px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #1a1a2e; border: none; border-radius: 12px; font-size: 1em; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; position: relative;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                             <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
@@ -367,7 +368,7 @@
                     </button>
 
                     <!-- Dashboard Icon Button -->
-                    <button id="dashboard-btn" onclick="window.location.href='dashboard.html'" class="icon-btn" style="flex: 0 0 auto; padding: 12px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 1em; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;" title="דשבורד">
+                    <button id="dashboard-btn" onclick="window.location.href='dashboard.html'" class="icon-btn" style="flex: 0 0 auto; padding: 12px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 1em; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; position: relative;" title="דשבורד">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -422,6 +423,7 @@
 
     <script src="dynamic-images.js"></script>
     <script src="firebase-config.js"></script>
+    <script src="user-auth.js"></script>
     <script src="session-manager.js"></script>
     <script src="remote-control-settings.js"></script>
     <script src="script.js"></script>
@@ -443,6 +445,41 @@
                 console.log('🖥️ זוהה מכשיר דסקטופ - ממשיך בדרך רגילה');
             }
         })();
+
+        // ✅ User Authentication Initialization
+        if (typeof userAuthManager !== 'undefined') {
+            userAuthManager.init();
+        }
+
+        // ✅ Protect Settings Buttons - Require Auth
+        document.addEventListener('DOMContentLoaded', () => {
+            // כפתור שמירת הגדרות
+            const saveSettingsBtn = document.getElementById('save-settings');
+            if (saveSettingsBtn) {
+                const originalSaveClick = saveSettingsBtn.onclick;
+                saveSettingsBtn.onclick = function(e) {
+                    if (saveSettingsBtn.hasAttribute('data-requires-auth')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        userAuthManager.requiresAuth(() => {
+                            // אחרי התחברות - הרץ את הפעולה המקורית
+                            if (originalSaveClick) {
+                                originalSaveClick.call(this, e);
+                            } else if (typeof saveInventorySettings === 'function') {
+                                saveInventorySettings();
+                            }
+                        });
+                    } else {
+                        // משתמש מחובר - הרץ ישירות
+                        if (originalSaveClick) {
+                            originalSaveClick.call(this, e);
+                        } else if (typeof saveInventorySettings === 'function') {
+                            saveInventorySettings();
+                        }
+                    }
+                };
+            }
+        });
     </script>
 </body>
 </html>
