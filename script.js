@@ -983,13 +983,20 @@ winFrequencySlider.addEventListener('input', (e) => {
     const value = parseInt(e.target.value);
     gameState.winFrequency = value;
     winFrequencyValue.textContent = value;
+    const settingNote = document.querySelector('.setting-note');
 
     if (value === 0) {
         winFrequencyText.textContent = 'רנדומלי לגמרי';
-        document.querySelector('.setting-note').textContent = 'ערך נוכחי: רנדומלי לגמרי (ללא זכיות מובטחות)';
+        settingNote.innerHTML = 'ערך נוכחי: רנדומלי לגמרי (ללא זכיות מובטחות)';
+        settingNote.style.color = '';
+    } else if (value === 1) {
+        winFrequencyText.textContent = value;
+        settingNote.innerHTML = '<span style="color: #44ff44; font-weight: bold;">⭐ זכייה מובטחת בכל סיבוב!</span>';
+        settingNote.style.color = '#44ff44';
     } else {
         winFrequencyText.textContent = value;
-        document.querySelector('.setting-note').textContent = `ערך נוכחי: זכייה כל ${value} נסיונות`;
+        settingNote.innerHTML = `ערך נוכחי: זכייה כל ${value} נסיונות`;
+        settingNote.style.color = '';
     }
 });
 
@@ -1692,10 +1699,25 @@ function loadSettings() {
         const winFreqSlider = document.getElementById('win-frequency');
         const winFreqValue = document.getElementById('win-frequency-value');
         const winFreqText = document.getElementById('win-frequency-text');
+        const settingNote = document.querySelector('.setting-note');
 
         if (winFreqSlider) winFreqSlider.value = gameState.winFrequency;
         if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
         if (winFreqText) winFreqText.textContent = gameState.winFrequency;
+
+        // עדכן את ההודעה בהתאם לערך
+        if (settingNote) {
+            if (gameState.winFrequency === 1) {
+                settingNote.innerHTML = '<span style="color: #44ff44; font-weight: bold;">⭐ זכייה מובטחת בכל סיבוב!</span>';
+                settingNote.style.color = '#44ff44';
+            } else if (gameState.winFrequency === 0) {
+                settingNote.innerHTML = 'ערך נוכחי: רנדומלי לגמרי (ללא זכיות מובטחות)';
+                settingNote.style.color = '';
+            } else {
+                settingNote.innerHTML = `זכייה כל <span id="win-frequency-text">${gameState.winFrequency}</span> נסיונות`;
+                settingNote.style.color = '';
+            }
+        }
     }
 
     // טען בונוס רנדומלי
