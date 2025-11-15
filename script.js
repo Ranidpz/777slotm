@@ -634,9 +634,16 @@ function checkWin() {
                     const remaining = img.inventory === null ? null : img.inventory;
                     console.log(`📦 מלאי תמונה ${arrayIndex + 1} (symbolIndex=${symbolIndex}) הופחת. נותר: ${remaining === null ? 'אינסוף' : remaining}`);
 
-                    // אם ה-label הוא ברירת מחדל ("תמונה X"), השתמש ב-"פרס" במקום
+                    // קבע את שם הפרס: קודם כל נבדוק אם יש prizeName מותאם אישית
+                    // אחרת נבדוק אם label אינו ברירת מחדל, אחרת נשתמש ב-"פרס"
                     const defaultLabelPattern = /^תמונה \d+$/;
-                    prizeDetails.prizeName = (img.label && !defaultLabelPattern.test(img.label)) ? img.label : 'פרס';
+                    if (img.prizeName && img.prizeName.trim()) {
+                        prizeDetails.prizeName = img.prizeName.trim();
+                    } else if (img.label && !defaultLabelPattern.test(img.label)) {
+                        prizeDetails.prizeName = img.label;
+                    } else {
+                        prizeDetails.prizeName = 'פרס';
+                    }
                     prizeDetails.remainingInventory = remaining;
                     prizeDetails.symbolDisplay = img.imageData; // ✅ שים את התמונה המקורית
                     prizeDetails.prizeCode = img.code; // ✅ שים את קוד הפרס

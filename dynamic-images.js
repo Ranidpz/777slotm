@@ -37,6 +37,7 @@ const dynamicImagesManager = {
             initialInventory: null,
             distributedCount: 0, // ✅ NEW: מונה כמה פרסים חולקו בסה"כ
             label: `תמונה ${prizeIndex + 1}`, // תווית
+            prizeName: '', // ✅ שם מותאם אישית לפרס
             symbolIndex: prizeIndex // מיקום בגלגלים
         };
 
@@ -159,6 +160,18 @@ const dynamicImagesManager = {
             <div class="inventory-controls">
                 <h4 class="inventory-header">מלאי</h4>
 
+                <!-- Prize Name Input -->
+                <div class="prize-name-input-row">
+                    <label for="prize-name-${image.id}" class="prize-name-label">שם הפרס:</label>
+                    <input type="text"
+                           id="prize-name-${image.id}"
+                           class="prize-name-input"
+                           data-image-id="${image.id}"
+                           value="${image.prizeName || ''}"
+                           placeholder="לדוגמה: iPhone 15"
+                           maxlength="30">
+                </div>
+
                 <div class="inventory-display-row">
                     <span class="inventory-label">מלאי נוכחי:</span>
                     <span class="inventory-current">${inventoryDisplay}</span>
@@ -237,6 +250,19 @@ const dynamicImagesManager = {
                 const value = e.target.value;
                 this.updateInventory(imageId, value);
                 this.render();
+            }
+
+            // מאזין לשינוי שם פרס
+            if (e.target.classList.contains('prize-name-input')) {
+                const imageId = parseFloat(e.target.getAttribute('data-image-id'));
+                const prizeName = e.target.value.trim();
+                const image = this.images.find(img => img.id === imageId);
+                if (image) {
+                    image.prizeName = prizeName;
+                    this.saveToStorage();
+                    this.syncToFirebase();
+                    console.log(`✏️ שם פרס עודכן: "${prizeName}" (ID: ${imageId})`);
+                }
             }
         });
 

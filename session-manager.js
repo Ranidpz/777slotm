@@ -546,8 +546,13 @@ class SessionManager {
         const prize = dynamicImagesManager.images[prizeDetails.symbolIndex];
         if (prize) {
           prizeCode = prize.code; // ✅ PRIZE_001, PRIZE_002...
-          prizeName = prize.label || prizeName;
-          console.log(`🎫 קוד פרס: ${prizeCode}`);
+          // ✅ השתמש ב-prizeName מותאם אישית אם קיים, אחרת label, אחרת ברירת מחדל
+          if (prize.prizeName && prize.prizeName.trim()) {
+            prizeName = prize.prizeName.trim();
+          } else if (prize.label) {
+            prizeName = prize.label;
+          }
+          console.log(`🎫 קוד פרס: ${prizeCode}, שם: ${prizeName}`);
         }
       }
 

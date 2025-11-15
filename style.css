@@ -988,6 +988,47 @@ button:active {
     padding-bottom: 5px;
 }
 
+/* Prize Name Input Row */
+.prize-name-input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+
+.prize-name-label {
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.prize-name-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(138, 43, 226, 0.4);
+    border-radius: 6px;
+    color: white;
+    font-family: 'Assistant', sans-serif;
+    font-size: 0.9em;
+    font-weight: 500;
+    text-align: right;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.prize-name-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85em;
+}
+
+.prize-name-input:focus {
+    outline: none;
+    border-color: rgba(138, 43, 226, 0.8);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.3);
+}
+
 /* Inventory Display Row */
 .inventory-display-row {
     display: flex;
