@@ -209,6 +209,35 @@
         </div>
     </div>
 
+    <!-- Modal: Transfer Event Ownership (Admin Only) -->
+    <div id="transfer-ownership-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>העבר בעלות אירוע</h2>
+                <button class="modal-close" onclick="eventsManager.closeTransferOwnershipModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="transfer-info">
+                    <p><strong>אירוע:</strong> <span id="transfer-event-name"></span></p>
+                    <p><strong>בעלים נוכחי:</strong> <span id="transfer-current-owner"></span></p>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="transfer-new-owner">בחר בעלים חדש:</label>
+                    <select id="transfer-new-owner" class="form-select" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 1em;">
+                        <option value="">טוען משתמשים...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="eventsManager.closeTransferOwnershipModal()">ביטול</button>
+                <button class="btn-primary" onclick="eventsManager.confirmTransferOwnership()">העבר בעלות</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Dashboard Scripts -->
     <script src="auth-manager.js"></script>
     <script src="events-manager.js"></script>

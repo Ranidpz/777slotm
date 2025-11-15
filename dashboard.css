@@ -445,6 +445,20 @@ body {
     background: rgba(239, 68, 68, 0.2);
 }
 
+.btn-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    font-size: 0.9em;
+    padding: 8px 12px;
+}
+
+.btn-warning:hover {
+    background: rgba(255, 193, 7, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
 .loading,
 .no-events {
     text-align: center;
@@ -594,6 +608,48 @@ body {
 .user-item-details p {
     font-size: 0.9em;
     color: var(--text-secondary);
+}
+
+/* Transfer Ownership Modal Styles */
+.transfer-info {
+    background: rgba(102, 126, 234, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    margin-bottom: 20px;
+}
+
+.transfer-info p {
+    margin: 8px 0;
+    color: var(--text-primary);
+    font-size: 0.95em;
+}
+
+.transfer-info strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.form-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-select:hover {
+    border-color: var(--primary);
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* Responsive */

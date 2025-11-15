@@ -95,6 +95,9 @@ const eventsManager = {
                         <button class="btn-primary" onclick="eventsManager.openEvent('${event.id}')">פתח משחק</button>
                         <button class="btn-secondary" onclick="eventsManager.viewScoreboard('${event.id}')">לוח זוכים</button>
                         <button class="btn-secondary" onclick="eventsManager.editEvent('${event.id}')">ערוך</button>
+                        ${authManager.isSuperAdmin() ?
+                            `<button class="btn-warning" onclick="eventsManager.showTransferOwnershipModal('${event.id}')" title="העבר בעלות למשתמש אחר">🔄 העבר בעלות</button>` :
+                            ''}
                         ${authManager.hasPermission('canDeleteEvents') ?
                             `<button class="btn-danger" onclick="eventsManager.deleteEvent('${event.id}')">מחק</button>` :
                             ''}
@@ -394,6 +397,130 @@ const eventsManager = {
         } catch (error) {
             console.error('❌ שגיאה בטעינת סטטיסטיקות:', error);
         }
+    },
+
+    // ✅ NEW: Transfer Event Ownership (Super Admin Only)
+    transferEventId: null,
+    allUsers: [],
+
+    // הצג מודל העברת בעלות
+    async showTransferOwnershipModal(eventId) {
+        if (!authManager.isSuperAdmin()) {
+            alert('❌ אין הרשאה');
+            return;
+        }
+
+        this.transferEventId = eventId;
+        const event = this.events.find(e => e.id === eventId);
+        if (!event) {
+            alert('❌ אירוע לא נמצא');
+            return;
+        }
+
+        // עדכן פרטי אירוע
+        document.getElementById('transfer-event-name').textContent = event.name || 'ללא שם';
+        document.getElementById('transfer-current-owner').textContent = event.ownerName || 'לא ידוע';
+
+        // טען רשימת משתמשים
+        await this.loadUsersForTransfer();
+
+        // הצג מודל
+        document.getElementById('transfer-ownership-modal').classList.remove('hidden');
+    },
+
+    // טען משתמשים לרשימת העברה
+    async loadUsersForTransfer() {
+        const select = document.getElementById('transfer-new-owner');
+        select.innerHTML = '<option value="">טוען...</option>';
+
+        try {
+            const usersRef = firebase.database().ref('users');
+            const snapshot = await usersRef.once('value');
+
+            this.allUsers = [];
+            snapshot.forEach((childSnapshot) => {
+                const user = childSnapshot.val();
+                this.allUsers.push({
+                    uid: childSnapshot.key,
+                    displayName: user.displayName || user.email,
+                    email: user.email,
+                    role: user.role
+                });
+            });
+
+            // מיין לפי שם
+            this.allUsers.sort((a, b) => a.displayName.localeCompare(b.displayName, 'he'));
+
+            // בנה רשימה
+            let html = '<option value="">-- בחר משתמש --</option>';
+            this.allUsers.forEach(user => {
+                const roleText = user.role === 'super_admin' ? '👑 מנהל על' : '🎬 מפיק';
+                html += `<option value="${user.uid}">${user.displayName} (${user.email}) - ${roleText}</option>`;
+            });
+
+            select.innerHTML = html;
+        } catch (error) {
+            console.error('❌ שגיאה בטעינת משתמשים:', error);
+            select.innerHTML = '<option value="">❌ שגיאה בטעינה</option>';
+        }
+    },
+
+    // אשר העברת בעלות
+    async confirmTransferOwnership() {
+        const newOwnerId = document.getElementById('transfer-new-owner').value;
+
+        if (!newOwnerId) {
+            alert('❌ נא לבחור משתמש');
+            return;
+        }
+
+        const event = this.events.find(e => e.id === this.transferEventId);
+        if (!event) {
+            alert('❌ אירוע לא נמצא');
+            return;
+        }
+
+        const newOwner = this.allUsers.find(u => u.uid === newOwnerId);
+        if (!newOwner) {
+            alert('❌ משתמש לא נמצא');
+            return;
+        }
+
+        const confirmed = confirm(
+            `האם להעביר את הבעלות על:\n\n` +
+            `"${event.name}"\n\n` +
+            `מ: ${event.ownerName}\n` +
+            `אל: ${newOwner.displayName}?`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            // עדכן בעלות ב-Firebase
+            const eventRef = firebase.database().ref(`events/${this.transferEventId}`);
+            await eventRef.update({
+                ownerId: newOwnerId,
+                ownerName: newOwner.displayName,
+                transferredAt: firebase.database.ServerValue.TIMESTAMP,
+                transferredBy: authManager.getCurrentUserId()
+            });
+
+            console.log('✅ בעלות הועברה בהצלחה');
+            alert(`✅ האירוע "${event.name}" הועבר ל-${newOwner.displayName}`);
+
+            // סגור מודל ורענן
+            this.closeTransferOwnershipModal();
+            await this.loadEvents();
+        } catch (error) {
+            console.error('❌ שגיאה בהעברת בעלות:', error);
+            alert('❌ שגיאה בהעברת בעלות');
+        }
+    },
+
+    // סגור מודל העברת בעלות
+    closeTransferOwnershipModal() {
+        document.getElementById('transfer-ownership-modal').classList.add('hidden');
+        this.transferEventId = null;
     }
 };
 
