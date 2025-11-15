@@ -229,7 +229,9 @@ body {
 .primary-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: linear-gradient(135deg, #666 0%, #888 100%);
+    background: linear-gradient(135deg, #666 0%, #888 100%) !important;
+    box-shadow: none !important;
+    animation: none !important;
 }
 
 /* Enabled pulse animation - green with bounce */

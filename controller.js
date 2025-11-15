@@ -53,10 +53,8 @@ class MobileController {
     const storedName = localStorage.getItem(`player_${this.sessionId}`);
     if (storedName) {
       document.getElementById('player-name-input').value = storedName;
-    } else {
-      // Generate random name
-      this.generateRandomName();
     }
+    // ✅ לא ממלאים שם אוטומטי - משאירים ריק עם placeholder
 
     // Setup event listeners
     this.setupEventListeners();
@@ -85,8 +83,18 @@ class MobileController {
     const name = nameInput.value.trim();
 
     if (name.length >= 2) {
+      const wasDisabled = connectBtn.disabled;
       connectBtn.disabled = false;
-      connectBtn.classList.add('enabled-pulse');
+
+      // ✅ הוסף אנימציה רק אם הכפתור היה מושבת קודם (מעבר ממושבת לפעיל)
+      if (wasDisabled) {
+        connectBtn.classList.remove('enabled-pulse');
+        // Force reflow כדי לאתחל את האנימציה
+        void connectBtn.offsetWidth;
+        connectBtn.classList.add('enabled-pulse');
+      } else if (!connectBtn.classList.contains('enabled-pulse')) {
+        connectBtn.classList.add('enabled-pulse');
+      }
     } else {
       connectBtn.disabled = true;
       connectBtn.classList.remove('enabled-pulse');
@@ -796,8 +804,9 @@ class MobileController {
     if (screenId === 'connection-screen') {
       const connectBtn = document.getElementById('connect-btn');
       if (connectBtn) {
-        connectBtn.disabled = false;
         connectBtn.innerHTML = '<span>התחברו למשחק</span>';
+        // ✅ וודא שהכפתור במצב הנכון לפי התוכן של שדה השם
+        this.validateNameInput();
       }
     }
   }
