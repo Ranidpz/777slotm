@@ -24,6 +24,8 @@ const gameState = {
     winningSymbol: null, // הסמל הזוכה הנוכחי
     lastWinningSymbol: null, // הפרס האחרון שזכה - למניעת חזרות
     qrPopupVisible: false, // האם QR popup מוצג כרגע
+    isWinScreenLocked: false, // נעילת מסך זכייה - מונע סיבובים נוספים
+    winScreenUnlockTime: 0, // זמן שבו ניתן לסגור את מסך הזכייה
     qrCustomText: 'אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸', // טקסט מותאם למסך QR
     scrollingBannerText: '🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰', // טקסט נגלל במסך הראשי
     scrollingBannerFontSize: 32 // גודל גופן לטקסט נגלל (בפיקסלים)
@@ -656,6 +658,11 @@ function checkWin() {
             console.log(`📡 נשלח לשלט מרחוק: זכייה בפרס ${prizeDetails.prizeName}`, prizeDetails);
         }
 
+        // 🔒 נעל את המסך למשך 3 שניות לפחות
+        gameState.isWinScreenLocked = true;
+        gameState.winScreenUnlockTime = Date.now() + 3000; // 3 שניות מינימום
+        console.log('🔒 מסך זכייה נעול למשך 3 שניות');
+
         playSound('win');
         winOverlay.classList.remove('hidden');
         winOverlay.classList.add('flashing');
@@ -792,12 +799,38 @@ function closeQRPopup() {
     if (qrPopup) {
         qrPopup.classList.add('hidden');
         gameState.qrPopupVisible = false;
-        console.log('🔒 QR popup נסגר - מוכן למשחק הבא');
+
+        // 🔓 שחרר את נעילת מסך הזכייה רק אם עברו 3 שניות
+        const timeLeft = Math.max(0, gameState.winScreenUnlockTime - Date.now());
+        if (timeLeft > 0) {
+            console.log(`⏰ נא להמתין עוד ${Math.ceil(timeLeft / 1000)} שניות לפני סיבוב הבא`);
+            setTimeout(() => {
+                gameState.isWinScreenLocked = false;
+                console.log('🔓 מסך זכייה משוחרר - מוכן למשחק הבא');
+            }, timeLeft);
+        } else {
+            gameState.isWinScreenLocked = false;
+            console.log('🔓 מסך זכייה משוחרר - מוכן למשחק הבא');
+        }
     }
 }
 
 // פונקציה להפעלת המכונה
 function triggerSpin(fromRemotePlayer = false) {
+    // 🔒 אם מסך הזכייה נעול - מנע סיבוב נוסף
+    if (gameState.isWinScreenLocked) {
+        const timeLeft = Math.max(0, gameState.winScreenUnlockTime - Date.now());
+        if (timeLeft > 0) {
+            console.log(`🔒 מסך זכייה נעול! נא להמתין ${Math.ceil(timeLeft / 1000)} שניות`);
+            return;
+        }
+        // אם הזמן עבר אבל מסך הזכייה עדיין מוצג - סגור אותו
+        if (gameState.qrPopupVisible) {
+            closeQRPopup();
+            return;
+        }
+    }
+
     // אם QR popup מוצג וזה לא שחקן מרחוק, סגור אותו במקום להתחיל סיבוב חדש
     if (gameState.qrPopupVisible && !fromRemotePlayer) {
         closeQRPopup();
