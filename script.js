@@ -813,6 +813,12 @@ function closeQRPopup() {
 
 // פונקציה להפעלת המכונה
 function triggerSpin(fromRemotePlayer = false) {
+    // 🔒 מנע לחיצות כפולות - אם כבר מסתובב, התעלם
+    if (gameState.isSpinning) {
+        console.log('🔒 הגלגלים כבר מסתובבים - מתעלם מלחיצה');
+        return;
+    }
+
     // 🔒 אם מסך הזכייה נעול - מנע סיבוב נוסף
     if (gameState.isWinScreenLocked) {
         const timeLeft = Math.max(0, gameState.winScreenUnlockTime - Date.now());
@@ -861,7 +867,7 @@ function triggerSpin(fromRemotePlayer = false) {
             gameState.isSpinning = true;
             gameState.manualStops = [false, false, false];
             gameState.currentReel = 0;
-            // ⚠️ spinsCount++ כבר נקרא ב-triggerSpin() - לא צריך כאן!
+            gameState.spinsCount++;  // הגדל ספירת סיבובים גם במצב ידני
 
             playSound('spin');
 
