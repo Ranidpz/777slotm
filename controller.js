@@ -527,16 +527,24 @@ class MobileController {
         console.log('🏆 הצגת פרטי פרס:', player.prizeDetails);
       }
 
-      // ✅ הצג תמונת פרס אם קיימת
+      // ✅ הצג תמונת פרס רק אם זו תמונה תקינה (לא אימוג'י)
       const prizeImageContainer = document.getElementById('prize-image-container');
       const prizeImage = document.getElementById('prize-image');
-      if (prizeImageContainer && prizeImage && player.prizeDetails.symbolDisplay) {
-        prizeImage.src = player.prizeDetails.symbolDisplay;
+      const symbolDisplay = player.prizeDetails.symbolDisplay;
+
+      // בדוק אם זו תמונה תקינה (מתחילה ב-http או data:image)
+      const isValidImage = symbolDisplay &&
+                          (symbolDisplay.startsWith('http') ||
+                           symbolDisplay.startsWith('data:image') ||
+                           symbolDisplay.startsWith('blob:'));
+
+      if (prizeImageContainer && prizeImage && isValidImage) {
+        prizeImage.src = symbolDisplay;
         prizeImageContainer.style.display = 'block';
-        console.log('🖼️ תמונת פרס הוצגה');
+        console.log('🖼️ תמונת פרס הוצגה:', symbolDisplay);
       } else if (prizeImageContainer) {
         prizeImageContainer.style.display = 'none';
-        console.log('⚠️ אין תמונת פרס להצגה');
+        console.log('⚠️ אין תמונת פרס להצגה (אימוג\'י או ללא תמונה)');
       }
     } else {
       console.log('⚠️ No prize details available');

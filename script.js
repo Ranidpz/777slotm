@@ -797,13 +797,20 @@ function showQRCodeIfNeeded() {
             console.log(`🏆 מציג שם פרס: ${prizeDetails.prizeName}`);
         }
 
-        // הצג תמונת פרס אם קיימת
-        if (mainPrizeImage && mainPrizeImageContainer && prizeDetails.symbolDisplay) {
-            mainPrizeImage.src = prizeDetails.symbolDisplay;
+        // הצג תמונת פרס רק אם זו תמונה תקינה (לא אימוג'י)
+        const symbolDisplay = prizeDetails.symbolDisplay;
+        const isValidImage = symbolDisplay &&
+                            (symbolDisplay.startsWith('http') ||
+                             symbolDisplay.startsWith('data:image') ||
+                             symbolDisplay.startsWith('blob:'));
+
+        if (mainPrizeImage && mainPrizeImageContainer && isValidImage) {
+            mainPrizeImage.src = symbolDisplay;
             mainPrizeImageContainer.style.display = 'block';
-            console.log('🖼️ תמונת פרס הוצגה במסך ראשי');
+            console.log('🖼️ תמונת פרס הוצגה במסך ראשי:', symbolDisplay);
         } else if (mainPrizeImageContainer) {
             mainPrizeImageContainer.style.display = 'none';
+            console.log('⚠️ לא מציג תמונה (אימוג\'י או ללא תמונה)');
         }
     }
 
