@@ -661,6 +661,9 @@ function checkWin() {
             prizeDetails.prizeName = displayedSymbols[0] || 'פרס';
         }
 
+        // ✅ שמור פרטי פרס ב-gameState להצגה במסך זכייה
+        gameState.lastWinPrizeDetails = prizeDetails;
+
         // שלח הודעה לשלט מרחוק עם פרטי הפרס
         if (window.sessionManager) {
             sessionManager.storeSpinResult(true, prizeDetails);
@@ -703,6 +706,32 @@ function checkWin() {
 
 // הצג QR code אם הוגדר מספר WhatsApp
 function showQRCodeIfNeeded() {
+    // ✅ הצג פרטי פרס (שם + תמונה)
+    const mainPrizeDisplay = document.getElementById('main-prize-display');
+    const mainPrizeName = document.getElementById('main-prize-name');
+    const mainPrizeImageContainer = document.getElementById('main-prize-image-container');
+    const mainPrizeImage = document.getElementById('main-prize-image');
+
+    if (gameState.lastWinPrizeDetails) {
+        const prizeDetails = gameState.lastWinPrizeDetails;
+
+        // הצג שם הפרס
+        if (mainPrizeName && prizeDetails.prizeName) {
+            mainPrizeName.textContent = `🎁 ${prizeDetails.prizeName}`;
+            mainPrizeDisplay.style.display = 'block';
+            console.log(`🏆 מציג שם פרס: ${prizeDetails.prizeName}`);
+        }
+
+        // הצג תמונת פרס אם קיימת
+        if (mainPrizeImage && mainPrizeImageContainer && prizeDetails.symbolDisplay) {
+            mainPrizeImage.src = prizeDetails.symbolDisplay;
+            mainPrizeImageContainer.style.display = 'block';
+            console.log('🖼️ תמונת פרס הוצגה במסך ראשי');
+        } else if (mainPrizeImageContainer) {
+            mainPrizeImageContainer.style.display = 'none';
+        }
+    }
+
     // הצג את שם השחקן בירוק למעלה (אם יש שחקן מרחוק פעיל)
     const winnerNameDisplay = document.getElementById('winner-name-display');
     if (winnerNameDisplay && window.sessionManager) {
