@@ -90,23 +90,30 @@ const dynamicImagesManager = {
     // הצג את כל התמונות ב-DOM
     render() {
         const container = document.getElementById('dynamic-images-container');
-        if (!container) return;
+        if (!container) {
+            console.warn('⚠️ קונטיינר dynamic-images-container לא נמצא!');
+            return;
+        }
 
         container.innerHTML = '';
+
+        console.log(`🎨 מתחיל רונדר עם ${this.images.length} תמונות`);
 
         // הצג את כל התמונות הקיימות
         this.images.forEach((image, index) => {
             const itemDiv = this.createImageItem(image, index);
             container.appendChild(itemDiv);
+            console.log(`➕ הוספתי תמונה ${index + 1}`);
         });
 
         // הוסף תיבת "הוסף פרס" בסוף
         if (this.images.length < this.maxImages) {
             const addPrizeBox = this.createAddPrizeBox();
             container.appendChild(addPrizeBox);
+            console.log(`➕ הוספתי תיבת הוספה`);
         }
 
-        console.log(`🎨 רונדר ${this.images.length} תמונות`);
+        console.log(`✅ רונדר הושלם - ${this.images.length} תמונות בתוספת תיבת הוספה`);
     },
 
     // צור תיבת "הוסף פרס" עם פלוס

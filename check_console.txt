@@ -1,0 +1,8 @@
+פתח את הקונסול (F12) וחפש את ההודעות הבאות:
+1. "🔍 updateScrollingBanner נקרא"
+2. "🔍 מנסה לטעון זוכים מ-Firebase, sessionId:"
+3. "📊 נתוני זוכים מ-Firebase:"
+4. "🏆 טקסט זוכים:"
+5. "📋 טקסט סופי משולב:"
+
+אלה יעזרו לנו לזהות איפה הבעיה.

@@ -2837,3 +2837,32 @@ input:checked + .toggle-slider:before {
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
 }
 
+/* ✅ Settings Footer Buttons */
+.save-btn-main:hover {
+    background: linear-gradient(135deg, #5bc05e 0%, #4caf50 100%) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(76, 175, 80, 0.6) !important;
+}
+
+.save-btn-main:active {
+    transform: translateY(0) !important;
+}
+
+.icon-btn:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5) !important;
+}
+
+.icon-btn:active {
+    transform: scale(0.95) !important;
+}
+
+.scoreboard-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5) !important;
+}
+
+.scoreboard-btn:active {
+    transform: translateY(0) !important;
+}
+

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Prizes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        #dynamic-images-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 בדיקת מערכת פרסים</h1>
+        <button onclick="testInit()">אתחל מערכת</button>
+        <button onclick="testRender()">רנדר תמונות</button>
+        <button onclick="checkImages()">בדוק תמונות</button>
+        
+        <h2>קונטיינר תמונות:</h2>
+        <div id="dynamic-images-container"></div>
+        
+        <h2>לוג:</h2>
+        <pre id="log" style="background: black; padding: 10px; border-radius: 5px;"></pre>
+    </div>
+
+    <script src="dynamic-images.js"></script>
+    <script>
+        function log(msg) {
+            const logEl = document.getElementById('log');
+            logEl.textContent += msg + '\n';
+            console.log(msg);
+        }
+
+        function testInit() {
+            log('🧪 Testing init...');
+            if (window.dynamicImagesManager) {
+                dynamicImagesManager.init();
+                log('✅ Init completed');
+            } else {
+                log('❌ dynamicImagesManager not found!');
+            }
+        }
+
+        function testRender() {
+            log('🧪 Testing render...');
+            if (window.dynamicImagesManager) {
+                dynamicImagesManager.render();
+                log('✅ Render completed');
+            }
+        }
+
+        function checkImages() {
+            log('🧪 Checking images...');
+            if (window.dynamicImagesManager) {
+                log(`📊 Images count: ${dynamicImagesManager.images.length}`);
+                log(`📊 Images data: ${JSON.stringify(dynamicImagesManager.images, null, 2)}`);
+            }
+        }
+
+        // Auto test on load
+        window.addEventListener('load', () => {
+            log('🔄 Page loaded');
+            testInit();
+            setTimeout(() => {
+                checkImages();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
