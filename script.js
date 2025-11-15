@@ -1123,6 +1123,14 @@ function openSettings() {
         whatsappNumber: gameState.whatsappNumber
     };
     settingsScreen.classList.remove('hidden');
+
+    // ✅ רנדר מערכת פרסים כשמסך ההגדרות נפתח
+    if (window.dynamicImagesManager) {
+        setTimeout(() => {
+            dynamicImagesManager.render();
+            console.log('🎨 רינדור מערכת פרסים במסך הגדרות');
+        }, 100); // המתן קצר שהמסך יופיע
+    }
 }
 
 // כפתור הגדרות חדש
@@ -1219,36 +1227,6 @@ for (let i = 0; i < 9; i++) {
         handleImageUpload(fileInput, i);
     }
 }
-
-// איפוס תמונות
-document.getElementById('reset-images').addEventListener('click', () => {
-    gameState.customSymbols = [null, null, null, null, null, null, null, null, null];
-
-    // מחק מ-localStorage
-    clearImagesFromStorage();
-
-    // איפוס גם את המדריך
-    localStorage.removeItem('tutorialSeen');
-
-    // נקה את כל השדות והתצוגות המקדימות
-    for (let i = 1; i <= 9; i++) {
-        const fileInput = document.getElementById(`image${i}`);
-        const preview = document.getElementById(`preview${i}`);
-
-        if (fileInput) fileInput.value = '';
-        if (preview) {
-            preview.style.backgroundImage = '';
-            preview.classList.remove('has-image');
-
-            // החזר את האייקון והטקסט
-            if (!preview.querySelector('.preview-icon')) {
-                preview.innerHTML = '<span class="preview-icon">📷</span><span class="preview-text">הוסף תמונה</span>';
-            }
-        }
-    }
-
-    initReels();
-});
 
 // טען תמונות מ-localStorage
 function loadImagesFromStorage() {
