@@ -9,6 +9,11 @@ const authManager = {
     init() {
         console.log('🔐 מאתחל מערכת משתמשים');
 
+        // ✅ אתחל Firebase לפני שמשתמשים בו
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
+
         // האזן לשינויי מצב התחברות
         firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
