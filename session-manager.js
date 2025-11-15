@@ -91,7 +91,6 @@ class SessionManager {
           if (settings.randomBonusPercent !== undefined) gameState.randomBonusPercent = settings.randomBonusPercent;
           if (settings.soundEnabled !== undefined) gameState.soundEnabled = settings.soundEnabled;
           if (settings.gameMode !== undefined) gameState.mode = settings.gameMode;
-          if (settings.guaranteedWinMode !== undefined) gameState.guaranteedWinMode = settings.guaranteedWinMode;
           if (settings.backgroundColor) gameState.backgroundColor = settings.backgroundColor;
           if (settings.whatsappNumber) gameState.whatsappNumber = settings.whatsappNumber;
           if (settings.qrCustomText) gameState.qrCustomText = settings.qrCustomText;

@@ -18,7 +18,6 @@ const gameState = {
         win: null,
         lose: null
     },
-    guaranteedWinMode: false, // מצב זכייה מובטחת
     inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
     initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
     winningSymbol: null, // הסמל הזוכה הנוכחי
@@ -330,30 +329,15 @@ function hasAvailableInventory() {
 
 // קבע אם זה צריך להיות סיבוב זוכה - אלגוריתם משופר
 function determineWin() {
-    // אם מצב זכייה מובטחת פעיל - תמיד זוכה!
-    if (gameState.guaranteedWinMode) {
-        console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב זכייה מובטחת)`);
-
-        // בדוק אם יש פרסים זמינים (אימוג'ים או תמונות עם מלאי)
-        if (hasAvailableInventory()) {
-            const mode = isUsingCustomImages() ? 'תמונות מותאמות' : 'אימוג\'ים';
-            console.log(`✅ זכייה מובטחת! (${mode})`);
-            return true;
-        } else {
-            console.log('🚫 כל הפרסים אזלו מהמלאי - הזכייה בוטלה!');
-            return false;
-        }
-    }
-
+    // מצב רנדומלי לגמרי (תדירות = 0)
     if (gameState.winFrequency === 0) {
-        // רנדומלי לגמרי
         const randomWin = Math.random() < 0.2; // 20% סיכוי לזכייה
         console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב רנדומלי)`);
         console.log(`${randomWin ? '✅ זכייה רנדומלית!' : '⏳ סיבוב רגיל'}`);
         return randomWin;
     }
 
-    // זכייה מובטחת כל X סיבובים
+    // ⭐ זכייה מובטחת כל X סיבובים
     const guaranteedWin = (gameState.spinsCount % gameState.winFrequency) === 0;
 
     // בונוס רנדומלי - רק אם הוגדר (0 = ללא בונוס)
@@ -364,6 +348,17 @@ function determineWin() {
 
     console.log(`🎰 סיבוב מספר: ${gameState.spinsCount}`);
     console.log(`📊 תדירות זכייה: כל ${gameState.winFrequency} סיבובים`);
+
+    // ⭐ תדירות = 1 = זכייה בכל סיבוב (עם בדיקת מלאי)
+    if (gameState.winFrequency === 1) {
+        console.log('🎯 מצב זכייה מובטחת (תדירות=1)');
+        // בדוק אם יש פרסים זמינים
+        if (!hasAvailableInventory()) {
+            console.log('🚫 כל הפרסים אזלו מהמלאי - הזכייה בוטלה!');
+            return false;
+        }
+    }
+
     if (gameState.randomBonusPercent > 0) {
         console.log(`🎲 בונוס רנדומלי: ${gameState.randomBonusPercent}% סיכוי`);
     }
@@ -391,7 +386,8 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
         // במצב זכייה - כל הגלילים צריכים לעצור על אותו סמל
         if (reelIndex === 0) {
             // הגליל הראשון בוחר סמל - בהתאם למצב
-            if (gameState.guaranteedWinMode) {
+            // ⭐ תדירות = 1 = מצב זכייה מובטחת (עם בדיקת מלאי)
+            if (gameState.winFrequency === 1) {
                 // במצב זכייה מובטחת - בחר סמל לפי סוג המשחק
 
                 if (isUsingCustomImages()) {
@@ -1040,7 +1036,6 @@ document.getElementById('save-settings').addEventListener('click', () => {
     localStorage.setItem('randomBonusPercent', gameState.randomBonusPercent);
     localStorage.setItem('soundEnabled', gameState.soundEnabled);
     localStorage.setItem('gameMode', gameState.mode);
-    localStorage.setItem('guaranteedWinMode', gameState.guaranteedWinMode);
 
     if (gameState.backgroundColor) {
         localStorage.setItem('backgroundColor', gameState.backgroundColor);
@@ -1071,7 +1066,6 @@ document.getElementById('save-settings').addEventListener('click', () => {
             randomBonusPercent: gameState.randomBonusPercent,
             soundEnabled: gameState.soundEnabled,
             gameMode: gameState.mode,
-            guaranteedWinMode: gameState.guaranteedWinMode,
             backgroundColor: gameState.backgroundColor || '#000000',
             whatsappNumber: gameState.whatsappNumber || '',
             qrCustomText: gameState.qrCustomText || '',
@@ -1111,7 +1105,6 @@ function openSettings() {
         soundEnabled: gameState.soundEnabled,
         mode: gameState.mode,
         backgroundColor: gameState.backgroundColor,
-        guaranteedWinMode: gameState.guaranteedWinMode,
         inventory: [...gameState.inventory],
         initialInventory: [...gameState.initialInventory],
         whatsappNumber: gameState.whatsappNumber
@@ -1727,14 +1720,6 @@ function loadSettings() {
         });
     }
 
-    // טען מצב זכייה מובטחת
-    const savedGuaranteedWin = localStorage.getItem('guaranteedWinMode');
-    if (savedGuaranteedWin !== null) {
-        gameState.guaranteedWinMode = savedGuaranteedWin === 'true';
-        const checkbox = document.getElementById('guaranteed-win-mode');
-        if (checkbox) checkbox.checked = gameState.guaranteedWinMode;
-    }
-
     // טען מספר WhatsApp
     const savedWhatsApp = localStorage.getItem('whatsappNumber');
     if (savedWhatsApp) {
@@ -2054,15 +2039,6 @@ setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
 setupBannerFontSizeControl(); // הגדר גודל גופן לטקסט נגלל
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 updateScrollingBanner(); // הצג את הטקסט הנגלל בהתחלה
-
-// הגדר מאזין למצב זכייה מובטחת
-const guaranteedWinCheckbox = document.getElementById('guaranteed-win-mode');
-if (guaranteedWinCheckbox) {
-    guaranteedWinCheckbox.addEventListener('change', (e) => {
-        gameState.guaranteedWinMode = e.target.checked;
-        console.log('🎯 מצב זכייה מובטחת:', gameState.guaranteedWinMode ? 'מופעל' : 'כבוי');
-    });
-}
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
