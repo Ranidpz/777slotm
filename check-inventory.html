@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>בדיקת מלאי</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .prize {
+            background: #2a2a4e;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .danger {
+            background: #f44336;
+        }
+        .danger:hover {
+            background: #da190b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 בדיקת מלאי פרסים</h1>
+    <div id="inventory-info"></div>
+
+    <h2>פעולות:</h2>
+    <button onclick="showInventory()">📊 הצג מלאי</button>
+    <button onclick="resetInventory()" class="danger">🔄 אפס מלאי (השב לראשוני)</button>
+    <button onclick="clearAll()" class="danger">🗑️ נקה הכל</button>
+
+    <script>
+        function showInventory() {
+            const saved = localStorage.getItem('dynamicImages');
+            const inventoryInfo = document.getElementById('inventory-info');
+
+            if (!saved) {
+                inventoryInfo.innerHTML = '<p>❌ אין נתונים ב-localStorage</p>';
+                return;
+            }
+
+            const images = JSON.parse(saved);
+            let html = '<h3>מלאי נוכחי:</h3>';
+
+            images.forEach((img, index) => {
+                const inventoryDisplay = img.inventory === null ? 'אינסוף ♾️' : img.inventory;
+                const initialDisplay = img.initialInventory === null ? 'אינסוף ♾️' : img.initialInventory;
+                const distributed = img.distributedCount || 0;
+
+                html += `
+                    <div class="prize">
+                        <h4>${img.prizeName || img.label}</h4>
+                        <p><strong>קוד:</strong> ${img.code}</p>
+                        <p><strong>מלאי נוכחי:</strong> ${inventoryDisplay}</p>
+                        <p><strong>מלאי ראשוני:</strong> ${initialDisplay}</p>
+                        <p><strong>סה"כ חולק:</strong> ${distributed}</p>
+                        <p><strong>symbolIndex:</strong> ${img.symbolIndex}</p>
+                    </div>
+                `;
+            });
+
+            inventoryInfo.innerHTML = html;
+        }
+
+        function resetInventory() {
+            if (!confirm('האם אתה בטוח? זה ישחזר את המלאי למצב הראשוני')) {
+                return;
+            }
+
+            const saved = localStorage.getItem('dynamicImages');
+            if (!saved) {
+                alert('אין נתונים');
+                return;
+            }
+
+            const images = JSON.parse(saved);
+            images.forEach(img => {
+                // השב מלאי למצב ראשוני
+                img.inventory = img.initialInventory;
+                // אפס מונה חלוקה
+                img.distributedCount = 0;
+            });
+
+            localStorage.setItem('dynamicImages', JSON.stringify(images));
+            alert('✅ המלאי שוחזר למצב הראשוני!');
+            showInventory();
+        }
+
+        function clearAll() {
+            if (!confirm('האם אתה בטוח? זה ימחק את כל הנתונים!')) {
+                return;
+            }
+
+            // נקה את כל הנתונים הישנים והחדשים
+            localStorage.removeItem('dynamicImages');
+            localStorage.removeItem('inventory');
+            localStorage.removeItem('initialInventory');
+            localStorage.removeItem('prizeInventory'); // ישן - למחיקה
+            localStorage.removeItem('initialPrizeInventory'); // ישן - למחיקה
+            alert('✅ כל הנתונים נמחקו!');
+            document.getElementById('inventory-info').innerHTML = '<p>✅ נתונים נמחקו. רענן את הדף הראשי.</p>';
+        }
+
+        // הצג מלאי אוטומטית בטעינה
+        showInventory();
+    </script>
+</body>
+</html>

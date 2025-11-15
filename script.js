@@ -18,8 +18,7 @@ const gameState = {
         win: null,
         lose: null
     },
-    inventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // מלאי לכל אחד מ-9 הסמלים
-    initialInventory: [0, 0, 0, 0, 0, 0, 0, 0, 0], // הכמות המקורית של כל פרס
+    // ✅ הוסר: inventory ו-initialInventory - עכשיו רק dynamicImagesManager מנהל מלאי
     winningSymbol: null, // הסמל הזוכה הנוכחי
     lastWinningSymbol: null, // הפרס האחרון שזכה - למניעת חזרות
     qrPopupVisible: false, // האם QR popup מוצג כרגע
@@ -1131,8 +1130,7 @@ let tempSettings = {
     mode: gameState.mode,
     backgroundColor: gameState.backgroundColor,
     guaranteedWinMode: gameState.guaranteedWinMode,
-    inventory: [...gameState.inventory],
-    initialInventory: [...gameState.initialInventory],
+    // ✅ הוסר: inventory ו-initialInventory - מנוהל ב-dynamicImagesManager
     whatsappNumber: gameState.whatsappNumber
 };
 
@@ -1167,8 +1165,7 @@ document.getElementById('save-settings').addEventListener('click', () => {
     // שמור גם את הצלילים המותאמים
     saveCustomSounds();
 
-    // שמור מלאי
-    saveInventory();
+    // ✅ הוסר: saveInventory() - המלאי נשמר אוטומטית ב-dynamicImagesManager
 
     // ✅ שמור פרסים גם ב-Firebase (גיבוי!)
     if (window.dynamicImagesManager && window.sessionManager && sessionManager.sessionId) {
@@ -1222,8 +1219,7 @@ function openSettings() {
         soundEnabled: gameState.soundEnabled,
         mode: gameState.mode,
         backgroundColor: gameState.backgroundColor,
-        inventory: [...gameState.inventory],
-        initialInventory: [...gameState.initialInventory],
+        // ✅ הוסר: inventory ו-initialInventory - מנוהל ב-dynamicImagesManager
         whatsappNumber: gameState.whatsappNumber
     };
     settingsScreen.classList.remove('hidden');
@@ -1658,125 +1654,9 @@ function resetSound(soundType) {
 
 // פונקציות לניהול מלאי
 
-// שמור מלאי ב-localStorage
-function saveInventory() {
-    try {
-        localStorage.setItem('prizeInventory', JSON.stringify(gameState.inventory));
-        localStorage.setItem('initialPrizeInventory', JSON.stringify(gameState.initialInventory));
-        console.log('💾 מלאי נשמר:', gameState.inventory);
-    } catch (e) {
-        console.error('❌ שגיאה בשמירת מלאי:', e);
-    }
-}
-
-// טען מלאי מ-localStorage
-function loadInventory() {
-    try {
-        const savedInventory = localStorage.getItem('prizeInventory');
-        const savedInitialInventory = localStorage.getItem('initialPrizeInventory');
-
-        if (savedInventory) {
-            gameState.inventory = JSON.parse(savedInventory);
-            console.log('✅ מלאי נטען:', gameState.inventory);
-        }
-
-        if (savedInitialInventory) {
-            gameState.initialInventory = JSON.parse(savedInitialInventory);
-            console.log('✅ מלאי ראשוני נטען:', gameState.initialInventory);
-        }
-
-        updateInventoryDisplay();
-        updateAllCounters();
-    } catch (e) {
-        console.error('❌ שגיאה בטעינת מלאי:', e);
-    }
-}
-
-// עדכן תצוגת המלאי בממשק
-function updateInventoryDisplay() {
-    for (let i = 0; i < 9; i++) {
-        const input = document.getElementById(`inventory${i + 1}`);
-        if (input) {
-            input.value = gameState.inventory[i] || 0;
-        }
-    }
-}
-
-// עדכן קאונטר בודד
-function updateCounter(index) {
-    const counter = document.getElementById(`counter${index + 1}`);
-    if (counter) {
-        const distributed = gameState.initialInventory[index] - gameState.inventory[index];
-        const total = gameState.initialInventory[index];
-
-        const distributedSpan = counter.querySelector('.distributed');
-        const totalSpan = counter.querySelector('.total');
-
-        if (distributedSpan) distributedSpan.textContent = distributed;
-        if (totalSpan) totalSpan.textContent = total;
-    }
-}
-
-// עדכן את כל הקאונטרים
-function updateAllCounters() {
-    for (let i = 0; i < 9; i++) {
-        updateCounter(i);
-    }
-}
-
-// הגדר מאזינים לשדות המלאי
-function setupInventoryInputs() {
-    for (let i = 0; i < 9; i++) {
-        const input = document.getElementById(`inventory${i + 1}`);
-        if (input) {
-            input.addEventListener('input', (e) => {
-                const value = parseInt(e.target.value) || 0;
-                gameState.inventory[i] = Math.max(0, value); // מינימום 0
-
-                // עדכן גם את המלאי הראשוני אם זה גדול יותר
-                if (value > gameState.initialInventory[i]) {
-                    gameState.initialInventory[i] = value;
-                }
-
-                // עדכן את הקאונטר
-                updateCounter(i);
-
-                console.log(`📦 מלאי סמל ${i} עודכן ל-${gameState.inventory[i]}`);
-            });
-        }
-    }
-
-    // הגדר כפתורי איפוס אישיים
-    const resetButtons = document.querySelectorAll('.reset-inventory-btn');
-    resetButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const index = parseInt(btn.dataset.index);
-            resetIndividualInventory(index);
-        });
-    });
-}
-
-// איפוס מלאי של פריט בודד
-function resetIndividualInventory(index) {
-    // אפס את המלאי
-    gameState.inventory[index] = 0;
-    gameState.initialInventory[index] = 0;
-
-    // עדכן את השדה
-    const input = document.getElementById(`inventory${index + 1}`);
-    if (input) {
-        input.value = 0;
-    }
-
-    // עדכן את הקאונטר
-    updateCounter(index);
-
-    // שמור
-    saveInventory();
-
-    console.log(`🔄 מלאי סמל ${index + 1} אופס`);
-}
+// ✅ הוסרו: saveInventory(), loadInventory(), updateInventoryDisplay(), updateCounter(),
+// updateAllCounters(), setupInventoryInputs(), resetIndividualInventory()
+// כל ניהול המלאי עבר ל-dynamicImagesManager - מקור אמת יחיד!
 
 // טען הגדרות מ-localStorage
 function loadSettings() {
@@ -2136,13 +2016,13 @@ if (window.dynamicImagesManager) {
 }
 
 loadImagesFromStorage(); // טען תמונות שמורות (מערכת ישנה - לתאימות)
-loadInventory(); // טען מלאי שמור
+// ✅ הוסר: loadInventory() - המלאי נטען אוטומטית ב-dynamicImagesManager
 initColorPicker(); // אתחל color picker
 initReels();
 loadBackgroundColor(); // טען צבע רקע שמור - אחרי initReels כדי שהצבע יוחל על הסמלים
 manageTutorial(); // נהל את המדריך
 setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
-setupInventoryInputs(); // הגדר שדות מלאי
+// ✅ הוסר: setupInventoryInputs() - ממשק המלאי נמצא ב-dynamicImagesManager
 setupWhatsAppInput(); // הגדר שדה WhatsApp
 setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
 setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
