@@ -74,9 +74,13 @@ const eventsManager = {
             const date = event.eventDate ? new Date(event.eventDate).toLocaleDateString('he-IL') : 'לא צוין';
             const statusText = event.status === 'active' ? 'פעיל' : 'סגור';
 
-            // ✅ הצג שם בעל האירוע (רק למנהל על)
-            const ownerBadge = authManager.isSuperAdmin() && event.ownerName ?
-                `<div class="event-owner-badge">👤 ${event.ownerName}</div>` : '';
+            // ✅ הצג שם בעל האירוע - כולם רואים, רק מנהל על יכול להחליף
+            const ownerBadge = event.ownerName ?
+                `<div class="event-owner-badge ${authManager.isSuperAdmin() ? 'clickable' : ''}"
+                      ${authManager.isSuperAdmin() ? `onclick="eventsManager.showTransferOwnershipModal('${event.id}')" title="לחץ להחלפת בעלים"` : ''}>
+                    👤 ${event.ownerName}
+                    ${authManager.isSuperAdmin() ? '<span class="change-icon">🔄</span>' : ''}
+                </div>` : '';
 
             return `
                 <div class="event-card" data-event-id="${event.id}">
@@ -132,6 +136,21 @@ const eventsManager = {
             this.filteredEvents = [...this.events];
         } else {
             this.filteredEvents = this.events.filter(event => event.status === status);
+        }
+
+        this.displayEvents();
+    },
+
+    // סנן לפי בעלות (למנהל על בלבד)
+    filterByOwner(ownerFilter) {
+        if (!authManager.isSuperAdmin()) return;
+
+        const currentUserId = authManager.getCurrentUserId();
+
+        if (ownerFilter === 'all') {
+            this.filteredEvents = [...this.events];
+        } else if (ownerFilter === 'mine') {
+            this.filteredEvents = this.events.filter(event => event.ownerId === currentUserId);
         }
 
         this.displayEvents();

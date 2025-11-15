@@ -136,7 +136,13 @@
                         oninput="eventsManager.filterEvents(this.value)"
                     >
 
-                    <!-- Filter -->
+                    <!-- Owner Filter (Admin Only) -->
+                    <select id="filter-owner" class="filter-select admin-only hidden" onchange="eventsManager.filterByOwner(this.value)">
+                        <option value="all">כל האירועים</option>
+                        <option value="mine">האירועים שלי</option>
+                    </select>
+
+                    <!-- Status Filter -->
                     <select id="filter-status" class="filter-select" onchange="eventsManager.filterByStatus(this.value)">
                         <option value="all">כל האירועים</option>
                         <option value="active">פעילים</option>

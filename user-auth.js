@@ -176,8 +176,14 @@ const userAuthManager = {
             if (isNewUser) {
                 await this.handleNewUserFirstEvent(user);
             } else {
-                // משתמש קיים - הרץ callback אם יש
-                if (afterLoginCallback && typeof afterLoginCallback === 'function') {
+                // משתמש קיים - בדוק אם יש sessionId נוכחי
+                const currentSessionId = this.getCurrentSessionId();
+
+                if (currentSessionId) {
+                    // יש סשן פעיל - צור אירוע חדש מהסשן ועבור לדשבורד
+                    await this.createEventFromCurrentSession(user, currentSessionId);
+                } else if (afterLoginCallback && typeof afterLoginCallback === 'function') {
+                    // אין סשן - הרץ callback רגיל
                     afterLoginCallback();
                 }
             }
@@ -314,6 +320,76 @@ const userAuthManager = {
     // קבל UID של המשתמש
     getUserId() {
         return this.currentUser?.uid || null;
+    },
+
+    // קבל את ה-sessionId הנוכחי מה-sessionStorage
+    getCurrentSessionId() {
+        return sessionStorage.getItem('slotMachineSessionId') || null;
+    },
+
+    // צור אירוע חדש מהסשן הנוכחי ועבור לדשבורד
+    async createEventFromCurrentSession(user, currentSessionId) {
+        console.log('🎉 יוצר אירוע חדש מהסשן הנוכחי...');
+
+        try {
+            const eventId = `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            // קרא נתוני מלאי נוכחיים מ-localStorage אם יש
+            let inventory = [];
+            const savedInventory = localStorage.getItem('customImages');
+            if (savedInventory) {
+                try {
+                    inventory = JSON.parse(savedInventory);
+                } catch (e) {
+                    console.warn('⚠️ לא ניתן לקרוא מלאי מ-localStorage');
+                }
+            }
+
+            const defaultEventName = `אירוע חדש של ${user.displayName || 'שלי'}`;
+
+            const newEvent = {
+                name: defaultEventName,
+                location: '',
+                eventDate: null,
+                description: 'אירוע שנוצר מתוך המשחק',
+                ownerId: user.uid,
+                ownerName: user.displayName || user.email,
+                sessionId: currentSessionId,  // ✅ קישור לסשן הנוכחי
+                status: 'active',
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                stats: {
+                    totalPlayers: 0,
+                    totalWinners: 0,
+                    totalSpins: 0
+                },
+                inventory: inventory  // ✅ שמור את המלאי הנוכחי
+            };
+
+            await firebase.database().ref(`events/${eventId}`).set(newEvent);
+
+            // עדכן סטטיסטיקות משתמש
+            const userRef = firebase.database().ref(`users/${user.uid}/stats`);
+            const statsSnapshot = await userRef.once('value');
+            const currentStats = statsSnapshot.val() || { totalEvents: 0 };
+
+            await userRef.update({
+                totalEvents: (currentStats.totalEvents || 0) + 1
+            });
+
+            console.log('✅ אירוע חדש נוצר:', eventId);
+
+            // הצג הודעה והעבר לדשבורד
+            if (confirm('🎉 אירוע חדש נוצר בהצלחה!\n\nהאם לעבור לדשבורד לניהול האירוע?')) {
+                window.location.href = 'dashboard.html';
+            }
+        } catch (error) {
+            console.error('❌ שגיאה ביצירת אירוע:', error);
+            alert('⚠️ התחברת בהצלחה, אך הייתה בעיה ביצירת האירוע. נסה ליצור אירוע ידנית בדשבורד.');
+
+            if (confirm('לעבור לדשבורד?')) {
+                window.location.href = 'dashboard.html';
+            }
+        }
     }
 };
 

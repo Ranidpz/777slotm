@@ -394,9 +394,11 @@ body {
     color: var(--danger);
 }
 
-/* Event Owner Badge - Only for super admin */
+/* Event Owner Badge */
 .event-owner-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 6px 12px;
     background: rgba(102, 126, 234, 0.15);
     color: var(--primary);
@@ -405,6 +407,33 @@ body {
     border-radius: 8px;
     margin-bottom: 12px;
     border: 1px solid rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.event-owner-badge.clickable {
+    cursor: pointer;
+}
+
+.event-owner-badge.clickable:hover {
+    background: rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.event-owner-badge .change-icon {
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+.event-owner-badge.clickable:hover .change-icon {
+    opacity: 1;
+    animation: rotate-icon 0.6s ease;
+}
+
+@keyframes rotate-icon {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .event-details {
