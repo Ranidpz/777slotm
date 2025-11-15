@@ -254,12 +254,22 @@ function initReels() {
 // התחל סיבוב
 function startSpin() {
     if (gameState.isSpinning) return;
-    
+
+    // ✅ סגור את מסך הזכייה הקודם אם הוא פתוח
+    if (gameState.qrPopupVisible) {
+        const qrPopup = document.getElementById('qr-popup');
+        if (qrPopup) {
+            qrPopup.classList.add('hidden');
+            gameState.qrPopupVisible = false;
+            console.log('🚪 מסך זכייה קודם נסגר לפני סיבוב חדש');
+        }
+    }
+
     gameState.isSpinning = true;
     gameState.manualStops = [false, false, false];
     gameState.currentReel = 0;
     gameState.spinsCount++;
-    
+
     playSound('spin');
     
     // קבע אם זה צריך להיות סיבוב זוכה
