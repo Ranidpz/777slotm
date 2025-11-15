@@ -680,8 +680,11 @@ function checkWin() {
             // עדכן את הפרס האחרון שזכה (למניעת חזרות)
             gameState.lastWinningSymbol = symbolIndex;
 
+            // ✅ בדוק אם פרסים פעילים (לא רק אם קיימים תמונות!)
+            const prizesActive = localStorage.getItem('prizesActive') !== 'false';
+
             // עדכן מלאי לפי סוג המשחק
-            if (isUsingCustomImages() && window.dynamicImagesManager) {
+            if (prizesActive && isUsingCustomImages() && window.dynamicImagesManager) {
                 // תמונות מותאמות - עדכן דרך dynamicImagesManager
                 // ✅ חפש את התמונה לפי symbolIndex שלה (לא לפי מיקום במערך!)
                 const img = dynamicImagesManager.images.find(i => i.symbolIndex === symbolIndex && i.imageData !== null);
@@ -713,6 +716,8 @@ function checkWin() {
                 console.log(`🎯 זכייה באימוג'י ${symbolIndex} (ללא הגבלת מלאי)`);
                 prizeDetails.prizeName = displayedSymbols[0];
                 prizeDetails.remainingInventory = null; // null במקום 'אינסוף'
+                // ✅ שמור את האימוג'י ב-symbolDisplay (לא תמונת פרס!)
+                // displayedSymbols[0] כבר מכיל את האימוג'י הנכון
             }
         } else {
             console.warn(`⚠️ לא הצלחנו לזהות את הסמל שזכה: ${displayedSymbols[0]}`);
