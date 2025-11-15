@@ -924,6 +924,19 @@ document.addEventListener('keydown', (e) => {
     // Debug: הצג כל לחיצה על מקש
     console.log('⌨️ Key pressed:', e.key, 'Code:', e.code);
 
+    // ✅ בדוק אם המשתמש נמצא בתוך שדה קלט (input, textarea)
+    const isTypingInInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+
+    if (isTypingInInput) {
+        console.log('⌨️ מקליד בשדה קלט - מתעלם מקיצורי מקלדת');
+        // אפשר רק ESC לעבוד כשמקלידים (לסגירת הגדרות)
+        if (e.key === 'Escape') {
+            settingsScreen.classList.add('hidden');
+            e.target.blur(); // הסר פוקוס משדה הקלט
+        }
+        return; // ✅ יציאה מוקדמת - לא מפעילים קיצורי מקלדת
+    }
+
     // Enter - התחל סיבוב
     if (e.key === 'Enter') {
         triggerSpin();
