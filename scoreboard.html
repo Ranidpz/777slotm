@@ -195,66 +195,39 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
-        .refresh-btn {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #1a1a2e;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
-            transition: all 0.3s ease;
+        /* Footer with subtle links */
+        .scoreboard-footer {
+            text-align: center;
+            padding: 30px 20px 40px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .refresh-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+        .footer-link {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 5px 10px;
         }
 
-        .reset-btn {
-            position: fixed;
-            bottom: 100px;
-            left: 30px;
-            background: rgba(255, 68, 68, 0.2);
-            color: #ff4444;
-            border: 2px solid #ff4444;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 0.95em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .footer-link:hover {
+            color: rgba(255, 215, 0, 0.9);
+            text-decoration: underline;
         }
 
-        .reset-btn:hover {
-            background: rgba(255, 68, 68, 0.4);
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(255, 68, 68, 0.4);
+        .footer-link-danger {
+            color: rgba(255, 100, 100, 0.7);
         }
 
-        .back-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .footer-link-danger:hover {
+            color: rgba(255, 68, 68, 1);
         }
 
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
+        .footer-separator {
+            color: rgba(255, 255, 255, 0.3);
+            margin: 0 10px;
         }
 
         @media (max-width: 768px) {
@@ -302,11 +275,16 @@
         <div id="winners-container">
             <div class="loading">⏳ טוען נתונים...</div>
         </div>
-    </div>
 
-    <button class="reset-btn" onclick="resetScoreboard()">🗑️ אפס לוח</button>
-    <button class="refresh-btn" onclick="location.reload()">🔄 רענן</button>
-    <button class="back-btn" onclick="window.location.href='index.html'">🎰 חזרה למשחק</button>
+        <!-- Footer with subtle links -->
+        <div class="scoreboard-footer">
+            <a href="index.html" class="footer-link">חזרה למשחק</a>
+            <span class="footer-separator">•</span>
+            <a href="javascript:void(0)" onclick="location.reload()" class="footer-link">רענן</a>
+            <span class="footer-separator">•</span>
+            <a href="javascript:void(0)" onclick="resetScoreboard()" class="footer-link footer-link-danger">אפס לוח</a>
+        </div>
+    </div>
 
     <script src="firebase-config.js"></script>
     <script>
