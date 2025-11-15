@@ -216,6 +216,27 @@
             box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
         }
 
+        .reset-btn {
+            position: fixed;
+            bottom: 100px;
+            left: 30px;
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 2px solid #ff4444;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 68, 68, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 68, 68, 0.4);
+        }
+
         .back-btn {
             position: fixed;
             bottom: 30px;
@@ -283,6 +304,7 @@
         </div>
     </div>
 
+    <button class="reset-btn" onclick="resetScoreboard()">🗑️ אפס לוח</button>
     <button class="refresh-btn" onclick="location.reload()">🔄 רענן</button>
     <button class="back-btn" onclick="window.location.href='index.html'">🎰 חזרה למשחק</button>
 
@@ -501,6 +523,39 @@
 
             loadWinners();
         });
+
+        // Reset scoreboard with confirmation
+        async function resetScoreboard() {
+            if (!currentSessionId) {
+                alert('❌ לא נמצא מזהה משחק');
+                return;
+            }
+
+            // Ask for confirmation
+            const confirmed = confirm('⚠️ האם אתם בטוחים שאתם רוצים לאפס את כל לוח הזוכים?\n\nפעולה זו תמחק את כל הנתונים ולא ניתן לשחזרם!');
+
+            if (!confirmed) {
+                console.log('❌ איפוס לוח בוטל');
+                return;
+            }
+
+            try {
+                console.log(`🗑️ מאפס לוח זוכים עבור session: ${currentSessionId}`);
+
+                // Delete all winners data
+                const winnersRef = firebase.database().ref(`sessions/${currentSessionId}/winners`);
+                await winnersRef.remove();
+
+                console.log('✅ לוח הזוכים אופס בהצלחה!');
+                alert('✅ לוח הזוכים אופס בהצלחה!');
+
+                // Reload the page to show empty state
+                location.reload();
+            } catch (error) {
+                console.error('❌ שגיאה באיפוס לוח הזוכים:', error);
+                alert('❌ שגיאה באיפוס לוח הזוכים. נסו שוב.');
+            }
+        }
 
         // KEYBOARD SHORTCUT: ג/G/D to return to game
         document.addEventListener('keydown', (e) => {

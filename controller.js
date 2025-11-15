@@ -61,6 +61,9 @@ class MobileController {
     // Setup event listeners
     this.setupEventListeners();
 
+    // Validate initial name and enable button if valid
+    this.validateNameInput();
+
     // Show connection screen
     this.showScreen('connection-screen');
   }
@@ -75,6 +78,21 @@ class MobileController {
     document.getElementById('player-name-input').value = name;
   }
 
+  // Validate name input and update button state
+  validateNameInput() {
+    const nameInput = document.getElementById('player-name-input');
+    const connectBtn = document.getElementById('connect-btn');
+    const name = nameInput.value.trim();
+
+    if (name.length >= 2) {
+      connectBtn.disabled = false;
+      connectBtn.classList.add('enabled-pulse');
+    } else {
+      connectBtn.disabled = true;
+      connectBtn.classList.remove('enabled-pulse');
+    }
+  }
+
   // Setup event listeners
   setupEventListeners() {
     // Connect button
@@ -87,6 +105,11 @@ class MobileController {
       if (e.key === 'Enter') {
         this.connectToGame();
       }
+    });
+
+    // Name validation - enable button when 2+ characters
+    document.getElementById('player-name-input').addEventListener('input', () => {
+      this.validateNameInput();
     });
 
     // Pull bar will be setup when showing playing screen
