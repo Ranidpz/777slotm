@@ -495,6 +495,18 @@ class MobileController {
         prizeNameElement.textContent = `🎁 ${prizeName}`;
         console.log('🏆 הצגת פרטי פרס:', player.prizeDetails);
       }
+
+      // ✅ הצג תמונת פרס אם קיימת
+      const prizeImageContainer = document.getElementById('prize-image-container');
+      const prizeImage = document.getElementById('prize-image');
+      if (prizeImageContainer && prizeImage && player.prizeDetails.symbolDisplay) {
+        prizeImage.src = player.prizeDetails.symbolDisplay;
+        prizeImageContainer.style.display = 'block';
+        console.log('🖼️ תמונת פרס הוצגה');
+      } else if (prizeImageContainer) {
+        prizeImageContainer.style.display = 'none';
+        console.log('⚠️ אין תמונת פרס להצגה');
+      }
     } else {
       console.log('⚠️ No prize details available');
     }
