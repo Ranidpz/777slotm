@@ -51,6 +51,10 @@ const dynamicImagesManager = {
         if (index !== -1 && this.images.length > this.minImages) {
             this.images.splice(index, 1);
             console.log(`🗑️ תמונה נמחקה`);
+
+            // ✅ CRITICAL FIX: אינדקס מחדש את symbolIndex אחרי מחיקה
+            this.reindexSymbols();
+
             this.render();
             this.saveToStorage();
         } else if (this.images.length <= this.minImages) {
@@ -86,6 +90,14 @@ const dynamicImagesManager = {
             console.log(`📦 מלאי עודכן:`, image.inventory === null ? 'אינסוף ♾️' : image.inventory);
             this.saveToStorage();
         }
+    },
+
+    // ✅ NEW: אינדקס מחדש את symbolIndex של כל התמונות
+    reindexSymbols() {
+        this.images.forEach((img, index) => {
+            img.symbolIndex = index;
+        });
+        console.log(`🔄 symbolIndex אונדקס מחדש: ${this.images.length} תמונות (0-${this.images.length - 1})`);
     },
 
     // הצג את כל התמונות ב-DOM
@@ -549,6 +561,10 @@ const dynamicImagesManager = {
                         img.distributedCount = 0; // ✅ NEW: Initialize for old data
                     }
                 });
+
+                // ✅ CRITICAL FIX: אינדקס מחדש את symbolIndex כדי למנוע ערכים שגויים
+                this.reindexSymbols();
+
                 console.log(`📂 נטענו ${this.images.length} תמונות מ-localStorage`);
             }
         } catch (e) {
@@ -618,6 +634,9 @@ const dynamicImagesManager = {
                     prizeName: prize.prizeName || '', // ✅ שם מותאם אישית
                     symbolIndex: prize.symbolIndex
                 }));
+
+                // ✅ CRITICAL FIX: אינדקס מחדש את symbolIndex כדי למנוע ערכים שגויים
+                this.reindexSymbols();
 
                 console.log(`☁️ ${this.images.length} פרסים נטענו מ-Firebase`);
 
