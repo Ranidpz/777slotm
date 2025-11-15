@@ -334,6 +334,13 @@ function determineWin() {
         const randomWin = Math.random() < 0.2; // 20% סיכוי לזכייה
         console.log(`🎰 סיבוב מספר: ${gameState.spinsCount} (מצב רנדומלי)`);
         console.log(`${randomWin ? '✅ זכייה רנדומלית!' : '⏳ סיבוב רגיל'}`);
+
+        // ✅ CRITICAL FIX: בדוק מלאי גם במצב רנדומלי
+        if (randomWin && isUsingCustomImages() && !hasAvailableInventory()) {
+            console.log('🚫 כל הפרסים אזלו מהמלאי - הזכייה בוטלה!');
+            return false;
+        }
+
         return randomWin;
     }
 
@@ -349,14 +356,14 @@ function determineWin() {
     console.log(`🎰 סיבוב מספר: ${gameState.spinsCount}`);
     console.log(`📊 תדירות זכייה: כל ${gameState.winFrequency} סיבובים`);
 
-    // ⭐ תדירות = 1 = זכייה בכל סיבוב (עם בדיקת מלאי)
-    if (gameState.winFrequency === 1) {
-        console.log('🎯 מצב זכייה מובטחת (תדירות=1)');
-        // בדוק אם יש פרסים זמינים
+    // ✅ CRITICAL FIX: בדוק מלאי תמיד אם משתמשים בתמונות מותאמות וצריך לזכות
+    if (shouldWin && isUsingCustomImages()) {
+        console.log('🔍 בודק מלאי פרסים לפני זכייה...');
         if (!hasAvailableInventory()) {
             console.log('🚫 כל הפרסים אזלו מהמלאי - הזכייה בוטלה!');
             return false;
         }
+        console.log('✅ יש פרסים זמינים במלאי');
     }
 
     if (gameState.randomBonusPercent > 0) {
@@ -437,9 +444,51 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
                     console.log(`🎯 אימוג'י ${gameState.winningSymbol} נבחר (ללא הגבלת מלאי)`);
                 }
             } else {
-                // מצב רגיל - בחר סמל רנדומלי
-                gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
-                console.log(`🎯 גליל 1 נבחר לעצור על סמל מספר: ${gameState.winningSymbol}`);
+                // מצב רגיל (תדירות != 1) - בחר סמל עם בדיקת מלאי
+                if (isUsingCustomImages()) {
+                    // ✅ CRITICAL FIX: בחר רק מתמונות עם מלאי זמין
+                    const availableSymbols = [];
+
+                    dynamicImagesManager.images.forEach((img, idx) => {
+                        if (img.imageData !== null && (img.inventory === null || img.inventory > 0)) {
+                            availableSymbols.push({
+                                symbolIndex: img.symbolIndex,
+                                arrayIndex: idx
+                            });
+                        }
+                    });
+
+                    if (availableSymbols.length > 0) {
+                        // נסה למנוע בחירה של אותו פרס פעמיים ברצף
+                        let selectedItem;
+
+                        if (availableSymbols.length > 1 && gameState.lastWinningSymbol !== null) {
+                            const otherSymbols = availableSymbols.filter(s => s.symbolIndex !== gameState.lastWinningSymbol);
+
+                            if (otherSymbols.length > 0) {
+                                selectedItem = otherSymbols[Math.floor(Math.random() * otherSymbols.length)];
+                                console.log(`🎲 תמונה - נמנע מחזרה על פרס ${gameState.lastWinningSymbol}, נבחר ${selectedItem.symbolIndex}`);
+                            } else {
+                                selectedItem = availableSymbols[0];
+                            }
+                        } else {
+                            selectedItem = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+                        }
+
+                        gameState.winningSymbol = selectedItem.symbolIndex;
+                        const inventory = dynamicImagesManager.images[selectedItem.arrayIndex].inventory;
+                        const inventoryText = inventory === null ? 'אינסוף' : inventory;
+                        console.log(`🎯 תמונה ${selectedItem.arrayIndex + 1} נבחרה (symbolIndex=${gameState.winningSymbol}, מלאי: ${inventoryText})`);
+                    } else {
+                        // אין פרסים זמינים - זה לא אמור לקרות כי determineWin כבר בדק
+                        gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
+                        console.error('❌ שגיאה: אין מלאי זמין אבל shouldWin=true');
+                    }
+                } else {
+                    // אימוג'ים - בחר רנדומלי (אין הגבלת מלאי)
+                    gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
+                    console.log(`🎯 אימוג'י ${gameState.winningSymbol} נבחר (ללא הגבלת מלאי)`);
+                }
             }
             targetSymbolIndex = gameState.winningSymbol;
         } else {
