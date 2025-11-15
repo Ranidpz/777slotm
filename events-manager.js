@@ -72,7 +72,6 @@ const eventsManager = {
 
         const html = this.filteredEvents.map(event => {
             const date = event.eventDate ? new Date(event.eventDate).toLocaleDateString('he-IL') : 'לא צוין';
-            const statusText = event.status === 'active' ? 'פעיל' : 'סגור';
 
             // ✅ הצג שם בעל האירוע - כולם רואים, רק מנהל על יכול להחליף
             const ownerBadge = event.ownerName ?
@@ -86,7 +85,10 @@ const eventsManager = {
                 <div class="event-card" data-event-id="${event.id}">
                     <div class="event-header">
                         <h3>${event.name || 'אירוע ללא שם'}</h3>
-                        <span class="event-status ${event.status || 'active'}">${statusText}</span>
+                        <span class="session-status-badge" id="session-status-${event.id}">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">בודק...</span>
+                        </span>
                     </div>
                     ${ownerBadge}
                     <div class="event-details">
@@ -94,6 +96,7 @@ const eventsManager = {
                         <p>📅 ${date}</p>
                         <p>🎮 ${event.stats?.totalPlayers || 0} שחקנים</p>
                         <p>🏆 ${event.stats?.totalWinners || 0} זוכים</p>
+                        <p class="session-time" id="session-time-${event.id}"></p>
                     </div>
                     <div class="event-actions">
                         <button class="btn-primary" onclick="eventsManager.openEvent('${event.id}')">פתח משחק</button>
@@ -111,6 +114,81 @@ const eventsManager = {
         }).join('');
 
         container.innerHTML = html;
+
+        // ✅ עדכן סטטוס session לכל אירוע
+        this.filteredEvents.forEach(event => {
+            if (event.sessionId) {
+                this.updateSessionStatus(event.id, event.sessionId);
+            }
+        });
+    },
+
+    // עדכן סטטוס session בזמן אמת
+    async updateSessionStatus(eventId, sessionId) {
+        try {
+            const sessionRef = firebase.database().ref(`sessions/${sessionId}`);
+
+            // האזן לשינויים בזמן אמת
+            sessionRef.on('value', (snapshot) => {
+                const sessionData = snapshot.val();
+                const statusBadge = document.getElementById(`session-status-${eventId}`);
+                const sessionTime = document.getElementById(`session-time-${eventId}`);
+
+                if (!statusBadge || !sessionTime) return;
+
+                if (sessionData && sessionData.sessionActive) {
+                    // Session פעיל
+                    statusBadge.innerHTML = `
+                        <span class="status-indicator active"></span>
+                        <span class="status-text">פעיל</span>
+                    `;
+                    statusBadge.className = 'session-status-badge active';
+
+                    // הצג מתי נפתח
+                    if (sessionData.openedAt) {
+                        const openedDate = new Date(sessionData.openedAt);
+                        const timeStr = openedDate.toLocaleString('he-IL', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        sessionTime.innerHTML = `🟢 נפתח ב: ${timeStr}`;
+                        sessionTime.style.color = '#4ade80';
+                    }
+                } else if (sessionData && sessionData.closedAt) {
+                    // Session סגור
+                    statusBadge.innerHTML = `
+                        <span class="status-indicator closed"></span>
+                        <span class="status-text">סגור</span>
+                    `;
+                    statusBadge.className = 'session-status-badge closed';
+
+                    // הצג מתי נסגר
+                    const closedDate = new Date(sessionData.closedAt);
+                    const timeStr = closedDate.toLocaleString('he-IL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    sessionTime.innerHTML = `🔴 נסגר ב: ${timeStr}`;
+                    sessionTime.style.color = '#ef4444';
+                } else {
+                    // אין נתונים
+                    statusBadge.innerHTML = `
+                        <span class="status-indicator unknown"></span>
+                        <span class="status-text">לא ידוע</span>
+                    `;
+                    statusBadge.className = 'session-status-badge unknown';
+                    sessionTime.innerHTML = '';
+                }
+            });
+        } catch (error) {
+            console.error('❌ שגיאה בעדכון סטטוס session:', error);
+        }
     },
 
     // סנן אירועים לפי חיפוש

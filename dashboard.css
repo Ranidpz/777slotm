@@ -423,21 +423,80 @@ body {
     flex: 1;
 }
 
-.event-status {
-    padding: 5px 12px;
+/* Session Status Badge - Real-time status */
+.session-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.85em;
     font-weight: 600;
+    transition: all 0.3s ease;
 }
 
-.event-status.active {
-    background: rgba(74, 222, 128, 0.2);
+.session-status-badge.active {
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.4);
     color: var(--success);
+    animation: pulse-green 2s ease-in-out infinite;
 }
 
-.event-status.closed {
-    background: rgba(239, 68, 68, 0.2);
+.session-status-badge.closed {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
     color: var(--danger);
+}
+
+.session-status-badge.unknown {
+    background: rgba(156, 163, 175, 0.15);
+    border: 1px solid rgba(156, 163, 175, 0.4);
+    color: rgba(156, 163, 175, 0.9);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-indicator.active {
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+    animation: pulse-indicator 2s ease-in-out infinite;
+}
+
+.status-indicator.closed {
+    background: var(--danger);
+}
+
+.status-indicator.unknown {
+    background: rgba(156, 163, 175, 0.5);
+}
+
+@keyframes pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(74, 222, 128, 0);
+    }
+}
+
+@keyframes pulse-indicator {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Session Time Display */
+.session-time {
+    font-size: 0.9em;
+    font-weight: 500;
+    margin-top: 8px;
 }
 
 /* Event Owner Badge */

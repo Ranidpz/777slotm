@@ -77,12 +77,21 @@ async function createSession(sessionId, maxPlayers = 3, maxAttempts = 3) {
       winners: existingWinners,  // ✅ שמור את הזוכים הקיימים!
       settings: {
         whatsappNumber: whatsappNumber
-      }
+      },
+      // ✅ Session Activity Tracking
+      sessionActive: true,
+      lastActiveAt: firebase.database.ServerValue.TIMESTAMP,
+      openedAt: firebase.database.ServerValue.TIMESTAMP
     });
+
+    // ✅ הגדר onDisconnect - כשהחלון נסגר, סמן session כלא פעיל
+    sessionRef.child('sessionActive').onDisconnect().set(false);
+    sessionRef.child('closedAt').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
 
     console.log('✅ Session created/updated:', sessionId);
     console.log('📱 WhatsApp number saved to session:', whatsappNumber);
     console.log('🏆 Winners preserved:', Object.keys(existingWinners).length);
+    console.log('🔴 onDisconnect handler set - session will auto-close on window close');
     return true;
   } catch (error) {
     console.error('❌ Error creating session:', error);
