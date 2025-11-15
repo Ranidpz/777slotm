@@ -827,10 +827,10 @@ function triggerSpin(fromRemotePlayer = false) {
             gameState.isSpinning = true;
             gameState.manualStops = [false, false, false];
             gameState.currentReel = 0;
-            gameState.spinsCount++;
-            
+            // ⚠️ spinsCount++ כבר נקרא ב-triggerSpin() - לא צריך כאן!
+
             playSound('spin');
-            
+
             // קבע אם זה צריך להיות סיבוב זוכה
             gameState.shouldWinManual = determineWin();
             
