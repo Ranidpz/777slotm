@@ -142,6 +142,10 @@ body {
     gap: 20px;
 }
 
+.user-profile-container {
+    position: relative;
+}
+
 .user-profile {
     display: flex;
     align-items: center;
@@ -150,6 +154,13 @@ body {
     padding: 10px 20px;
     border-radius: 50px;
     border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+    background: rgba(37, 37, 69, 0.8);
+    border-color: rgba(255, 215, 0, 0.3);
 }
 
 .user-avatar {
@@ -189,24 +200,59 @@ body {
     color: white;
 }
 
-.btn-logout {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: var(--danger);
-    padding: 10px 20px;
-    border-radius: 10px;
+/* User Dropdown Menu */
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    min-width: 200px;
+    overflow: hidden;
+    z-index: 1000;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 15px 20px;
+    color: var(--text-primary);
     font-size: 1em;
     font-weight: 600;
     cursor: pointer;
+    text-align: right;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
-.btn-logout:hover {
-    background: rgba(239, 68, 68, 0.2);
-    transform: translateY(-2px);
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.logout-item {
+    color: var(--danger);
+}
+
+.logout-item:hover {
+    background: rgba(239, 68, 68, 0.1);
 }
 
 /* ==================== Main Content ==================== */

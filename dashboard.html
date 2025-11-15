@@ -56,20 +56,23 @@
                 </div>
 
                 <div class="header-right">
-                    <!-- User Profile -->
-                    <div class="user-profile">
-                        <img id="user-photo" src="https://via.placeholder.com/40" alt="User" class="user-avatar">
-                        <div class="user-info">
-                            <span id="user-name" class="user-name">משתמש</span>
-                            <span id="user-role-badge" class="role-badge manager">מנהל אירועים</span>
+                    <!-- User Profile with Dropdown -->
+                    <div class="user-profile-container">
+                        <div class="user-profile" onclick="toggleUserMenu()">
+                            <img id="user-photo" src="https://via.placeholder.com/40" alt="User" class="user-avatar">
+                            <div class="user-info">
+                                <span id="user-name" class="user-name">משתמש</span>
+                                <span id="user-role-badge" class="role-badge manager">מנהל אירועים</span>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Menu -->
+                        <div class="user-dropdown-menu hidden" id="user-dropdown-menu">
+                            <button class="dropdown-item logout-item" onclick="authManager.signOut()">
+                                <span>התנתק</span>
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Logout Button -->
-                    <button class="btn-logout" onclick="authManager.signOut()">
-                        <span>🚪</span>
-                        <span>התנתק</span>
-                    </button>
                 </div>
             </div>
         </header>
@@ -247,5 +250,23 @@
     <!-- Dashboard Scripts -->
     <script src="auth-manager.js"></script>
     <script src="events-manager.js"></script>
+
+    <script>
+        // Toggle user dropdown menu
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const userProfile = document.querySelector('.user-profile-container');
+            const menu = document.getElementById('user-dropdown-menu');
+
+            if (userProfile && !userProfile.contains(e.target)) {
+                menu?.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
