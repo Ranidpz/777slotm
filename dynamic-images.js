@@ -35,6 +35,7 @@ const dynamicImagesManager = {
             imageData: null, // base64 של התמונה
             inventory: null, // null = אינסוף, מספר = כמות מוגבלת
             initialInventory: null,
+            distributedCount: 0, // ✅ NEW: מונה כמה פרסים חולקו בסה"כ
             label: `תמונה ${prizeIndex + 1}`, // תווית
             symbolIndex: prizeIndex // מיקום בגלגלים
         };
@@ -93,12 +94,33 @@ const dynamicImagesManager = {
 
         container.innerHTML = '';
 
+        // הצג את כל התמונות הקיימות
         this.images.forEach((image, index) => {
             const itemDiv = this.createImageItem(image, index);
             container.appendChild(itemDiv);
         });
 
+        // הוסף תיבת "הוסף פרס" בסוף
+        if (this.images.length < this.maxImages) {
+            const addPrizeBox = this.createAddPrizeBox();
+            container.appendChild(addPrizeBox);
+        }
+
         console.log(`🎨 רונדר ${this.images.length} תמונות`);
+    },
+
+    // צור תיבת "הוסף פרס" עם פלוס
+    createAddPrizeBox() {
+        const div = document.createElement('div');
+        div.className = 'add-prize-box';
+        div.id = 'add-prize-box';
+
+        div.innerHTML = `
+            <div class="add-prize-icon">+</div>
+            <p class="add-prize-text">לחצו או גררו תמונה<br>להוספת פרס</p>
+        `;
+
+        return div;
     },
 
     // צור אלמנט תמונה בודד
@@ -110,9 +132,8 @@ const dynamicImagesManager = {
         const hasImage = image.imageData !== null;
         const inventoryValue = image.inventory === null ? '' : image.inventory;
         const inventoryDisplay = image.inventory === null ? '∞' : image.inventory;
-        const distributedCount = image.initialInventory !== null && image.inventory !== null
-            ? (image.initialInventory - image.inventory)
-            : 0;
+        const isUnlimited = image.inventory === null;
+        const distributedCount = image.distributedCount || 0; // ✅ NEW: Track total distributed
 
         div.innerHTML = `
             <label for="image-${image.id}">
@@ -126,27 +147,47 @@ const dynamicImagesManager = {
                 </div>
                 <input type="file" id="image-${image.id}" accept="image/*,image/png" hidden data-image-id="${image.id}">
             </label>
-            <div class="inventory-input-wrapper">
-                <label for="inventory-${image.id}">מלאי:</label>
-                <input type="number"
-                       id="inventory-${image.id}"
-                       min="0"
-                       value="${inventoryValue}"
-                       placeholder="∞"
-                       class="inventory-input"
-                       data-image-id="${image.id}">
-                <button class="reset-inventory-btn" data-image-id="${image.id}">איפוס</button>
-                ${this.images.length > this.minImages ? `<button class="remove-image-btn" data-image-id="${image.id}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                </button>` : ''}
-            </div>
-            <div class="inventory-counter" id="counter-${image.id}">
-                <span class="distributed">${distributedCount}</span> / <span class="total">${inventoryDisplay}</span>
+
+            <!-- מלאי - Inventory Controls -->
+            <div class="inventory-controls">
+                <h4 class="inventory-header">מלאי</h4>
+
+                <div class="inventory-display-row">
+                    <span class="inventory-label">מלאי נוכחי:</span>
+                    <span class="inventory-current">${inventoryDisplay}</span>
+                </div>
+
+                <div class="inventory-input-row">
+                    <input type="number"
+                           id="inventory-${image.id}"
+                           min="0"
+                           value="${inventoryValue}"
+                           placeholder="∞"
+                           class="inventory-input-new"
+                           data-image-id="${image.id}"
+                           ${isUnlimited ? 'disabled' : ''}>
+                    <button class="unlimited-toggle-btn ${isUnlimited ? 'active' : ''}"
+                            data-image-id="${image.id}"
+                            title="מלאי בלתי מוגבל">
+                        ♾️
+                    </button>
+                </div>
+
+                <div class="distributed-section">
+                    <span class="distributed-label">סה״כ חולק:</span>
+                    <span class="distributed-value">${distributedCount}</span>
+                    <button class="reset-distributed-btn"
+                            data-image-id="${image.id}"
+                            title="איפוס מונה חלוקה">
+                        🔄
+                    </button>
+                </div>
+
+                ${this.images.length > this.minImages ? `
+                <button class="remove-image-btn-new" data-image-id="${image.id}" title="מחק פרס">
+                    🗑️ מחק
+                </button>
+                ` : ''}
             </div>
         `;
 
@@ -175,9 +216,10 @@ const dynamicImagesManager = {
             }
         });
 
-        // מאזין לשינוי מלאי
+        // מאזין לשינוי מלאי (כולל input-new class)
         container.addEventListener('input', (e) => {
-            if (e.target.classList.contains('inventory-input')) {
+            if (e.target.classList.contains('inventory-input') ||
+                e.target.classList.contains('inventory-input-new')) {
                 const imageId = parseFloat(e.target.getAttribute('data-image-id'));
                 const value = e.target.value;
                 this.updateInventory(imageId, value);
@@ -185,31 +227,50 @@ const dynamicImagesManager = {
             }
         });
 
-        // מאזין לאיפוס מלאי
+        // מאזין לכל הכפתורים
         container.addEventListener('click', (e) => {
-            if (e.target.classList.contains('reset-inventory-btn')) {
-                const imageId = parseFloat(e.target.getAttribute('data-image-id'));
+            const target = e.target;
+            const imageId = parseFloat(target.getAttribute('data-image-id'));
+
+            // ✅ כפתור מלאי בלתי מוגבל
+            if (target.classList.contains('unlimited-toggle-btn')) {
                 const image = this.images.find(img => img.id === imageId);
-                if (image && image.initialInventory !== null) {
-                    image.inventory = image.initialInventory;
+                if (image) {
+                    if (image.inventory === null) {
+                        // עבור למצב מוגבל - הגדר ל-10
+                        image.inventory = 10;
+                        image.initialInventory = 10;
+                    } else {
+                        // עבור למצב בלתי מוגבל
+                        image.inventory = null;
+                        image.initialInventory = null;
+                    }
                     this.saveToStorage();
                     this.render();
                 }
             }
 
-            // מאזין למחיקת תמונה
-            if (e.target.classList.contains('remove-image-btn')) {
-                const imageId = parseFloat(e.target.getAttribute('data-image-id'));
+            // ✅ איפוס מונה חלוקה
+            if (target.classList.contains('reset-distributed-btn')) {
+                const image = this.images.find(img => img.id === imageId);
+                if (image) {
+                    if (confirm('האם לאפס את מונה החלוקה?')) {
+                        image.distributedCount = 0;
+                        this.saveToStorage();
+                        this.render();
+                    }
+                }
+            }
+
+            // ✅ מחיקת תמונה (כפתור חדש)
+            if (target.classList.contains('remove-image-btn-new')) {
                 if (confirm('האם אתה בטוח שברצונך למחוק תמונה זו?')) {
                     this.removeImage(imageId);
                 }
             }
-        });
 
-        // כפתור הוסף תמונה
-        const addBtn = document.getElementById('add-image-btn');
-        if (addBtn) {
-            addBtn.addEventListener('click', () => {
+            // ✅ תיבת "הוסף פרס"
+            if (target.closest('#add-prize-box')) {
                 if (this.images.length < this.maxImages) {
                     this.addEmptySlot();
                     this.render();
@@ -217,17 +278,37 @@ const dynamicImagesManager = {
                 } else {
                     alert(`ניתן להוסיף עד ${this.maxImages} תמונות`);
                 }
-            });
-        }
+            }
+        });
 
-        // כפתור איפוס לאימוג'י
-        const resetBtn = document.getElementById('reset-images');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                if (confirm('האם אתה בטוח? כל התמונות יימחקו ותחזור לאימוג\'י ברירת מחדל')) {
-                    this.resetToEmojis();
+        // ✅ כפתור טוגל פרסים פעיל/כבוי (גלובלי)
+        const prizesToggle = document.getElementById('prizes-active-toggle');
+        if (prizesToggle) {
+            prizesToggle.addEventListener('change', (e) => {
+                const isActive = e.target.checked;
+                const statusText = document.getElementById('prizes-toggle-status');
+
+                if (isActive) {
+                    statusText.textContent = '✓ משתמש בתמונות פרסים';
+                    console.log('🎁 פרסים פעילים');
+                } else {
+                    statusText.textContent = '✗ משתמש באימוג׳י ברירת מחדל';
+                    console.log('😊 אימוג׳י ברירת מחדל');
                 }
+
+                // שמור הגדרה
+                localStorage.setItem('prizesActive', isActive);
             });
+
+            // טען הגדרה
+            const savedState = localStorage.getItem('prizesActive');
+            if (savedState !== null) {
+                prizesToggle.checked = savedState === 'true';
+                const statusText = document.getElementById('prizes-toggle-status');
+                statusText.textContent = prizesToggle.checked
+                    ? '✓ משתמש בתמונות פרסים'
+                    : '✗ משתמש באימוג׳י ברירת מחדל';
+            }
         }
     },
 
@@ -250,6 +331,13 @@ const dynamicImagesManager = {
     // קבל מערך של 9 תמונות לשימוש במשחק
     getGameSymbols() {
         console.log('🔍 getGameSymbols נקרא, this.images:', this.images.length, 'תמונות');
+
+        // ✅ בדוק אם פרסים פעילים
+        const prizesActive = localStorage.getItem('prizesActive');
+        if (prizesActive === 'false') {
+            console.log('😊 פרסים כבויים - משתמש באימוג׳י');
+            return null;
+        }
 
         // סנן רק תמונות שהועלו
         const uploadedImages = this.images.filter(img => img.imageData !== null);
@@ -364,13 +452,25 @@ const dynamicImagesManager = {
 
         // בדוק אם יש מלאי
         if (targetImage.inventory === null) {
-            console.log(`♾️ מלאי אינסופי לתמונה - לא מפחית`);
-            return true; // אינסוף - תמיד זמין
+            // ✅ מלאי אינסופי - רק עדכן מונה חלוקה
+            if (targetImage.distributedCount === undefined) {
+                targetImage.distributedCount = 0;
+            }
+            targetImage.distributedCount++;
+            console.log(`♾️ מלאי אינסופי - מונה חלוקה: ${targetImage.distributedCount}`);
+            this.saveToStorage();
+            this.render();
+            return true;
         }
 
         if (targetImage.inventory > 0) {
             targetImage.inventory--;
-            console.log(`📦 מלאי הופחת ל-${targetImage.inventory} עבור תמונה`);
+            // ✅ עדכן גם מונה חלוקה
+            if (targetImage.distributedCount === undefined) {
+                targetImage.distributedCount = 0;
+            }
+            targetImage.distributedCount++;
+            console.log(`📦 מלאי הופחת ל-${targetImage.inventory}, סה"כ חולק: ${targetImage.distributedCount}`);
             this.saveToStorage();
             this.render(); // רענן את התצוגה
             return true;
@@ -404,6 +504,9 @@ const dynamicImagesManager = {
                     if (img.symbolIndex === undefined) {
                         img.symbolIndex = index;
                     }
+                    if (img.distributedCount === undefined) {
+                        img.distributedCount = 0; // ✅ NEW: Initialize for old data
+                    }
                 });
                 console.log(`📂 נטענו ${this.images.length} תמונות מ-localStorage`);
             }
@@ -434,6 +537,7 @@ const dynamicImagesManager = {
                         imageUrl: img.imageData, // base64 או blob URL
                         inventory: img.inventory,
                         initialInventory: img.initialInventory,
+                        distributedCount: img.distributedCount || 0, // ✅ NEW
                         symbolIndex: img.symbolIndex,
                         updatedAt: firebase.database.ServerValue.TIMESTAMP
                     };
@@ -467,6 +571,7 @@ const dynamicImagesManager = {
                     imageData: prize.imageUrl,
                     inventory: prize.inventory,
                     initialInventory: prize.initialInventory,
+                    distributedCount: prize.distributedCount || 0, // ✅ NEW
                     label: prize.name,
                     symbolIndex: prize.symbolIndex
                 }));

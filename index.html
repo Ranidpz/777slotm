@@ -306,14 +306,20 @@
             <div class="settings-divider"></div>
 
             <div class="setting-group">
-                <h3>תמונות מותאמות אישית ומלאי פרסים</h3>
+                <h3>מלאי ופרסים</h3>
                 <p class="setting-description">העלה מינימום 2 תמונות: לוגו + פרס אחד לפחות. מלאי ריק = בלתי מוגבל ♾️</p>
                 <div id="dynamic-images-container" class="image-upload-grid">
                     <!-- תמונות יווצרו באופן דינמי דרך JavaScript -->
                 </div>
-                <div class="images-actions">
-                    <button id="add-image-btn" class="add-image-btn">➕ הוסף תמונה נוספת</button>
-                    <button id="reset-images" class="reset-images-btn">🔄 איפוס לאימוג'י ברירת מחדל</button>
+
+                <!-- Global Prizes Toggle -->
+                <div class="prizes-toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="prizes-active-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">פרסים פעיל</span>
+                    <span class="toggle-status" id="prizes-toggle-status">✓ משתמש בתמונות פרסים</span>
                 </div>
             </div>
 
