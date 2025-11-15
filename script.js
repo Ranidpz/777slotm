@@ -909,8 +909,8 @@ function triggerSpin(fromRemotePlayer = false) {
         return;
     }
 
-    // 🔒 אם מסך הזכייה נעול - מנע סיבוב נוסף
-    if (gameState.isWinScreenLocked) {
+    // 🔒 אם מסך הזכייה נעול - מנע סיבוב נוסף (אלא אם זה שחקן מרחוק)
+    if (gameState.isWinScreenLocked && !fromRemotePlayer) {
         const timeLeft = Math.max(0, gameState.winScreenUnlockTime - Date.now());
         if (timeLeft > 0) {
             console.log(`🔒 מסך זכייה נעול! נא להמתין ${Math.ceil(timeLeft / 1000)} שניות`);
@@ -923,15 +923,17 @@ function triggerSpin(fromRemotePlayer = false) {
         }
     }
 
+    // ✅ אם שחקן מרחוק וה-QR מוצג - סגור אותו, שחרר נעילה והמשך לסpin
+    if (gameState.qrPopupVisible && fromRemotePlayer) {
+        console.log('🎮 שחקן מרחוק לחץ בזמן מסך זכייה - סוגר ומתחיל סיבוב חדש');
+        closeQRPopup();
+        gameState.isWinScreenLocked = false; // שחרר נעילה
+    }
+
     // אם QR popup מוצג וזה לא שחקן מרחוק, סגור אותו במקום להתחיל סיבוב חדש
     if (gameState.qrPopupVisible && !fromRemotePlayer) {
         closeQRPopup();
         return;
-    }
-
-    // אם שחקן מרחוק וה-QR מוצג - סגור אותו והמשך לסpin
-    if (gameState.qrPopupVisible && fromRemotePlayer) {
-        closeQRPopup();
     }
 
     // נקה את currentSpinPlayerId רק אם זה סיבוב אנונימי (לא מרחוק)
