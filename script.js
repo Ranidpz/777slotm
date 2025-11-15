@@ -8,6 +8,7 @@ const gameState = {
     currentReel: 0,
     spinsCount: 0,
     winFrequency: 3, // זכייה כל כמה נסיונות (0 = רנדומלי לגמרי)
+    randomBonusPercent: 3, // אחוז סיכוי נוסף לזכייה (0 = ללא בונוס)
     totalSymbols: 9, // מספר כולל של סמלים במשחק
     soundEnabled: true, // האם צלילים מופעלים
     backgroundColor: '#242424', // צבע הרקע ברירת מחדל
@@ -353,13 +354,17 @@ function determineWin() {
     // זכייה מובטחת כל X סיבובים
     const guaranteedWin = (gameState.spinsCount % gameState.winFrequency) === 0;
 
-    // בנוסף, תמיד יש סיכוי רנדומלי קטן לזכות (10%)
-    const randomBonus = Math.random() < 0.1;
+    // בונוס רנדומלי - רק אם הוגדר (0 = ללא בונוס)
+    const randomBonus = gameState.randomBonusPercent > 0 ?
+        (Math.random() < (gameState.randomBonusPercent / 100)) : false;
 
     const shouldWin = guaranteedWin || randomBonus;
 
     console.log(`🎰 סיבוב מספר: ${gameState.spinsCount}`);
     console.log(`📊 תדירות זכייה: כל ${gameState.winFrequency} סיבובים`);
+    if (gameState.randomBonusPercent > 0) {
+        console.log(`🎲 בונוס רנדומלי: ${gameState.randomBonusPercent}% סיכוי`);
+    }
     if (guaranteedWin) {
         console.log('✅ זכייה מובטחת לפי תדירות!');
     } else if (randomBonus) {
@@ -949,7 +954,7 @@ winFrequencySlider.addEventListener('input', (e) => {
     const value = parseInt(e.target.value);
     gameState.winFrequency = value;
     winFrequencyValue.textContent = value;
-    
+
     if (value === 0) {
         winFrequencyText.textContent = 'רנדומלי לגמרי';
         document.querySelector('.setting-note').textContent = 'ערך נוכחי: רנדומלי לגמרי (ללא זכיות מובטחות)';
@@ -958,6 +963,20 @@ winFrequencySlider.addEventListener('input', (e) => {
         document.querySelector('.setting-note').textContent = `ערך נוכחי: זכייה כל ${value} נסיונות`;
     }
 });
+
+// סליידר בונוס רנדומלי
+const randomBonusSlider = document.getElementById('random-bonus-percent');
+const randomBonusValue = document.getElementById('random-bonus-value');
+const randomBonusText = document.getElementById('random-bonus-text');
+
+if (randomBonusSlider && randomBonusValue && randomBonusText) {
+    randomBonusSlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        gameState.randomBonusPercent = value;
+        randomBonusValue.textContent = value;
+        randomBonusText.textContent = value;
+    });
+}
 
 // יצירת עותק של ההגדרות הנוכחיות בפתיחת מסך ההגדרות
 let tempSettings = {
@@ -985,6 +1004,7 @@ document.getElementById('scoreboard-btn').addEventListener('click', () => {
 document.getElementById('save-settings').addEventListener('click', () => {
     // שמור את כל ההגדרות ב-localStorage
     localStorage.setItem('winFrequency', gameState.winFrequency);
+    localStorage.setItem('randomBonusPercent', gameState.randomBonusPercent);
     localStorage.setItem('soundEnabled', gameState.soundEnabled);
     localStorage.setItem('gameMode', gameState.mode);
     localStorage.setItem('guaranteedWinMode', gameState.guaranteedWinMode);
@@ -1015,6 +1035,7 @@ document.getElementById('save-settings').addEventListener('click', () => {
     if (window.sessionManager && sessionManager.sessionId) {
         const gameSettings = {
             winFrequency: gameState.winFrequency,
+            randomBonusPercent: gameState.randomBonusPercent,
             soundEnabled: gameState.soundEnabled,
             gameMode: gameState.mode,
             guaranteedWinMode: gameState.guaranteedWinMode,
@@ -1053,6 +1074,7 @@ document.getElementById('save-settings').addEventListener('click', () => {
 function openSettings() {
     tempSettings = {
         winFrequency: gameState.winFrequency,
+        randomBonusPercent: gameState.randomBonusPercent,
         soundEnabled: gameState.soundEnabled,
         mode: gameState.mode,
         backgroundColor: gameState.backgroundColor,
@@ -1648,6 +1670,19 @@ function loadSettings() {
         if (winFreqSlider) winFreqSlider.value = gameState.winFrequency;
         if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
         if (winFreqText) winFreqText.textContent = gameState.winFrequency;
+    }
+
+    // טען בונוס רנדומלי
+    const savedRandomBonus = localStorage.getItem('randomBonusPercent');
+    if (savedRandomBonus !== null) {
+        gameState.randomBonusPercent = parseInt(savedRandomBonus);
+        const randomBonusSlider = document.getElementById('random-bonus-percent');
+        const randomBonusValue = document.getElementById('random-bonus-value');
+        const randomBonusText = document.getElementById('random-bonus-text');
+
+        if (randomBonusSlider) randomBonusSlider.value = gameState.randomBonusPercent;
+        if (randomBonusValue) randomBonusValue.textContent = gameState.randomBonusPercent;
+        if (randomBonusText) randomBonusText.textContent = gameState.randomBonusPercent;
     }
 
     // טען מצב משחק

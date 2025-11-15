@@ -88,6 +88,7 @@ class SessionManager {
         // עדכן את gameState רק אם יש הגדרות ב-Firebase
         if (typeof window.gameState !== 'undefined') {
           if (settings.winFrequency !== undefined) gameState.winFrequency = settings.winFrequency;
+          if (settings.randomBonusPercent !== undefined) gameState.randomBonusPercent = settings.randomBonusPercent;
           if (settings.soundEnabled !== undefined) gameState.soundEnabled = settings.soundEnabled;
           if (settings.gameMode !== undefined) gameState.mode = settings.gameMode;
           if (settings.guaranteedWinMode !== undefined) gameState.guaranteedWinMode = settings.guaranteedWinMode;

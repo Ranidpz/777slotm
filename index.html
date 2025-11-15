@@ -240,9 +240,9 @@
 
             <div class="settings-divider"></div>
 
-            <!-- שורה 3: תדירות זכיות + מצב זכייה מובטחת -->
+            <!-- שורה 3: תדירות זכיות + בונוס רנדומלי + מצב זכייה מובטחת -->
             <div class="settings-row">
-                <div class="setting-group half">
+                <div class="setting-group third">
                     <h3>תדירות זכיות</h3>
                     <p class="setting-description">כל כמה סיבובים (0 = רנדומלי)</p>
                     <div class="slider-container">
@@ -252,7 +252,17 @@
                     <p class="setting-note">זכייה כל <span id="win-frequency-text">3</span> נסיונות</p>
                 </div>
 
-                <div class="setting-group half">
+                <div class="setting-group third">
+                    <h3>בונוס רנדומלי</h3>
+                    <p class="setting-description">אחוז סיכוי נוסף לזכייה (0 = ללא בונוס)</p>
+                    <div class="slider-container">
+                        <input type="range" id="random-bonus-percent" min="0" max="50" value="3" step="1">
+                        <span id="random-bonus-value">3</span>
+                    </div>
+                    <p class="setting-note">סיכוי <span id="random-bonus-text">3</span>% לזכייה בכל סיבוב</p>
+                </div>
+
+                <div class="setting-group third">
                     <h3>מצב זכייה מובטחת</h3>
                     <label class="checkbox-label">
                         <input type="checkbox" id="guaranteed-win-mode">
