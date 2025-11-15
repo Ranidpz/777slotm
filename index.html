@@ -451,6 +451,35 @@
             userAuthManager.init();
         }
 
+        // ✅ Auto-Initialize Session if opened from Dashboard
+        (async function autoInitSessionFromDashboard() {
+            // בדוק אם יש sessionId ב-localStorage (פתוח מהדשבורד)
+            const savedSessionId = localStorage.getItem('currentSessionId');
+
+            if (savedSessionId && typeof initFirebase === 'function' && typeof createSession === 'function') {
+                console.log('🎯 זוהה פתיחה מדשבורד - מאתחל session אוטומטית');
+                console.log('📱 Session ID מ-dashboard:', savedSessionId);
+
+                // אתחל Firebase
+                const db = initFirebase();
+                if (db) {
+                    // בדוק מה ה-maxAttempts הנוכחי
+                    const maxAttempts = parseInt(localStorage.getItem('maxPlayerAttempts')) || 3;
+
+                    // שמור את ה-sessionId ב-sessionStorage (כמו שעושה getSessionId)
+                    sessionStorage.setItem('slotMachineSessionId', savedSessionId);
+
+                    // צור/עדכן session ב-Firebase
+                    await createSession(savedSessionId, 3, maxAttempts);
+
+                    console.log('✅ Session אותחל אוטומטית - הסטטוס בדשבורד יתעדכן ל-"פעיל"');
+
+                    // נקה מ-localStorage כי כבר הועבר ל-sessionStorage
+                    localStorage.removeItem('currentSessionId');
+                }
+            }
+        })();
+
         // ✅ Protect Settings Buttons - Require Auth
         document.addEventListener('DOMContentLoaded', () => {
             // כפתור שמירת הגדרות
