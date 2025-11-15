@@ -574,6 +574,7 @@ const dynamicImagesManager = {
                     prizesData[img.code] = {
                         code: img.code,
                         name: img.label,
+                        prizeName: img.prizeName || '', // ✅ שם מותאם אישית
                         symbol: img.imageData ? '🖼️' : '🎁', // סמל ברירת מחדל
                         imageUrl: img.imageData, // base64 או blob URL
                         inventory: img.inventory,
@@ -614,6 +615,7 @@ const dynamicImagesManager = {
                     initialInventory: prize.initialInventory,
                     distributedCount: prize.distributedCount || 0, // ✅ NEW
                     label: prize.name,
+                    prizeName: prize.prizeName || '', // ✅ שם מותאם אישית
                     symbolIndex: prize.symbolIndex
                 }));
 
