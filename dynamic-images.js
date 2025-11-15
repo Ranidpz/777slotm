@@ -183,11 +183,17 @@ const dynamicImagesManager = {
                 <div class="distributed-section">
                     <span class="distributed-label">סה״כ חולק:</span>
                     <span class="distributed-value">${distributedCount}</span>
-                    <button class="reset-distributed-btn"
-                            data-image-id="${image.id}"
-                            title="איפוס מונה חלוקה">
-                        🔄
-                    </button>
+                    <svg class="reset-distributed-icon"
+                         data-image-id="${image.id}"
+                         title="איפוס מונה חלוקה"
+                         width="18" height="18"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         style="cursor: pointer; color: #FF9800; transition: all 0.2s ease;">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+                    </svg>
                 </div>
 
                 ${this.images.length > this.minImages ? `
@@ -258,8 +264,10 @@ const dynamicImagesManager = {
             }
 
             // ✅ איפוס מונה חלוקה
-            if (target.classList.contains('reset-distributed-btn')) {
-                const image = this.images.find(img => img.id === imageId);
+            if (target.classList.contains('reset-distributed-icon') || target.closest('.reset-distributed-icon')) {
+                const iconElement = target.classList.contains('reset-distributed-icon') ? target : target.closest('.reset-distributed-icon');
+                const iconImageId = parseFloat(iconElement.getAttribute('data-image-id'));
+                const image = this.images.find(img => img.id === iconImageId);
                 if (image) {
                     if (confirm('האם לאפס את מונה החלוקה?')) {
                         image.distributedCount = 0;

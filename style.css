@@ -643,6 +643,8 @@ body {
     flex-direction: column;
     box-sizing: border-box;
     min-width: 0;
+    max-width: 100%;
+    width: 100%;
 }
 
 .image-upload-item label {
@@ -963,6 +965,9 @@ button:active {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .inventory-header {
@@ -983,6 +988,9 @@ button:active {
     padding: 5px 10px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 5px;
+    gap: 8px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .inventory-label {
@@ -1002,6 +1010,8 @@ button:active {
     display: flex;
     gap: 8px;
     align-items: center;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .inventory-input-new {
@@ -1016,6 +1026,8 @@ button:active {
     font-weight: 600;
     text-align: center;
     transition: all 0.2s ease;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .inventory-input-new:focus {
@@ -1068,6 +1080,9 @@ button:active {
     background: rgba(76, 175, 80, 0.1);
     border-radius: 5px;
     border: 1px solid rgba(76, 175, 80, 0.3);
+    gap: 8px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .distributed-label {
@@ -1082,20 +1097,20 @@ button:active {
     color: #4CAF50;
 }
 
-.reset-distributed-btn {
-    padding: 4px 8px;
-    background: rgba(255, 152, 0, 0.3);
-    border: 1px solid rgba(255, 152, 0, 0.5);
-    border-radius: 4px;
-    color: white;
-    font-size: 1em;
+.reset-distributed-icon {
     cursor: pointer;
+    color: #FF9800;
     transition: all 0.2s ease;
 }
 
-.reset-distributed-btn:hover {
-    background: rgba(255, 152, 0, 0.5);
-    transform: scale(1.1);
+.reset-distributed-icon:hover {
+    color: #FFB74D;
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 6px rgba(255, 152, 0, 0.6));
+}
+
+.reset-distributed-icon:active {
+    transform: scale(1.05);
 }
 
 /* Remove Image Button (New) */
