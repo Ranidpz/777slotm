@@ -327,7 +327,7 @@ const userAuthManager = {
         return sessionStorage.getItem('slotMachineSessionId') || null;
     },
 
-    // צור אירוע חדש מהסשן הנוכחי ועבור לדשבורד
+    // צור אירוע חדש מהסשן הנוכחי והישאר באותו דף
     async createEventFromCurrentSession(user, currentSessionId) {
         console.log('🎉 יוצר אירוע חדש מהסשן הנוכחי...');
 
@@ -345,7 +345,14 @@ const userAuthManager = {
                 }
             }
 
-            const defaultEventName = `אירוע חדש של ${user.displayName || 'שלי'}`;
+            // שם אירוע - תאריך נוכחי
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('he-IL', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            const defaultEventName = `אירוע ב-${dateStr}`;
 
             const newEvent = {
                 name: defaultEventName,
@@ -378,17 +385,22 @@ const userAuthManager = {
 
             console.log('✅ אירוע חדש נוצר:', eventId);
 
-            // הצג הודעה והעבר לדשבורד
-            if (confirm('🎉 אירוע חדש נוצר בהצלחה!\n\nהאם לעבור לדשבורד לניהול האירוע?')) {
-                window.location.href = 'dashboard.html';
-            }
+            // ✅ שמור את ה-eventId ב-localStorage (קישור לאירוע)
+            localStorage.setItem('currentEventId', eventId);
+
+            // ✅ עדכן את ה-URL עם event ו-session (ללא רענון דף!)
+            const newUrl = `${window.location.pathname}?event=${eventId}&session=${currentSessionId}`;
+            window.history.pushState({ eventId, sessionId: currentSessionId }, '', newUrl);
+            console.log('🔗 URL עודכן:', newUrl);
+
+            // ✅ הצג הודעה קטנה ונעימה - לא לעבור לדשבורד!
+            alert(`✅ אירוע "${defaultEventName}" נוצר בהצלחה!\n\nמעכשיו כל שמירה תעדכן את האירוע הזה.`);
+
+            return eventId;
         } catch (error) {
             console.error('❌ שגיאה ביצירת אירוע:', error);
-            alert('⚠️ התחברת בהצלחה, אך הייתה בעיה ביצירת האירוע. נסה ליצור אירוע ידנית בדשבורד.');
-
-            if (confirm('לעבור לדשבורד?')) {
-                window.location.href = 'dashboard.html';
-            }
+            alert('⚠️ התחברת בהצלחה, אך הייתה בעיה ביצירת האירוע.');
+            return null;
         }
     }
 };

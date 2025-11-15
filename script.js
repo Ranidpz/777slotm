@@ -1180,53 +1180,16 @@ document.getElementById('scoreboard-btn').addEventListener('click', () => {
     }
 });
 
-// שמירת הגדרות
-document.getElementById('save-settings').addEventListener('click', () => {
-    // שמור את כל ההגדרות ב-localStorage
-    localStorage.setItem('winFrequency', gameState.winFrequency);
-    localStorage.setItem('randomBonusPercent', gameState.randomBonusPercent);
-    localStorage.setItem('soundEnabled', gameState.soundEnabled);
-    localStorage.setItem('gameMode', gameState.mode);
+// שמירת הגדרות - עכשיו עם בדיקת התחברות ועדכון אירוע!
+document.getElementById('save-settings').addEventListener('click', async () => {
+    console.log('💾 לחיצה על שמור הגדרות...');
 
-    if (gameState.backgroundColor) {
-        localStorage.setItem('backgroundColor', gameState.backgroundColor);
-    }
+    // ✅ קרא למנגנון החדש שמטפל בהכל
+    const success = await eventSettingsManager.saveSettings();
 
-    // שמור מספר WhatsApp
-    if (gameState.whatsappNumber) {
-        localStorage.setItem('whatsappNumber', gameState.whatsappNumber);
-        console.log('📱 מספר WhatsApp נשמר:', gameState.whatsappNumber);
-    }
-
-    // שמור גם את הצלילים המותאמים
-    saveCustomSounds();
-
-    // ✅ הוסר: saveInventory() - המלאי נשמר אוטומטית ב-dynamicImagesManager
-
-    // ✅ שמור פרסים גם ב-Firebase (גיבוי!)
-    if (window.dynamicImagesManager && window.sessionManager && sessionManager.sessionId) {
-        dynamicImagesManager.saveToFirebase(sessionManager.sessionId);
-        console.log('☁️ פרסים נשמרו גם ב-Firebase');
-    }
-
-    // ✅ שמור הגדרות משחק ב-Firebase (גיבוי!)
-    if (window.sessionManager && sessionManager.sessionId) {
-        const gameSettings = {
-            winFrequency: gameState.winFrequency,
-            randomBonusPercent: gameState.randomBonusPercent,
-            soundEnabled: gameState.soundEnabled,
-            gameMode: gameState.mode,
-            backgroundColor: gameState.backgroundColor || '#000000',
-            whatsappNumber: gameState.whatsappNumber || '',
-            qrCustomText: gameState.qrCustomText || '',
-            scrollingBannerText: gameState.scrollingBannerText || '',
-            scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,
-            lastUpdated: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        firebase.database().ref(`sessions/${sessionManager.sessionId}/gameSettings`).set(gameSettings)
-            .then(() => console.log('☁️ הגדרות משחק נשמרו ב-Firebase'))
-            .catch(error => console.error('❌ שגיאה בשמירת הגדרות ב-Firebase:', error));
+    if (!success) {
+        console.log('⚠️ שמירה נכשלה או בוטלה');
+        return;
     }
 
     console.log('✅ ההגדרות נשמרו בהצלחה!');

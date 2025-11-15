@@ -196,6 +196,19 @@ class SessionManager {
   updateUI() {
     if (!this.currentSession) return;
 
+    // ✅ בדוק אם ה-session נסגר מרחוק
+    if (this.currentSession.sessionActive === false) {
+      console.warn('🚨 Session נסגר מרחוק! מעביר למשחק דיפולטי...');
+
+      // הצג הודעה למשתמש
+      alert('⚠️ Session זה נסגר מרחוק.\n\nמעביר אותך למשחק...');
+
+      // נקה את ה-URL והעבר למשחק דיפולטי
+      window.history.replaceState({}, '', window.location.pathname);
+      window.location.reload();
+      return;
+    }
+
     const qrContainer = document.getElementById('qr-container');
     const qrDisplay = document.getElementById('qr-display');
     const playerInfo = document.getElementById('player-info');

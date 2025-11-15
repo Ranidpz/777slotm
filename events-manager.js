@@ -140,9 +140,32 @@ const eventsManager = {
                     // Session פעיל
                     statusBadge.innerHTML = `
                         <span class="status-indicator active"></span>
-                        <span class="status-text">פעיל</span>
+                        <span class="status-text">פעיל (לחץ לניתוק)</span>
                     `;
-                    statusBadge.className = 'session-status-badge active';
+                    statusBadge.className = 'session-status-badge active clickable';
+                    statusBadge.style.cursor = 'pointer';
+
+                    // ✅ הוסף click handler לניתוק session
+                    statusBadge.onclick = async () => {
+                        const confirmDisconnect = confirm('❓ האם אתה בטוח שברצונך לנתק את ה-session?\n\nכל הטאבים הפתוחים יוחזרו למשחק הרגיל.');
+
+                        if (confirmDisconnect) {
+                            try {
+                                // סגור את ה-session
+                                await firebase.database().ref(`sessions/${sessionId}`).update({
+                                    sessionActive: false,
+                                    closedAt: firebase.database.ServerValue.TIMESTAMP,
+                                    closedReason: 'manual_disconnect'
+                                });
+
+                                console.log('✅ Session נותק בהצלחה:', sessionId);
+                                alert('✅ Session נותק בהצלחה!');
+                            } catch (error) {
+                                console.error('❌ שגיאה בניתוק session:', error);
+                                alert('❌ שגיאה בניתוק session. נסה שוב.');
+                            }
+                        }
+                    };
 
                     // הצג מתי נפתח
                     if (sessionData.openedAt) {
