@@ -40,38 +40,51 @@ class SessionManager {
     this.sessionId = getSessionId();
     console.log('📱 Session ID:', this.sessionId);
 
-    // Create session in Firebase
-    await createSession(this.sessionId, 3, maxAttempts);
+    // ✅ צור session ב-Firebase רק אם יש אירוע פעיל (eventId ב-URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('event');
 
-    // ✅ נסה לטעון פרסים מ-Firebase (שחזור אוטומטי!)
-    if (window.dynamicImagesManager) {
-      const loaded = await dynamicImagesManager.loadFromFirebase(this.sessionId);
-      if (loaded) {
-        console.log('☁️ פרסים נטענו מ-Firebase בהצלחה');
-        // עדכן את הגלגלים אם צריך
-        if (typeof applyDynamicImages === 'function') {
-          applyDynamicImages();
+    if (eventId) {
+      console.log('🎯 יש אירוע פעיל - יוצר session:', eventId);
+      await createSession(this.sessionId, 3, maxAttempts);
+    } else {
+      console.log('⚠️ אין אירוע פעיל - לא יוצר session חדש');
+      console.log('💤 משחק במצב דיפולטי (ללא שליטה מרחוק)');
+      return false;
+    }
+
+    // ✅ רק אם יש אירוע פעיל - טען הגדרות והצג QR
+    if (eventId) {
+      // נסה לטעון פרסים מ-Firebase (שחזור אוטומטי!)
+      if (window.dynamicImagesManager) {
+        const loaded = await dynamicImagesManager.loadFromFirebase(this.sessionId);
+        if (loaded) {
+          console.log('☁️ פרסים נטענו מ-Firebase בהצלחה');
+          // עדכן את הגלגלים אם צריך
+          if (typeof applyDynamicImages === 'function') {
+            applyDynamicImages();
+          }
         }
       }
+
+      // Generate QR code
+      this.generateQRCode();
+
+      // Start listening to session changes
+      this.startListening();
+
+      // Add click handler to skip current player
+      this.setupPlayerInfoClickHandler();
+
+      // ✅ עדכן את הפס הנגלל עם זוכים (אחרי שיש sessionId)
+      if (typeof updateScrollingBanner === 'function') {
+        updateScrollingBanner();
+        console.log('📜 פס גלילה עודכן עם sessionId');
+      }
+
+      // ✅ טען הגדרות משחק מ-Firebase (אם קיימות)
+      this.loadGameSettingsFromFirebase();
     }
-
-    // Generate QR code
-    this.generateQRCode();
-
-    // Start listening to session changes
-    this.startListening();
-
-    // Add click handler to skip current player
-    this.setupPlayerInfoClickHandler();
-
-    // ✅ עדכן את הפס הנגלל עם זוכים (אחרי שיש sessionId)
-    if (typeof updateScrollingBanner === 'function') {
-      updateScrollingBanner();
-      console.log('📜 פס גלילה עודכן עם sessionId');
-    }
-
-    // ✅ טען הגדרות משחק מ-Firebase (אם קיימות)
-    this.loadGameSettingsFromFirebase();
 
     return true;
   }
@@ -203,9 +216,13 @@ class SessionManager {
       // הצג הודעה למשתמש
       alert('⚠️ Session זה נסגר מרחוק.\n\nמעביר אותך למשחק...');
 
-      // נקה את ה-URL והעבר למשחק דיפולטי
+      // נקה את ה-URL ונקה localStorage
       window.history.replaceState({}, '', window.location.pathname);
-      window.location.reload();
+      localStorage.removeItem('currentEventId');
+
+      // ✅ במקום reload - פשוט נקה את ה-URL ונשאר בדף
+      // זה ימנע יצירת session חדש כי אין eventId ב-URL
+      window.location.href = window.location.pathname;
       return;
     }
 
