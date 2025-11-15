@@ -396,31 +396,36 @@ function stopReelSmooth(reelIndex, shouldWin = false) {
 
                     dynamicImagesManager.images.forEach((img, idx) => {
                         if (img.imageData !== null && (img.inventory === null || img.inventory > 0)) {
-                            availableSymbols.push(idx);
+                            // ✅ שמור את symbolIndex (המיקום בגליל) ולא idx (המיקום במערך)
+                            availableSymbols.push({
+                                symbolIndex: img.symbolIndex,
+                                arrayIndex: idx
+                            });
                         }
                     });
 
                     if (availableSymbols.length > 0) {
                         // נסה למנוע בחירה של אותו פרס פעמיים ברצף
-                        let selectedSymbol;
+                        let selectedItem;
 
                         if (availableSymbols.length > 1 && gameState.lastWinningSymbol !== null) {
-                            const otherSymbols = availableSymbols.filter(s => s !== gameState.lastWinningSymbol);
+                            const otherSymbols = availableSymbols.filter(s => s.symbolIndex !== gameState.lastWinningSymbol);
 
                             if (otherSymbols.length > 0) {
-                                selectedSymbol = otherSymbols[Math.floor(Math.random() * otherSymbols.length)];
-                                console.log(`🎲 תמונה מותאמת - נמנע מחזרה על פרס ${gameState.lastWinningSymbol}, נבחר ${selectedSymbol}`);
+                                selectedItem = otherSymbols[Math.floor(Math.random() * otherSymbols.length)];
+                                console.log(`🎲 תמונה מותאמת - נמנע מחזרה על פרס ${gameState.lastWinningSymbol}, נבחר ${selectedItem.symbolIndex}`);
                             } else {
-                                selectedSymbol = availableSymbols[0];
+                                selectedItem = availableSymbols[0];
                             }
                         } else {
-                            selectedSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+                            selectedItem = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
                         }
 
-                        gameState.winningSymbol = selectedSymbol;
-                        const inventory = dynamicImagesManager.images[selectedSymbol].inventory;
+                        // ✅ שמור את symbolIndex (המיקום בגליל) ב-winningSymbol
+                        gameState.winningSymbol = selectedItem.symbolIndex;
+                        const inventory = dynamicImagesManager.images[selectedItem.arrayIndex].inventory;
                         const inventoryText = inventory === null ? 'אינסוף' : inventory;
-                        console.log(`🎯 תמונה ${gameState.winningSymbol} נבחרה (מלאי: ${inventoryText})`);
+                        console.log(`🎯 תמונה ${selectedItem.arrayIndex + 1} נבחרה (symbolIndex=${gameState.winningSymbol}, מלאי: ${inventoryText})`);
                     } else {
                         // לא אמור להגיע לכאן בגלל התיקון ב-determineWin
                         gameState.winningSymbol = Math.floor(Math.random() * numSymbols);
@@ -620,22 +625,23 @@ function checkWin() {
             // עדכן מלאי לפי סוג המשחק
             if (isUsingCustomImages() && window.dynamicImagesManager) {
                 // תמונות מותאמות - עדכן דרך dynamicImagesManager
-                // ⚠️ symbolIndex עלול להיות גדול מכמות התמונות (כי התמונות חוזרות על עצמן)
-                // נשתמש ב-modulo כדי למצוא את התמונה המקורית
-                const uploadedImages = dynamicImagesManager.images.filter(img => img.imageData !== null);
-                const actualImageIndex = symbolIndex % uploadedImages.length;
-                const img = uploadedImages[actualImageIndex];
+                // ✅ חפש את התמונה לפי symbolIndex שלה (לא לפי מיקום במערך!)
+                const img = dynamicImagesManager.images.find(i => i.symbolIndex === symbolIndex && i.imageData !== null);
 
-                if (img && img.imageData !== null) {
+                if (img) {
+                    const arrayIndex = dynamicImagesManager.images.indexOf(img);
                     dynamicImagesManager.decrementInventoryBySymbolIndex(symbolIndex);
                     const remaining = img.inventory === null ? null : img.inventory;
-                    console.log(`📦 מלאי תמונה ${symbolIndex} (תמונה מקורית: ${actualImageIndex}) הופחת. נותר: ${remaining === null ? 'אינסוף' : remaining}`);
+                    console.log(`📦 מלאי תמונה ${arrayIndex + 1} (symbolIndex=${symbolIndex}) הופחת. נותר: ${remaining === null ? 'אינסוף' : remaining}`);
 
                     // אם ה-label הוא ברירת מחדל ("תמונה X"), השתמש ב-"פרס" במקום
                     const defaultLabelPattern = /^תמונה \d+$/;
                     prizeDetails.prizeName = (img.label && !defaultLabelPattern.test(img.label)) ? img.label : 'פרס';
                     prizeDetails.remainingInventory = remaining;
                     prizeDetails.symbolDisplay = img.imageData; // ✅ שים את התמונה המקורית
+                    prizeDetails.prizeCode = img.code; // ✅ שים את קוד הפרס
+                } else {
+                    console.error(`❌ לא נמצאה תמונה עם symbolIndex=${symbolIndex}`);
                 }
             } else {
                 // אימוג'ים - אין צורך בעדכון מלאי
