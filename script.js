@@ -1686,7 +1686,7 @@ function initColorPicker() {
     }
 }
 
-// מפת צבעים לגלילים
+// מפת צבעים לגלילים (presets)
 const reelColorSchemes = {
     'metal-gray': {
         light: '#3a3f5c',
@@ -1730,8 +1730,8 @@ const reelColorSchemes = {
     }
 };
 
-// החל צבע גלילים
-function applyReelColor(colorScheme) {
+// החל צבע גלילים מ-preset
+function applyReelColorPreset(colorScheme) {
     const scheme = reelColorSchemes[colorScheme];
     if (!scheme) {
         console.warn('⚠️ סכמת צבע לא קיימת:', colorScheme);
@@ -1743,14 +1743,45 @@ function applyReelColor(colorScheme) {
     root.style.setProperty('--reel-color-mid', scheme.mid);
     root.style.setProperty('--reel-color-dark', scheme.dark);
 
-    console.log('🎨 צבע גלילים עודכן:', colorScheme);
+    console.log('🎨 צבע גלילים עודכן (preset):', colorScheme);
+}
+
+// החל צבע גלילים מותאם (hex color)
+function applyCustomReelColor(color) {
+    if (!isValidColor(color)) {
+        console.warn('⚠️ צבע לא תקין:', color);
+        return;
+    }
+
+    // צור גרסאות מוארות ומוכהות של הצבע
+    const lightColor = lightenColor(color, 15);
+    const darkColor = darkenColor(color, 15);
+
+    const root = document.documentElement;
+    root.style.setProperty('--reel-color-light', lightColor);
+    root.style.setProperty('--reel-color-mid', color);
+    root.style.setProperty('--reel-color-dark', darkColor);
+
+    console.log('🎨 צבע גלילים מותאם עודכן:', color);
+}
+
+// עדכן את ה-color picker
+function updateReelColorPicker(color) {
+    const colorPicker = document.getElementById('reel-color-picker');
+    const colorInput = document.getElementById('reel-color-input');
+    const colorPreview = document.getElementById('reel-color-preview');
+
+    if (colorPicker) colorPicker.value = color;
+    if (colorInput) colorInput.value = color;
+    if (colorPreview) colorPreview.style.backgroundColor = color;
 }
 
 // שמור צבע גלילים
-function saveReelColor(colorScheme) {
+function saveReelColor(color, isPreset = false) {
     try {
-        localStorage.setItem('reelColor', colorScheme);
-        console.log('💾 צבע גלילים נשמר:', colorScheme);
+        localStorage.setItem('reelColor', color);
+        localStorage.setItem('reelColorIsPreset', isPreset ? 'true' : 'false');
+        console.log('💾 צבע גלילים נשמר:', color, isPreset ? '(preset)' : '(custom)');
     } catch (e) {
         console.error('❌ שגיאה בשמירת צבע גלילים:', e);
     }
@@ -1760,15 +1791,41 @@ function saveReelColor(colorScheme) {
 function loadReelColor() {
     try {
         const savedColor = localStorage.getItem('reelColor') || 'metal-gray';
-        applyReelColor(savedColor);
+        const isPreset = localStorage.getItem('reelColorIsPreset') !== 'false'; // ברירת מחדל: true
 
-        // עדכן את הבחירה בהגדרות
-        const radioInput = document.querySelector(`input[name="reel-color"][value="${savedColor}"]`);
-        if (radioInput) {
-            radioInput.checked = true;
+        if (isPreset && reelColorSchemes[savedColor]) {
+            // זה preset
+            applyReelColorPreset(savedColor);
+            const radioInput = document.querySelector(`input[name="reel-color-preset"][value="${savedColor}"]`);
+            if (radioInput) {
+                radioInput.checked = true;
+            }
+            // עדכן את ה-preview עם הצבע מה-preset
+            const scheme = reelColorSchemes[savedColor];
+            if (scheme) {
+                updateReelColorPicker(scheme.mid);
+            }
+        } else if (!isPreset && isValidColor(savedColor)) {
+            // זה צבע מותאם
+            applyCustomReelColor(savedColor);
+            updateReelColorPicker(savedColor);
+            // בטל בחירה מ-presets
+            const checkedRadio = document.querySelector('input[name="reel-color-preset"]:checked');
+            if (checkedRadio) checkedRadio.checked = false;
+        } else {
+            // ברירת מחדל
+            applyReelColorPreset('metal-gray');
+            const radioInput = document.querySelector(`input[name="reel-color-preset"][value="metal-gray"]`);
+            if (radioInput) {
+                radioInput.checked = true;
+            }
+            const scheme = reelColorSchemes['metal-gray'];
+            if (scheme) {
+                updateReelColorPicker(scheme.mid);
+            }
         }
 
-        console.log('📂 צבע גלילים נטען:', savedColor);
+        console.log('📂 צבע גלילים נטען:', savedColor, isPreset ? '(preset)' : '(custom)');
         return savedColor;
     } catch (e) {
         console.error('❌ שגיאה בטעינת צבע גלילים:', e);
@@ -1778,13 +1835,83 @@ function loadReelColor() {
 
 // אתחול בחירת צבע גלילים
 function initReelColorPicker() {
-    const reelColorRadios = document.querySelectorAll('input[name="reel-color"]');
+    const reelColorPicker = document.getElementById('reel-color-picker');
+    const reelColorInput = document.getElementById('reel-color-input');
+    const reelColorPreview = document.getElementById('reel-color-preview');
+    const reelColorRadios = document.querySelectorAll('input[name="reel-color-preset"]');
 
+    // color picker
+    if (reelColorPicker) {
+        reelColorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            applyCustomReelColor(color);
+            updateReelColorPicker(color);
+            saveReelColor(color, false);
+
+            // בטל בחירה מ-presets
+            const checkedRadio = document.querySelector('input[name="reel-color-preset"]:checked');
+            if (checkedRadio) checkedRadio.checked = false;
+        });
+    }
+
+    // קלט ידני של צבע
+    if (reelColorInput) {
+        reelColorInput.addEventListener('input', (e) => {
+            let color = e.target.value.trim();
+
+            // אם לא מתחיל ב-#, הוסף אותו
+            if (color && !color.startsWith('#')) {
+                color = '#' + color;
+                reelColorInput.value = color;
+            }
+
+            // אם זה צבע תקין, עדכן
+            if (isValidColor(color)) {
+                applyCustomReelColor(color);
+                updateReelColorPicker(color);
+                saveReelColor(color, false);
+                reelColorInput.style.borderColor = 'rgba(255, 215, 0, 0.5)';
+
+                // בטל בחירה מ-presets
+                const checkedRadio = document.querySelector('input[name="reel-color-preset"]:checked');
+                if (checkedRadio) checkedRadio.checked = false;
+            } else if (color.length >= 7) {
+                // צבע לא תקין
+                reelColorInput.style.borderColor = '#ff6b6b';
+            }
+        });
+
+        // כשיוצאים מהשדה
+        reelColorInput.addEventListener('blur', (e) => {
+            const color = e.target.value.trim();
+            if (!isValidColor(color)) {
+                // אם לא תקין, חזור לצבע השמור
+                const savedColor = localStorage.getItem('reelColor') || '#2d3250';
+                reelColorInput.value = savedColor;
+                reelColorInput.style.borderColor = 'rgba(255, 215, 0, 0.3)';
+            }
+        });
+    }
+
+    // לחיצה על ה-preview פותחת את ה-color picker
+    if (reelColorPreview) {
+        reelColorPreview.addEventListener('click', () => {
+            if (reelColorPicker) reelColorPicker.click();
+        });
+    }
+
+    // presets (radio buttons)
     reelColorRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             const colorScheme = e.target.value;
-            applyReelColor(colorScheme);
-            saveReelColor(colorScheme);
+            applyReelColorPreset(colorScheme);
+            saveReelColor(colorScheme, true);
+
+            // עדכן את ה-preview עם הצבע מה-preset
+            const scheme = reelColorSchemes[colorScheme];
+            if (scheme) {
+                updateReelColorPicker(scheme.mid);
+            }
         });
     });
 

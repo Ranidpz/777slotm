@@ -262,45 +262,57 @@
             <!-- שורה חדשה: צבע גלילים -->
             <div class="setting-group">
                 <h3>🎨 צבע הגלילים</h3>
-                <p class="setting-description">בחר את צבע רקע הגלילים במסך ההגרלה</p>
+
+                <!-- Color Picker -->
+                <div class="color-picker-container">
+                    <input type="color" id="reel-color-picker" value="#2d3250" hidden>
+                    <label for="reel-color-picker" class="color-picker-label">
+                        <div class="color-preview" id="reel-color-preview"></div>
+                        <span>בחר צבע</span>
+                    </label>
+                    <input type="text" id="reel-color-input" placeholder="#2d3250" maxlength="7">
+                </div>
+
+                <!-- אפשרויות צבע מוכנות -->
+                <p class="setting-description" style="margin-top: 15px;">או בחר מהאפשרויות המוכנות:</p>
                 <div class="reel-color-options">
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="metal-gray" checked>
+                        <input type="radio" name="reel-color-preset" value="metal-gray" checked>
                         <span class="color-swatch" style="background: linear-gradient(180deg, #3a3f5c 0%, #252a42 50%, #3a3f5c 100%);"></span>
                         <span class="color-name">אפור מטאלי</span>
                     </label>
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="gold">
+                        <input type="radio" name="reel-color-preset" value="gold">
                         <span class="color-swatch" style="background: linear-gradient(180deg, #d4af37 0%, #c9a227 50%, #d4af37 100%);"></span>
                         <span class="color-name">זהב</span>
                     </label>
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="silver">
+                        <input type="radio" name="reel-color-preset" value="silver">
                         <span class="color-swatch" style="background: linear-gradient(180deg, #c0c0c0 0%, #a8a8a8 50%, #c0c0c0 100%);"></span>
                         <span class="color-name">כסף</span>
                     </label>
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="red">
+                        <input type="radio" name="reel-color-preset" value="red">
                         <span class="color-swatch" style="background: linear-gradient(180deg, #8b0000 0%, #660000 50%, #8b0000 100%);"></span>
                         <span class="color-name">אדום כהה</span>
                     </label>
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="blue">
+                        <input type="radio" name="reel-color-preset" value="blue">
                         <span class="color-swatch" style="background: linear-gradient(180deg, #1e3a8a 0%, #1e293b 50%, #1e3a8a 100%);"></span>
                         <span class="color-name">כחול עמוק</span>
                     </label>
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="green">
+                        <input type="radio" name="reel-color-preset" value="green">
                         <span class="color-swatch" style="background: linear-gradient(180deg, #065f46 0%, #064e3b 50%, #065f46 100%);"></span>
                         <span class="color-name">ירוק</span>
                     </label>
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="purple">
+                        <input type="radio" name="reel-color-preset" value="purple">
                         <span class="color-swatch" style="background: linear-gradient(180deg, #6b21a8 0%, #581c87 50%, #6b21a8 100%);"></span>
                         <span class="color-name">סגול</span>
                     </label>
                     <label class="reel-color-option">
-                        <input type="radio" name="reel-color" value="bronze">
+                        <input type="radio" name="reel-color-preset" value="bronze">
                         <span class="color-swatch" style="background: linear-gradient(180deg, #cd7f32 0%, #b87333 50%, #cd7f32 100%);"></span>
                         <span class="color-name">ברונזה</span>
                     </label>
