@@ -106,6 +106,41 @@
         <div class="scrolling-text" id="scrolling-text"></div>
     </div>
 
+    <!-- Simple Win Screen (no WhatsApp) -->
+    <div id="simple-win-popup" class="hidden">
+        <div class="simple-win-content">
+            <div id="simple-winner-name-display" class="winner-name-display" style="color: #44ff44; font-size: 2.5em; font-weight: 800; text-align: center; margin-bottom: 25px; text-shadow: 0 0 30px rgba(68, 255, 68, 0.7);"></div>
+
+            <h1 class="simple-win-title">Congratulations!</h1>
+            <p class="simple-win-subtitle">Please collect your prize at the counter</p>
+
+            <!-- Prize Display -->
+            <div id="simple-prize-display" style="display: none; text-align: center; margin: 30px 0;">
+                <div id="simple-prize-image-container" style="display: none; margin: 20px auto;">
+                    <img id="simple-prize-image" src="" alt="תמונת הפרס" style="max-width: 300px; max-height: 300px; border-radius: 15px; box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); border: 3px solid #ffd700;">
+                </div>
+                <p id="simple-prize-name" style="font-size: 2.5em; font-weight: 800; color: #ffd700; margin: 20px 0; text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);"></p>
+            </div>
+
+            <!-- WhatsApp QR in Simple Mode (if enabled) -->
+            <div id="simple-whatsapp-section" style="display: none; margin: 30px 0;">
+                <div id="simple-qr-code-container" style="background: white; padding: 15px; border-radius: 10px; display: inline-block; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); margin: 10px 0;">
+                    <!-- QR code will be inserted here -->
+                </div>
+                <p style="color: #ffd700; font-size: 1.2em; margin-top: 15px; font-weight: 600;">סרוק לשליחת הודעת זכייה בוואטסאפ 📱</p>
+            </div>
+
+            <p class="simple-win-footer">THE FUTURE OF GAMING</p>
+
+            <!-- Powered by Playzone -->
+            <div class="simple-win-powered-by">
+                <span>Powered by</span>
+                <a href="https://playzone.co.il" target="_blank" rel="noopener">Playzone</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Win Screen (with WhatsApp QR) -->
     <div id="qr-popup" class="hidden">
         <div class="qr-content">
             <div id="winner-name-display" class="winner-name-display" style="color: #44ff44; font-size: 2em; font-weight: 800; text-align: center; margin-bottom: 15px; text-shadow: 0 0 20px rgba(68, 255, 68, 0.5);"></div>
@@ -224,6 +259,56 @@
 
             <div class="settings-divider"></div>
 
+            <!-- שורה חדשה: צבע גלילים -->
+            <div class="setting-group">
+                <h3>🎨 צבע הגלילים</h3>
+                <p class="setting-description">בחר את צבע רקע הגלילים במסך ההגרלה</p>
+                <div class="reel-color-options">
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="metal-gray" checked>
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #3a3f5c 0%, #252a42 50%, #3a3f5c 100%);"></span>
+                        <span class="color-name">אפור מטאלי</span>
+                    </label>
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="gold">
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #d4af37 0%, #c9a227 50%, #d4af37 100%);"></span>
+                        <span class="color-name">זהב</span>
+                    </label>
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="silver">
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #c0c0c0 0%, #a8a8a8 50%, #c0c0c0 100%);"></span>
+                        <span class="color-name">כסף</span>
+                    </label>
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="red">
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #8b0000 0%, #660000 50%, #8b0000 100%);"></span>
+                        <span class="color-name">אדום כהה</span>
+                    </label>
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="blue">
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #1e3a8a 0%, #1e293b 50%, #1e3a8a 100%);"></span>
+                        <span class="color-name">כחול עמוק</span>
+                    </label>
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="green">
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #065f46 0%, #064e3b 50%, #065f46 100%);"></span>
+                        <span class="color-name">ירוק</span>
+                    </label>
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="purple">
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #6b21a8 0%, #581c87 50%, #6b21a8 100%);"></span>
+                        <span class="color-name">סגול</span>
+                    </label>
+                    <label class="reel-color-option">
+                        <input type="radio" name="reel-color" value="bronze">
+                        <span class="color-swatch" style="background: linear-gradient(180deg, #cd7f32 0%, #b87333 50%, #cd7f32 100%);"></span>
+                        <span class="color-name">ברונזה</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-divider"></div>
+
             <!-- שורה 2: צלילים -->
             <div class="setting-group">
                 <h3>צלילים</h3>
@@ -287,8 +372,18 @@
 
             <div class="settings-divider"></div>
 
-            <!-- שורה: WhatsApp + טקסט QR -->
+            <!-- שורה: מסך זכייה + WhatsApp + טקסט QR -->
             <div class="settings-row">
+                <div class="setting-group third">
+                    <h3>🎉 מצב מסך זכייה</h3>
+                    <p class="setting-description">בחר כיצד להציג את מסך הזכייה</p>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="simple-win-screen">
+                        <span>מסך זכייה פשוט (ללא WhatsApp)</span>
+                    </label>
+                    <p class="setting-note" style="margin-top: 8px; font-size: 0.9em; color: #999;">סימון = מסך פשוט עם הפרס בלבד<br>ביטול = מסך מלא עם WhatsApp (אם הוזן מספר)</p>
+                </div>
+
                 <div class="setting-group third">
                     <h3>הודעת WhatsApp בזכייה</h3>
                     <p class="setting-description">הזן מספר (עם קידומת: 972501234567)</p>

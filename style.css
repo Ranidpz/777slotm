@@ -27,17 +27,98 @@ body {
     padding: 0;
     justify-content: center;
     align-items: stretch;
+    background: #0a0a0a;
 }
 
 .reel-container {
     flex: 1;
     height: 100vh;
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    /* רקע גליל - צבע דינמי עם אפקט תלת-ממד */
+    background:
+        linear-gradient(90deg,
+            rgba(0, 0, 0, 0.4) 0%,
+            rgba(0, 0, 0, 0) 5%,
+            rgba(0, 0, 0, 0) 95%,
+            rgba(0, 0, 0, 0.4) 100%
+        ),
+        linear-gradient(180deg,
+            var(--reel-color-light, #3a3f5c) 0%,
+            var(--reel-color-mid, #2d3250) 15%,
+            var(--reel-color-dark, #252a42) 50%,
+            var(--reel-color-mid, #2d3250) 85%,
+            var(--reel-color-light, #3a3f5c) 100%
+        );
     border-radius: 0;
     box-shadow: none;
     overflow: hidden;
     position: relative;
-    border: none;
+    /* פס הפרדה שחור בין הגלילים */
+    border-left: 3px solid #000000;
+    border-right: 3px solid #000000;
+    /* אפקט עומק תלת-ממדי */
+    box-shadow:
+        inset 6px 0 12px rgba(0, 0, 0, 0.6),
+        inset -6px 0 12px rgba(0, 0, 0, 0.6),
+        inset 0 6px 12px rgba(0, 0, 0, 0.4),
+        inset 0 -6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* הגליל הראשון - ללא border שמאלי */
+.reel-container:first-child {
+    border-left: none;
+}
+
+/* הגליל האחרון - ללא border ימני */
+.reel-container:last-child {
+    border-right: none;
+}
+
+/* אפקט ברק על הגלילים */
+.reel-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.03) 50%,
+        transparent 100%
+    );
+    animation: shine 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes shine {
+    0%, 100% {
+        left: -50%;
+        opacity: 0;
+    }
+    50% {
+        left: 100%;
+        opacity: 1;
+    }
+}
+
+/* קווי הבהוב בצדדים */
+.reel-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background:
+        linear-gradient(90deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 2%,
+            transparent 98%,
+            rgba(255, 255, 255, 0.1) 100%
+        );
+    pointer-events: none;
+    z-index: 5;
 }
 
 .reel {
@@ -55,11 +136,15 @@ body {
     justify-content: center;
     align-items: center;
     font-size: clamp(60px, 12vmin, 200px);
-    background: linear-gradient(180deg, #2d3561 0%, #1f2544 100%);
+    /* רקע שקוף - הסמלים יושבים על הגליל */
+    background: transparent;
+    /* קו הפרדה עדין בין סמלים */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     text-shadow:
         0 0 20px rgba(255, 215, 0, 0.6),
         0 0 40px rgba(255, 215, 0, 0.4),
-        0 0 60px rgba(255, 215, 0, 0.2);
+        0 0 60px rgba(255, 215, 0, 0.2),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* רספונסיבי למובייל - text-shadow מופחת לביצועים */
@@ -573,6 +658,89 @@ body {
     color: rgba(255, 255, 255, 0.4);
 }
 
+/* בחירת צבע גלילים */
+.reel-color-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.reel-color-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.reel-color-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 215, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.reel-color-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.reel-color-option input[type="radio"]:checked + .color-swatch {
+    box-shadow:
+        0 0 0 3px rgba(255, 215, 0, 0.6),
+        0 4px 15px rgba(255, 215, 0, 0.4);
+    transform: scale(1.05);
+}
+
+.reel-color-option input[type="radio"]:checked ~ .color-name {
+    color: #ffd700;
+    font-weight: 700;
+}
+
+.color-swatch {
+    width: 100%;
+    height: 50px;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: inset 3px 0 8px rgba(0, 0, 0, 0.4),
+                inset -3px 0 8px rgba(0, 0, 0, 0.4);
+}
+
+.color-name {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .reel-color-options {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .reel-color-option {
+        padding: 10px;
+    }
+
+    .color-swatch {
+        height: 40px;
+    }
+
+    .color-name {
+        font-size: 12px;
+    }
+}
+
 .small-btn {
     padding: 12px 20px;
     font-size: 0.9em;
@@ -626,22 +794,29 @@ body {
 /* גריד העלאת תמונות - מינימליסטי */
 .image-upload-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 10px;
     margin-bottom: 20px;
     width: 100%;
 }
 
+@media (max-width: 1200px) {
+    .image-upload-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+}
+
 @media (max-width: 768px) {
     .image-upload-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 8px;
     }
 }
 
 @media (max-width: 480px) {
     .image-upload-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 6px;
     }
 }
@@ -651,15 +826,7 @@ body {
     flex-direction: column;
     box-sizing: border-box;
     min-width: 0;
-    max-width: 150px;
-    width: 150px;
-}
-
-@media (max-width: 480px) {
-    .image-upload-item {
-        max-width: 140px;
-        width: 140px;
-    }
+    width: 100%;
 }
 
 .image-upload-item label {
@@ -2207,6 +2374,118 @@ input:checked + .toggle-slider:before {
 }
 
 /* QR Code Popup */
+/* Simple Win Screen Styles */
+#simple-win-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f0c29 50%, #302b63 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+#simple-win-popup.hidden {
+    display: none;
+    animation: none;
+}
+
+.simple-win-content {
+    text-align: center;
+    padding: 60px 40px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+    box-shadow:
+        0 0 80px rgba(255, 215, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border: 4px solid rgba(255, 215, 0, 0.6);
+    transform: scale(0.5);
+    animation: popIn 0.5s ease-out 0.2s forwards;
+    max-width: 800px;
+    width: 80%;
+}
+
+.simple-win-title {
+    font-size: 5em;
+    font-weight: 900;
+    color: #ffd700;
+    margin: 0 0 20px 0;
+    text-shadow:
+        0 0 30px rgba(255, 215, 0, 0.8),
+        0 0 60px rgba(255, 215, 0, 0.6),
+        0 5px 15px rgba(0, 0, 0, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+    font-family: 'Assistant', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 2px;
+}
+
+.simple-win-subtitle {
+    font-size: 2em;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 40px 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    font-family: 'Assistant', sans-serif;
+}
+
+.simple-win-footer {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #ffd700;
+    margin: 40px 0 20px 0;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    letter-spacing: 3px;
+    font-family: 'Assistant', sans-serif;
+}
+
+.simple-win-powered-by {
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: #999;
+    font-family: 'Assistant', sans-serif;
+}
+
+.simple-win-powered-by span {
+    margin-left: 5px;
+}
+
+.simple-win-powered-by a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.simple-win-powered-by a:hover {
+    color: #fff;
+}
+
+/* Responsive adjustments for simple win screen */
+@media (max-width: 768px) {
+    .simple-win-content {
+        width: 90%;
+        padding: 40px 20px;
+    }
+
+    .simple-win-title {
+        font-size: 3em;
+    }
+
+    .simple-win-subtitle {
+        font-size: 1.5em;
+    }
+
+    .simple-win-footer {
+        font-size: 1.3em;
+    }
+}
+
+/* Full Win Screen (QR Popup) */
 #qr-popup {
     position: fixed;
     top: 0;

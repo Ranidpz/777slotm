@@ -13,6 +13,7 @@ const gameState = {
     soundEnabled: true, // האם צלילים מופעלים
     backgroundColor: '#242424', // צבע הרקע ברירת מחדל
     whatsappNumber: '', // מספר WhatsApp להצגת QR code בזכייה
+    simpleWinScreen: false, // מסך זכייה פשוט (true) או מלא עם QR (false)
     customSounds: { // צלילים מותאמים אישית
         spin: null,
         win: null,
@@ -781,6 +782,113 @@ function checkWin() {
 
 // הצג QR code אם הוגדר מספר WhatsApp
 function showQRCodeIfNeeded() {
+    // בדוק אם להציג מסך פשוט או מלא
+    if (gameState.simpleWinScreen) {
+        // מסך זכייה פשוט
+        showSimpleWinScreen();
+    } else {
+        // מסך זכייה מלא עם WhatsApp (אם הוגדר)
+        showFullWinScreen();
+    }
+}
+
+// הצג מסך זכייה פשוט
+function showSimpleWinScreen() {
+    const simpleWinPopup = document.getElementById('simple-win-popup');
+    const simplePrizeDisplay = document.getElementById('simple-prize-display');
+    const simplePrizeName = document.getElementById('simple-prize-name');
+    const simplePrizeImageContainer = document.getElementById('simple-prize-image-container');
+    const simplePrizeImage = document.getElementById('simple-prize-image');
+    const simpleWinnerNameDisplay = document.getElementById('simple-winner-name-display');
+    const simpleWhatsappSection = document.getElementById('simple-whatsapp-section');
+    const simpleQrContainer = document.getElementById('simple-qr-code-container');
+
+    if (!simpleWinPopup) {
+        console.error('❌ לא נמצא אלמנט simple-win-popup');
+        return;
+    }
+
+    // הצג פרטי פרס
+    if (gameState.lastWinPrizeDetails) {
+        const prizeDetails = gameState.lastWinPrizeDetails;
+
+        // הצג שם הפרס
+        if (simplePrizeName && prizeDetails.prizeName) {
+            simplePrizeName.textContent = prizeDetails.prizeName;
+            simplePrizeDisplay.style.display = 'block';
+            console.log(`🏆 מציג שם פרס במסך פשוט: ${prizeDetails.prizeName}`);
+        }
+
+        // הצג תמונת פרס
+        const symbolDisplay = prizeDetails.symbolDisplay;
+        const isValidImage = symbolDisplay &&
+                            (symbolDisplay.startsWith('http') ||
+                             symbolDisplay.startsWith('data:image') ||
+                             symbolDisplay.startsWith('blob:'));
+
+        if (simplePrizeImage && simplePrizeImageContainer && isValidImage) {
+            simplePrizeImage.src = symbolDisplay;
+            simplePrizeImageContainer.style.display = 'block';
+            console.log('🖼️ תמונת פרס הוצגה במסך פשוט:', symbolDisplay);
+        } else if (simplePrizeImageContainer) {
+            simplePrizeImageContainer.style.display = 'none';
+        }
+    }
+
+    // הצג שם שחקן (אם יש)
+    if (simpleWinnerNameDisplay && window.sessionManager) {
+        const playerId = sessionManager.currentSpinPlayerId;
+        if (playerId) {
+            firebase.database().ref(`sessions/${sessionManager.sessionId}/players/${playerId}`).once('value').then(snapshot => {
+                const player = snapshot.val();
+                if (player && player.name && (player.status === 'showing_result' || player.status === 'finished')) {
+                    simpleWinnerNameDisplay.textContent = player.name;
+                    simpleWinnerNameDisplay.style.display = 'block';
+                    console.log(`🏆 מציג שם זוכה במסך פשוט: ${player.name}`);
+                } else {
+                    simpleWinnerNameDisplay.style.display = 'none';
+                }
+            }).catch(error => {
+                console.error('❌ Error fetching player:', error);
+                simpleWinnerNameDisplay.style.display = 'none';
+            });
+        } else {
+            simpleWinnerNameDisplay.style.display = 'none';
+        }
+    }
+
+    // הצג WhatsApp QR במסך פשוט אם יש מספר
+    const whatsappNumber = gameState.whatsappNumber.trim();
+    if (whatsappNumber && simpleWhatsappSection && simpleQrContainer) {
+        // נקה תוכן קודם
+        simpleQrContainer.innerHTML = '';
+
+        // יצור QR code
+        const message = encodeURIComponent('היי! זכיתי במכונת המזל! 🎰🎉');
+        const whatsappURL = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+        const qrSize = 200;
+        const qrImage = document.createElement('img');
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(whatsappURL)}`;
+        qrImage.alt = 'QR Code for WhatsApp';
+        qrImage.style.maxWidth = '100%';
+        qrImage.style.height = 'auto';
+
+        simpleQrContainer.appendChild(qrImage);
+        simpleWhatsappSection.style.display = 'block';
+        console.log('📱 WhatsApp QR הוצג במסך פשוט');
+    } else if (simpleWhatsappSection) {
+        simpleWhatsappSection.style.display = 'none';
+    }
+
+    // הצג את המסך
+    simpleWinPopup.classList.remove('hidden');
+    gameState.qrPopupVisible = true;
+    console.log('🎉 מסך זכייה פשוט מוצג');
+}
+
+// הצג מסך זכייה מלא עם WhatsApp
+function showFullWinScreen() {
     // ✅ הצג פרטי פרס (שם + תמונה)
     const mainPrizeDisplay = document.getElementById('main-prize-display');
     const mainPrizeName = document.getElementById('main-prize-name');
@@ -916,22 +1024,29 @@ function updateQRCustomMessage() {
 // סגירת QR popup
 function closeQRPopup() {
     const qrPopup = document.getElementById('qr-popup');
+    const simpleWinPopup = document.getElementById('simple-win-popup');
+
     if (qrPopup) {
         qrPopup.classList.add('hidden');
-        gameState.qrPopupVisible = false;
+    }
 
-        // 🔓 שחרר את נעילת מסך הזכייה רק אם עברו 3 שניות
-        const timeLeft = Math.max(0, gameState.winScreenUnlockTime - Date.now());
-        if (timeLeft > 0) {
-            console.log(`⏰ נא להמתין עוד ${Math.ceil(timeLeft / 1000)} שניות לפני סיבוב הבא`);
-            setTimeout(() => {
-                gameState.isWinScreenLocked = false;
-                console.log('🔓 מסך זכייה משוחרר - מוכן למשחק הבא');
-            }, timeLeft);
-        } else {
+    if (simpleWinPopup) {
+        simpleWinPopup.classList.add('hidden');
+    }
+
+    gameState.qrPopupVisible = false;
+
+    // 🔓 שחרר את נעילת מסך הזכייה רק אם עברו 3 שניות
+    const timeLeft = Math.max(0, gameState.winScreenUnlockTime - Date.now());
+    if (timeLeft > 0) {
+        console.log(`⏰ נא להמתין עוד ${Math.ceil(timeLeft / 1000)} שניות לפני סיבוב הבא`);
+        setTimeout(() => {
             gameState.isWinScreenLocked = false;
             console.log('🔓 מסך זכייה משוחרר - מוכן למשחק הבא');
-        }
+        }, timeLeft);
+    } else {
+        gameState.isWinScreenLocked = false;
+        console.log('🔓 מסך זכייה משוחרר - מוכן למשחק הבא');
     }
 }
 
@@ -1571,6 +1686,112 @@ function initColorPicker() {
     }
 }
 
+// מפת צבעים לגלילים
+const reelColorSchemes = {
+    'metal-gray': {
+        light: '#3a3f5c',
+        mid: '#2d3250',
+        dark: '#252a42'
+    },
+    'gold': {
+        light: '#d4af37',
+        mid: '#c9a227',
+        dark: '#b8941f'
+    },
+    'silver': {
+        light: '#c0c0c0',
+        mid: '#a8a8a8',
+        dark: '#909090'
+    },
+    'red': {
+        light: '#8b0000',
+        mid: '#660000',
+        dark: '#4d0000'
+    },
+    'blue': {
+        light: '#1e3a8a',
+        mid: '#1e293b',
+        dark: '#0f172a'
+    },
+    'green': {
+        light: '#065f46',
+        mid: '#064e3b',
+        dark: '#053b2f'
+    },
+    'purple': {
+        light: '#6b21a8',
+        mid: '#581c87',
+        dark: '#4c1d95'
+    },
+    'bronze': {
+        light: '#cd7f32',
+        mid: '#b87333',
+        dark: '#a0522d'
+    }
+};
+
+// החל צבע גלילים
+function applyReelColor(colorScheme) {
+    const scheme = reelColorSchemes[colorScheme];
+    if (!scheme) {
+        console.warn('⚠️ סכמת צבע לא קיימת:', colorScheme);
+        return;
+    }
+
+    const root = document.documentElement;
+    root.style.setProperty('--reel-color-light', scheme.light);
+    root.style.setProperty('--reel-color-mid', scheme.mid);
+    root.style.setProperty('--reel-color-dark', scheme.dark);
+
+    console.log('🎨 צבע גלילים עודכן:', colorScheme);
+}
+
+// שמור צבע גלילים
+function saveReelColor(colorScheme) {
+    try {
+        localStorage.setItem('reelColor', colorScheme);
+        console.log('💾 צבע גלילים נשמר:', colorScheme);
+    } catch (e) {
+        console.error('❌ שגיאה בשמירת צבע גלילים:', e);
+    }
+}
+
+// טען צבע גלילים שמור
+function loadReelColor() {
+    try {
+        const savedColor = localStorage.getItem('reelColor') || 'metal-gray';
+        applyReelColor(savedColor);
+
+        // עדכן את הבחירה בהגדרות
+        const radioInput = document.querySelector(`input[name="reel-color"][value="${savedColor}"]`);
+        if (radioInput) {
+            radioInput.checked = true;
+        }
+
+        console.log('📂 צבע גלילים נטען:', savedColor);
+        return savedColor;
+    } catch (e) {
+        console.error('❌ שגיאה בטעינת צבע גלילים:', e);
+        return 'metal-gray';
+    }
+}
+
+// אתחול בחירת צבע גלילים
+function initReelColorPicker() {
+    const reelColorRadios = document.querySelectorAll('input[name="reel-color"]');
+
+    reelColorRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const colorScheme = e.target.value;
+            applyReelColor(colorScheme);
+            saveReelColor(colorScheme);
+        });
+    });
+
+    // טען צבע שמור
+    loadReelColor();
+}
+
 // שמור תמונות ב-localStorage
 function saveImagesToStorage() {
     try {
@@ -1777,6 +1998,17 @@ function loadSettings() {
         console.log('📱 מספר WhatsApp נטען:', savedWhatsApp);
     }
 
+    // טען מצב מסך זכייה פשוט
+    const savedSimpleWinScreen = localStorage.getItem('simpleWinScreen');
+    if (savedSimpleWinScreen !== null) {
+        gameState.simpleWinScreen = savedSimpleWinScreen === 'true';
+        const simpleWinCheckbox = document.getElementById('simple-win-screen');
+        if (simpleWinCheckbox) {
+            simpleWinCheckbox.checked = gameState.simpleWinScreen;
+        }
+        console.log('🎉 מצב מסך זכייה פשוט נטען:', gameState.simpleWinScreen);
+    }
+
     // טען טקסט מותאם ל-QR
     const savedCustomText = localStorage.getItem('qrCustomText');
     if (savedCustomText) {
@@ -1819,6 +2051,26 @@ function loadSettings() {
         if (fontSizeValue) fontSizeValue.textContent = gameState.scrollingBannerFontSize;
         updateScrollingBanner();
         console.log(`📏 גודל גופן נגלל נטען: ${gameState.scrollingBannerFontSize}px`);
+    }
+}
+
+// הגדרת מאזינים למסך זכייה פשוט
+function setupSimpleWinScreenToggle() {
+    const simpleWinCheckbox = document.getElementById('simple-win-screen');
+
+    if (simpleWinCheckbox) {
+        simpleWinCheckbox.addEventListener('change', (e) => {
+            gameState.simpleWinScreen = e.target.checked;
+            localStorage.setItem('simpleWinScreen', gameState.simpleWinScreen);
+            console.log('🎉 מצב מסך זכייה פשוט עודכן:', gameState.simpleWinScreen ? 'פשוט' : 'מלא');
+
+            // עדכן גם ב-Firebase אם יש session פעיל
+            if (window.sessionManager && sessionManager.sessionId) {
+                firebase.database().ref(`sessions/${sessionManager.sessionId}/settings/simpleWinScreen`).set(gameState.simpleWinScreen)
+                    .then(() => console.log('🎉 מצב מסך זכייה עודכן ב-Firebase'))
+                    .catch((error) => console.error('❌ שגיאה בעדכון מסך זכייה ב-Firebase:', error));
+            }
+        });
     }
 }
 
@@ -2042,6 +2294,7 @@ function setupBannerFontSizeControl() {
 // הגדר סגירת QR בלחיצה על המסך
 function setupQRPopupClose() {
     const qrPopup = document.getElementById('qr-popup');
+    const simpleWinPopup = document.getElementById('simple-win-popup');
 
     if (qrPopup) {
         // סגור בלחיצת עכבר
@@ -2053,6 +2306,23 @@ function setupQRPopupClose() {
 
         // סגור במגע
         qrPopup.addEventListener('touchstart', (e) => {
+            if (gameState.qrPopupVisible) {
+                e.preventDefault();
+                closeQRPopup();
+            }
+        }, { passive: false });
+    }
+
+    if (simpleWinPopup) {
+        // סגור מסך זכייה פשוט בלחיצת עכבר
+        simpleWinPopup.addEventListener('click', () => {
+            if (gameState.qrPopupVisible) {
+                closeQRPopup();
+            }
+        });
+
+        // סגור במגע
+        simpleWinPopup.addEventListener('touchstart', (e) => {
             if (gameState.qrPopupVisible) {
                 e.preventDefault();
                 closeQRPopup();
@@ -2220,11 +2490,13 @@ if (window.dynamicImagesManager) {
 loadImagesFromStorage(); // טען תמונות שמורות (מערכת ישנה - לתאימות)
 // ✅ הוסר: loadInventory() - המלאי נטען אוטומטית ב-dynamicImagesManager
 initColorPicker(); // אתחל color picker
+initReelColorPicker(); // אתחל בחירת צבע גלילים
 initReels();
 loadBackgroundColor(); // טען צבע רקע שמור - אחרי initReels כדי שהצבע יוחל על הסמלים
 manageTutorial(); // נהל את המדריך
 setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
 // ✅ הוסר: setupInventoryInputs() - ממשק המלאי נמצא ב-dynamicImagesManager
+setupSimpleWinScreenToggle(); // הגדר צ'ק בוקס מסך זכייה פשוט
 setupWhatsAppInput(); // הגדר שדה WhatsApp
 setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
 setupScrollingBannerInput(); // הגדר שדה טקסט נגלל

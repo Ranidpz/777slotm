@@ -142,6 +142,8 @@ const eventSettingsManager = {
             localStorage.setItem('whatsappNumber', gameState.whatsappNumber);
         }
 
+        localStorage.setItem('simpleWinScreen', gameState.simpleWinScreen);
+
         // שמור צלילים מותאמים
         if (typeof saveCustomSounds === 'function') {
             saveCustomSounds();
@@ -173,6 +175,7 @@ const eventSettingsManager = {
             gameMode: gameState.mode,
             backgroundColor: gameState.backgroundColor || '#000000',
             whatsappNumber: gameState.whatsappNumber || '',
+            simpleWinScreen: gameState.simpleWinScreen || false,
             qrCustomText: gameState.qrCustomText || '',
             scrollingBannerText: gameState.scrollingBannerText || '',
             scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,

@@ -106,6 +106,7 @@ class SessionManager {
           if (settings.gameMode !== undefined) gameState.mode = settings.gameMode;
           if (settings.backgroundColor) gameState.backgroundColor = settings.backgroundColor;
           if (settings.whatsappNumber) gameState.whatsappNumber = settings.whatsappNumber;
+          if (settings.simpleWinScreen !== undefined) gameState.simpleWinScreen = settings.simpleWinScreen;
           if (settings.qrCustomText) gameState.qrCustomText = settings.qrCustomText;
           if (settings.scrollingBannerText) gameState.scrollingBannerText = settings.scrollingBannerText;
           if (settings.scrollingBannerFontSize) gameState.scrollingBannerFontSize = settings.scrollingBannerFontSize;
