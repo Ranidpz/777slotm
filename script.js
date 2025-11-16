@@ -2077,7 +2077,16 @@ function setupInventoryAuthLock() {
 
     // פונקציה לבדיקת מצב התחברות ונעילה
     function checkAuthAndLockInventory() {
-        if (typeof userAuthManager !== 'undefined' && userAuthManager.isLoggedIn()) {
+        // בדוק אם userAuthManager קיים ומוכן
+        if (typeof userAuthManager === 'undefined') {
+            console.warn('⚠️ userAuthManager עדיין לא נטען');
+            return;
+        }
+
+        const isLoggedIn = userAuthManager.isLoggedIn();
+        console.log('🔍 בדיקת סטטוס התחברות למלאי:', isLoggedIn);
+
+        if (isLoggedIn) {
             // משתמש מחובר - בטל נעילה
             inventoryContainer.classList.remove('inventory-section-locked');
             console.log('🔓 מלאי ופרסים זמין - משתמש מחובר');
@@ -2085,34 +2094,42 @@ function setupInventoryAuthLock() {
             // משתמש לא מחובר - נעל
             inventoryContainer.classList.add('inventory-section-locked');
             console.log('🔒 מלאי ופרסים נעול - נדרשת התחברות');
-
-            // הוסף מאזין ללחיצה על האזור הנעול
-            inventoryContainer.addEventListener('click', (e) => {
-                if (inventoryContainer.classList.contains('inventory-section-locked')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    if (typeof userAuthManager !== 'undefined') {
-                        userAuthManager.requiresAuth(() => {
-                            // אחרי התחברות - בטל נעילה
-                            inventoryContainer.classList.remove('inventory-section-locked');
-                            console.log('✅ מלאי ופרסים זמין לאחר התחברות');
-                        });
-                    }
-                }
-            }, { capture: true });
         }
     }
 
-    // בדיקה ראשונית
-    checkAuthAndLockInventory();
+    // הוסף מאזין ללחיצה על האזור הנעול - פעם אחת בלבד
+    inventoryContainer.addEventListener('click', (e) => {
+        if (inventoryContainer.classList.contains('inventory-section-locked')) {
+            e.preventDefault();
+            e.stopPropagation();
 
-    // עדכן כשמצב ההתחברות משתנה
+            if (typeof userAuthManager !== 'undefined') {
+                userAuthManager.requiresAuth(() => {
+                    // אחרי התחברות - בטל נעילה
+                    inventoryContainer.classList.remove('inventory-section-locked');
+                    console.log('✅ מלאי ופרסים זמין לאחר התחברות');
+                });
+            }
+        }
+    }, { capture: true });
+
+    // המתן ל-Firebase Auth להיות מוכן
     if (typeof firebase !== 'undefined' && firebase.auth) {
-        firebase.auth().onAuthStateChanged(() => {
-            checkAuthAndLockInventory();
+        firebase.auth().onAuthStateChanged((user) => {
+            console.log('🔄 Firebase Auth State Changed:', user ? 'מחובר' : 'לא מחובר');
+            // המתן קצת לוודא שכל המערכות מוכנות
+            setTimeout(() => {
+                checkAuthAndLockInventory();
+            }, 100);
         });
+    } else {
+        console.warn('⚠️ Firebase Auth לא זמין');
     }
+
+    // בדיקה ראשונית - עם עיכוב קטן
+    setTimeout(() => {
+        checkAuthAndLockInventory();
+    }, 500);
 }
 
 // הגדרת כפתור דשבורד - לניווט באותו חלון
