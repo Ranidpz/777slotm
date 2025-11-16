@@ -154,9 +154,10 @@ const eventsManager = {
             // ✅ הצג שם בעל האירוע - כולם רואים, רק מנהל על יכול להחליף
             const ownerBadge = event.ownerName ?
                 `<div class="event-owner-badge ${authManager.isSuperAdmin() ? 'clickable' : ''}"
-                      ${authManager.isSuperAdmin() ? `onclick="eventsManager.showTransferOwnershipModal('${event.id}')" title="לחץ להחלפת בעלים"` : ''}>
-                    👤 ${event.ownerName}
-                    ${authManager.isSuperAdmin() ? '<span class="change-icon">🔄</span>' : ''}
+                      ${authManager.isSuperAdmin() ? `onclick="event.stopPropagation(); eventsManager.showTransferOwnershipModal('${event.id}')" title="לחץ להחלפת בעלים"` : ''}>
+                    <i data-lucide="user" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-left: 4px;"></i>
+                    ${event.ownerName}
+                    ${authManager.isSuperAdmin() ? '<i data-lucide="repeat" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px; opacity: 0.7;"></i>' : ''}
                 </div>` : '';
 
             return `
