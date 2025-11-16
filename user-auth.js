@@ -128,18 +128,37 @@ const userAuthManager = {
         document.body.appendChild(modal);
 
         // הוסף אירועים
-        document.getElementById('modal-google-signin').addEventListener('click', async () => {
-            await this.signInWithGoogle(afterLoginCallback);
-        });
+        const googleSigninBtn = document.getElementById('modal-google-signin');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+        const overlay = modal.querySelector('.auth-modal-overlay');
 
-        document.getElementById('modal-cancel-btn').addEventListener('click', () => {
-            this.closeLoginModal();
-        });
+        if (googleSigninBtn) {
+            googleSigninBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔵 נלחץ כפתור התחברות עם Google');
+                await this.signInWithGoogle(afterLoginCallback);
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔴 נלחץ כפתור ביטול');
+                this.closeLoginModal();
+            });
+        }
 
         // סגור בלחיצה על הרקע
-        modal.querySelector('.auth-modal-overlay').addEventListener('click', () => {
-            this.closeLoginModal();
-        });
+        if (overlay) {
+            overlay.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('⚫ נלחץ על הרקע');
+                this.closeLoginModal();
+            });
+        }
 
         // הצג את המודל
         setTimeout(() => modal.classList.add('show'), 10);

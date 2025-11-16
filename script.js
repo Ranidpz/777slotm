@@ -2365,44 +2365,74 @@ function setupInventoryAuthLock() {
 
 // הגדרת כפתור דשבורד - לפתיחה בטאב חדש
 function setupDashboardButton() {
+    console.log('🔧 setupDashboardButton called');
+
     // המתן לטעינת DOM אם צריך
     const initButton = () => {
+        console.log('🔧 initButton called, readyState:', document.readyState);
         const dashboardBtn = document.getElementById('dashboard-btn');
 
         if (dashboardBtn) {
-            console.log('🔍 נמצא כפתור דשבורד:', dashboardBtn);
+            console.log('✅ נמצא כפתור דשבורד:', dashboardBtn);
+            console.log('📍 הכפתור מוצג?', dashboardBtn.offsetParent !== null);
+            console.log('📍 הכפתור disabled?', dashboardBtn.disabled);
 
-            // הסר listeners קודמים (למקרה שנקרא פעמיים)
-            const newBtn = dashboardBtn.cloneNode(true);
-            dashboardBtn.parentNode.replaceChild(newBtn, dashboardBtn);
+            // בדוק אם כבר יש event listener
+            if (dashboardBtn.dataset.listenerAdded === 'true') {
+                console.log('⚠️ Event listener כבר קיים, מדלג');
+                return;
+            }
 
-            newBtn.addEventListener('click', (e) => {
+            // פונקציית פתיחת דשבורד
+            const openDashboard = (e) => {
+                console.log('🏠 נלחץ כפתור דשבורד!');
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
 
-                console.log('🏠 נלחץ כפתור דשבורד - פותח בטאב חדש...');
+                console.log('🔄 מנסה לפתוח dashboard.html בטאב חדש...');
 
                 // פתח בטאב חדש
                 const newWindow = window.open('dashboard.html', '_blank');
 
-                if (!newWindow) {
-                    console.error('❌ לא ניתן לפתוח טאב חדש - אולי חסום על ידי popup blocker');
-                    alert('⚠️ לא ניתן לפתוח דשבורד בטאב חדש.\nאנא אפשר פתיחת חלונות קופצים לאתר זה.');
-                } else {
-                    console.log('✅ דשבורד נפתח בטאב חדש');
-                }
-            });
+                // בדוק אם החלון נפתח בהצלחה
+                setTimeout(() => {
+                    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                        console.error('❌ לא ניתן לפתוח טאב חדש - חסום על ידי popup blocker');
 
-            console.log('✅ כפתור דשבורד מוכן');
+                        // הצע אופציה חלופית
+                        const useRedirect = confirm('⚠️ הדפדפן חסם פתיחה בטאב חדש.\n\nהאם לנווט לדשבורד בחלון זה?\n(לחץ Cancel כדי להישאר בעמוד הנוכחי)');
+
+                        if (useRedirect) {
+                            console.log('🔄 מנווט לדשבורד בחלון הנוכחי...');
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            console.log('ℹ️ המשתמש בחר להישאר בעמוד הנוכחי');
+                            alert('💡 טיפ: אפשר פתיחת חלונות קופצים (pop-ups) לאתר זה בהגדרות הדפדפן כדי לפתוח בטאב חדש.');
+                        }
+                    } else {
+                        console.log('✅ דשבורד נפתח בהצלחה בטאב חדש');
+                    }
+                }, 100); // המתן 100ms כדי לתת לדפדפן לבדוק
+            };
+
+            // הוסף event listener
+            dashboardBtn.addEventListener('click', openDashboard, true); // true = capture phase
+            dashboardBtn.dataset.listenerAdded = 'true';
+
+            console.log('✅ כפתור דשבורד מוכן ומחובר');
         } else {
             console.error('❌ לא נמצא כפתור דשבורד (dashboard-btn)');
+            console.log('🔍 כפתורים זמינים:', Array.from(document.querySelectorAll('button')).map(b => b.id || b.className));
         }
     };
 
     // אם ה-DOM כבר נטען, אתחל מיד
     if (document.readyState === 'loading') {
+        console.log('⏳ DOM עדיין טוען, ממתין ל-DOMContentLoaded');
         document.addEventListener('DOMContentLoaded', initButton);
     } else {
+        console.log('✅ DOM כבר נטען, מאתחל מיד');
         initButton();
     }
 }

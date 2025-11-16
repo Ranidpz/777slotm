@@ -373,13 +373,18 @@ const eventsManager = {
 
     // ערוך אירוע
     async editEvent(eventId) {
+        console.log('✏️ editEvent called with eventId:', eventId);
         this.currentEventId = eventId;
+        console.log('✅ this.currentEventId set to:', this.currentEventId);
 
         const event = this.events.find(e => e.id === eventId);
         if (!event) {
+            console.error('❌ אירוע לא נמצא:', eventId);
             alert('❌ אירוע לא נמצא');
             return;
         }
+
+        console.log('📄 Event found:', event.name);
 
         document.getElementById('modal-title').textContent = 'ערוך אירוע';
         document.getElementById('event-name').value = event.name || '';
@@ -388,6 +393,7 @@ const eventsManager = {
         document.getElementById('event-description').value = event.description || '';
 
         document.getElementById('event-modal').classList.remove('hidden');
+        console.log('✅ Modal opened for editing');
     },
 
     // שמור אירוע (יצירה/עריכה)
@@ -405,9 +411,13 @@ const eventsManager = {
         const eventDate = dateInput ? new Date(dateInput).getTime() : null;
         const userId = authManager.getCurrentUserId();
 
+        console.log('🔍 saveEvent called - currentEventId:', this.currentEventId);
+        console.log('📝 Event data:', { name, location, eventDate, description });
+
         try {
             if (this.currentEventId) {
                 // עריכת אירוע קיים
+                console.log('🔄 מעדכן אירוע קיים:', this.currentEventId);
                 const eventRef = firebase.database().ref(`events/${this.currentEventId}`);
                 await eventRef.update({
                     name,
@@ -417,9 +427,11 @@ const eventsManager = {
                     updatedAt: firebase.database.ServerValue.TIMESTAMP
                 });
 
-                console.log('✅ אירוע עודכן');
+                console.log('✅ אירוע עודכן בהצלחה');
                 alert('✅ האירוע עודכן בהצלחה');
             } else {
+                // אין currentEventId - יוצר אירוע חדש
+                console.log('➕ יוצר אירוע חדש (currentEventId הוא null/undefined)');
                 // יצירת אירוע חדש
                 const eventId = `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 const sessionId = `slot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
