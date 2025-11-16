@@ -812,9 +812,10 @@ function showSimpleWinScreen() {
     if (gameState.lastWinPrizeDetails) {
         const prizeDetails = gameState.lastWinPrizeDetails;
 
-        // הצג שם הפרס
+        // הצג שם הפרס בעמודה השמאלית
         if (simplePrizeName && prizeDetails.prizeName) {
             simplePrizeName.textContent = prizeDetails.prizeName;
+            simplePrizeName.style.display = 'block';
             simplePrizeDisplay.style.display = 'block';
             console.log(`🏆 מציג שם פרס במסך פשוט: ${prizeDetails.prizeName}`);
         }
@@ -829,7 +830,13 @@ function showSimpleWinScreen() {
         if (simplePrizeImage && simplePrizeImageContainer && isValidImage) {
             simplePrizeImage.src = symbolDisplay;
             simplePrizeImageContainer.style.display = 'block';
+
+            // הגדר את רקע התמונה לצבע הרקע שנבחר במערכת
+            const backgroundColor = gameState.backgroundColor || '#242424';
+            simplePrizeImageContainer.style.backgroundColor = backgroundColor;
+
             console.log('🖼️ תמונת פרס הוצגה במסך פשוט:', symbolDisplay);
+            console.log('🎨 רקע תמונת פרס הוגדר ל:', backgroundColor);
         } else if (simplePrizeImageContainer) {
             simplePrizeImageContainer.style.display = 'none';
         }
