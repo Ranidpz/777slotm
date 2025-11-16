@@ -230,6 +230,123 @@
             margin: 0 10px;
         }
 
+        /* Prize Statistics Styles */
+        #prize-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .prize-stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .prize-stat-card:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .prize-stat-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prize-stat-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .prize-stat-symbol {
+            font-size: 2.5em;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .prize-stat-name {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #FFD700;
+        }
+
+        .prize-stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .prize-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95em;
+        }
+
+        .prize-stat-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .prize-stat-value {
+            font-weight: 700;
+            color: white;
+        }
+
+        .prize-stat-value.infinite {
+            color: #4ade80;
+        }
+
+        .prize-stat-value.low {
+            color: #ef4444;
+        }
+
+        .prize-stat-value.medium {
+            color: #fbbf24;
+        }
+
+        .prize-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .prize-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24 0%, #FFD700 100%);
+            transition: width 0.3s ease;
+        }
+
+        .prize-progress-fill.low {
+            background: linear-gradient(90deg, #ef4444 0%, #fca5a5 100%);
+        }
+
+        .prize-progress-fill.medium {
+            background: linear-gradient(90deg, #fbbf24 0%, #fde047 100%);
+        }
+
+        .prize-progress-fill.high {
+            background: linear-gradient(90deg, #4ade80 0%, #86efac 100%);
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2em;
@@ -272,6 +389,15 @@
             </div>
         </div>
 
+        <!-- Prize Inventory Statistics -->
+        <div id="prize-stats-container" style="display: none;">
+            <div class="header" style="margin-top: 20px; margin-bottom: 20px;">
+                <h2 style="font-size: 2em;">🎁 סטטיסטיקות פרסים</h2>
+                <p style="font-size: 1em;">מעקב אחרי המלאי של כל פרס</p>
+            </div>
+            <div id="prize-stats-grid"></div>
+        </div>
+
         <div id="winners-container">
             <div class="loading">⏳ טוען נתונים...</div>
         </div>
@@ -290,6 +416,7 @@
     <script>
         let winnersData = [];
         let currentSessionId = null;
+        let prizeInventoryData = []; // מלאי הפרסים
 
         // Get sessionId from URL or localStorage
         function getSessionId() {
@@ -310,6 +437,120 @@
             }
 
             return null;
+        }
+
+        // טען נתוני מלאי פרסים מ-localStorage
+        function loadPrizeInventory() {
+            try {
+                const saved = localStorage.getItem('dynamicImages');
+                if (saved) {
+                    prizeInventoryData = JSON.parse(saved);
+                    console.log('📦 נטענו נתוני מלאי של', prizeInventoryData.length, 'פרסים');
+                    return true;
+                }
+            } catch (e) {
+                console.error('❌ שגיאה בטעינת נתוני מלאי:', e);
+            }
+            return false;
+        }
+
+        // חשב סטטיסטיקות לכל פרס
+        function calculatePrizeStats() {
+            if (prizeInventoryData.length === 0) {
+                return [];
+            }
+
+            return prizeInventoryData.map((prize, index) => {
+                const totalPrizes = prize.initialInventory; // כמות התחלתית
+                const distributed = prize.distributedCount || 0; // כמה חולק
+                const remaining = prize.inventory; // כמה נשאר
+
+                // חשב אחוז נותר
+                let percentRemaining = 100;
+                if (totalPrizes !== null && totalPrizes > 0) {
+                    percentRemaining = Math.round((remaining / totalPrizes) * 100);
+                }
+
+                return {
+                    name: prize.prizeName || `פרס ${index + 1}`,
+                    imageData: prize.imageData,
+                    totalPrizes: totalPrizes === null ? '∞' : totalPrizes,
+                    distributed: distributed,
+                    remaining: remaining === null ? '∞' : remaining,
+                    percentRemaining: percentRemaining,
+                    isInfinite: prize.inventory === null
+                };
+            });
+        }
+
+        // הצג סטטיסטיקות פרסים
+        function displayPrizeStats() {
+            const prizeStats = calculatePrizeStats();
+
+            if (prizeStats.length === 0) {
+                // אין נתוני מלאי - הסתר את הסקשן
+                document.getElementById('prize-stats-container').style.display = 'none';
+                return;
+            }
+
+            // הצג את הסקשן
+            document.getElementById('prize-stats-container').style.display = 'block';
+
+            const container = document.getElementById('prize-stats-grid');
+
+            const html = prizeStats.map(prize => {
+                // קבע סוג צבע לפי אחוז נותר
+                let valueClass = '';
+                let progressClass = 'high';
+
+                if (prize.isInfinite) {
+                    valueClass = 'infinite';
+                    progressClass = 'high';
+                } else {
+                    if (prize.percentRemaining <= 20) {
+                        valueClass = 'low';
+                        progressClass = 'low';
+                    } else if (prize.percentRemaining <= 50) {
+                        valueClass = 'medium';
+                        progressClass = 'medium';
+                    }
+                }
+
+                // בדוק אם יש תמונה
+                const imageHTML = prize.imageData
+                    ? `<img src="${prize.imageData}" alt="${prize.name}" class="prize-stat-image">`
+                    : `<div class="prize-stat-symbol">🎁</div>`;
+
+                return `
+                    <div class="prize-stat-card">
+                        <div class="prize-stat-header">
+                            ${imageHTML}
+                            <div class="prize-stat-name">${prize.name}</div>
+                        </div>
+                        <div class="prize-stat-info">
+                            <div class="prize-stat-row">
+                                <span class="prize-stat-label">סה״כ פרסים:</span>
+                                <span class="prize-stat-value ${prize.isInfinite ? 'infinite' : ''}">${prize.totalPrizes}</span>
+                            </div>
+                            <div class="prize-stat-row">
+                                <span class="prize-stat-label">חולק:</span>
+                                <span class="prize-stat-value">${prize.distributed}</span>
+                            </div>
+                            <div class="prize-stat-row">
+                                <span class="prize-stat-label">נשאר:</span>
+                                <span class="prize-stat-value ${valueClass}">${prize.remaining}</span>
+                            </div>
+                            ${!prize.isInfinite ? `
+                                <div class="prize-progress-bar">
+                                    <div class="prize-progress-fill ${progressClass}" style="width: ${prize.percentRemaining}%"></div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
         }
 
         // Load and display winners
@@ -498,6 +739,10 @@
                     return;
                 }
             }
+
+            // טען נתוני מלאי פרסים והצג סטטיסטיקות
+            loadPrizeInventory();
+            displayPrizeStats();
 
             loadWinners();
         });
