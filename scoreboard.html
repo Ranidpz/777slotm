@@ -439,19 +439,50 @@
             return null;
         }
 
-        // טען נתוני מלאי פרסים מ-localStorage
-        function loadPrizeInventory() {
+        // טען נתוני מלאי פרסים מ-Firebase
+        async function loadPrizeInventory() {
+            if (!currentSessionId) {
+                console.warn('⚠️ אין sessionId - לא ניתן לטעון מלאי פרסים');
+                return false;
+            }
+
             try {
+                // נסה קודם מ-localStorage (מהיר)
                 const saved = localStorage.getItem('dynamicImages');
                 if (saved) {
                     prizeInventoryData = JSON.parse(saved);
-                    console.log('📦 נטענו נתוני מלאי של', prizeInventoryData.length, 'פרסים');
+                    console.log('📦 נטענו נתוני מלאי מ-localStorage:', prizeInventoryData.length, 'פרסים');
+                }
+
+                // טען מ-Firebase (עדכני)
+                const prizesRef = firebase.database().ref(`sessions/${currentSessionId}/prizes`);
+                const snapshot = await prizesRef.once('value');
+                const prizesData = snapshot.val();
+
+                if (prizesData) {
+                    // המר מאובייקט למערך
+                    prizeInventoryData = Object.values(prizesData).map(prize => ({
+                        id: Date.now() + Math.random(),
+                        code: prize.code,
+                        imageData: prize.imageUrl,
+                        inventory: prize.inventory,
+                        initialInventory: prize.initialInventory,
+                        distributedCount: prize.distributedCount || 0,
+                        label: prize.name,
+                        prizeName: prize.prizeName || '',
+                        symbolIndex: prize.symbolIndex
+                    }));
+
+                    console.log('☁️ נטענו נתוני מלאי מ-Firebase:', prizeInventoryData.length, 'פרסים');
                     return true;
+                } else {
+                    console.log('📭 אין נתוני פרסים ב-Firebase');
+                    return prizeInventoryData.length > 0; // true אם יש מ-localStorage
                 }
             } catch (e) {
                 console.error('❌ שגיאה בטעינת נתוני מלאי:', e);
+                return false;
             }
-            return false;
         }
 
         // חשב סטטיסטיקות לכל פרס
@@ -741,8 +772,9 @@
             }
 
             // טען נתוני מלאי פרסים והצג סטטיסטיקות
-            loadPrizeInventory();
-            displayPrizeStats();
+            loadPrizeInventory().then(() => {
+                displayPrizeStats();
+            });
 
             loadWinners();
         });
