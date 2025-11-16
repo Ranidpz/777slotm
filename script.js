@@ -1686,239 +1686,6 @@ function initColorPicker() {
     }
 }
 
-// מפת צבעים לגלילים (presets)
-const reelColorSchemes = {
-    'metal-gray': {
-        light: '#3a3f5c',
-        mid: '#2d3250',
-        dark: '#252a42'
-    },
-    'gold': {
-        light: '#d4af37',
-        mid: '#c9a227',
-        dark: '#b8941f'
-    },
-    'silver': {
-        light: '#c0c0c0',
-        mid: '#a8a8a8',
-        dark: '#909090'
-    },
-    'red': {
-        light: '#8b0000',
-        mid: '#660000',
-        dark: '#4d0000'
-    },
-    'blue': {
-        light: '#1e3a8a',
-        mid: '#1e293b',
-        dark: '#0f172a'
-    },
-    'green': {
-        light: '#065f46',
-        mid: '#064e3b',
-        dark: '#053b2f'
-    },
-    'purple': {
-        light: '#6b21a8',
-        mid: '#581c87',
-        dark: '#4c1d95'
-    },
-    'bronze': {
-        light: '#cd7f32',
-        mid: '#b87333',
-        dark: '#a0522d'
-    }
-};
-
-// החל צבע גלילים מ-preset
-function applyReelColorPreset(colorScheme) {
-    const scheme = reelColorSchemes[colorScheme];
-    if (!scheme) {
-        console.warn('⚠️ סכמת צבע לא קיימת:', colorScheme);
-        return;
-    }
-
-    const root = document.documentElement;
-    root.style.setProperty('--reel-color-light', scheme.light);
-    root.style.setProperty('--reel-color-mid', scheme.mid);
-    root.style.setProperty('--reel-color-dark', scheme.dark);
-
-    console.log('🎨 צבע גלילים עודכן (preset):', colorScheme);
-}
-
-// החל צבע גלילים מותאם (hex color)
-function applyCustomReelColor(color) {
-    if (!isValidColor(color)) {
-        console.warn('⚠️ צבע לא תקין:', color);
-        return;
-    }
-
-    // צור גרסאות מוארות ומוכהות של הצבע
-    const lightColor = lightenColor(color, 15);
-    const darkColor = darkenColor(color, 15);
-
-    const root = document.documentElement;
-    root.style.setProperty('--reel-color-light', lightColor);
-    root.style.setProperty('--reel-color-mid', color);
-    root.style.setProperty('--reel-color-dark', darkColor);
-
-    console.log('🎨 צבע גלילים מותאם עודכן:', color);
-}
-
-// עדכן את ה-color picker
-function updateReelColorPicker(color) {
-    const colorPicker = document.getElementById('reel-color-picker');
-    const colorInput = document.getElementById('reel-color-input');
-    const colorPreview = document.getElementById('reel-color-preview');
-
-    if (colorPicker) colorPicker.value = color;
-    if (colorInput) colorInput.value = color;
-    if (colorPreview) colorPreview.style.backgroundColor = color;
-}
-
-// שמור צבע גלילים
-function saveReelColor(color, isPreset = false) {
-    try {
-        localStorage.setItem('reelColor', color);
-        localStorage.setItem('reelColorIsPreset', isPreset ? 'true' : 'false');
-        console.log('💾 צבע גלילים נשמר:', color, isPreset ? '(preset)' : '(custom)');
-    } catch (e) {
-        console.error('❌ שגיאה בשמירת צבע גלילים:', e);
-    }
-}
-
-// טען צבע גלילים שמור
-function loadReelColor() {
-    try {
-        const savedColor = localStorage.getItem('reelColor') || 'metal-gray';
-        const isPreset = localStorage.getItem('reelColorIsPreset') !== 'false'; // ברירת מחדל: true
-
-        if (isPreset && reelColorSchemes[savedColor]) {
-            // זה preset
-            applyReelColorPreset(savedColor);
-            const radioInput = document.querySelector(`input[name="reel-color-preset"][value="${savedColor}"]`);
-            if (radioInput) {
-                radioInput.checked = true;
-            }
-            // עדכן את ה-preview עם הצבע מה-preset
-            const scheme = reelColorSchemes[savedColor];
-            if (scheme) {
-                updateReelColorPicker(scheme.mid);
-            }
-        } else if (!isPreset && isValidColor(savedColor)) {
-            // זה צבע מותאם
-            applyCustomReelColor(savedColor);
-            updateReelColorPicker(savedColor);
-            // בטל בחירה מ-presets
-            const checkedRadio = document.querySelector('input[name="reel-color-preset"]:checked');
-            if (checkedRadio) checkedRadio.checked = false;
-        } else {
-            // ברירת מחדל
-            applyReelColorPreset('metal-gray');
-            const radioInput = document.querySelector(`input[name="reel-color-preset"][value="metal-gray"]`);
-            if (radioInput) {
-                radioInput.checked = true;
-            }
-            const scheme = reelColorSchemes['metal-gray'];
-            if (scheme) {
-                updateReelColorPicker(scheme.mid);
-            }
-        }
-
-        console.log('📂 צבע גלילים נטען:', savedColor, isPreset ? '(preset)' : '(custom)');
-        return savedColor;
-    } catch (e) {
-        console.error('❌ שגיאה בטעינת צבע גלילים:', e);
-        return 'metal-gray';
-    }
-}
-
-// אתחול בחירת צבע גלילים
-function initReelColorPicker() {
-    const reelColorPicker = document.getElementById('reel-color-picker');
-    const reelColorInput = document.getElementById('reel-color-input');
-    const reelColorPreview = document.getElementById('reel-color-preview');
-    const reelColorRadios = document.querySelectorAll('input[name="reel-color-preset"]');
-
-    // color picker
-    if (reelColorPicker) {
-        reelColorPicker.addEventListener('input', (e) => {
-            const color = e.target.value;
-            applyCustomReelColor(color);
-            updateReelColorPicker(color);
-            saveReelColor(color, false);
-
-            // בטל בחירה מ-presets
-            const checkedRadio = document.querySelector('input[name="reel-color-preset"]:checked');
-            if (checkedRadio) checkedRadio.checked = false;
-        });
-    }
-
-    // קלט ידני של צבע
-    if (reelColorInput) {
-        reelColorInput.addEventListener('input', (e) => {
-            let color = e.target.value.trim();
-
-            // אם לא מתחיל ב-#, הוסף אותו
-            if (color && !color.startsWith('#')) {
-                color = '#' + color;
-                reelColorInput.value = color;
-            }
-
-            // אם זה צבע תקין, עדכן
-            if (isValidColor(color)) {
-                applyCustomReelColor(color);
-                updateReelColorPicker(color);
-                saveReelColor(color, false);
-                reelColorInput.style.borderColor = 'rgba(255, 215, 0, 0.5)';
-
-                // בטל בחירה מ-presets
-                const checkedRadio = document.querySelector('input[name="reel-color-preset"]:checked');
-                if (checkedRadio) checkedRadio.checked = false;
-            } else if (color.length >= 7) {
-                // צבע לא תקין
-                reelColorInput.style.borderColor = '#ff6b6b';
-            }
-        });
-
-        // כשיוצאים מהשדה
-        reelColorInput.addEventListener('blur', (e) => {
-            const color = e.target.value.trim();
-            if (!isValidColor(color)) {
-                // אם לא תקין, חזור לצבע השמור
-                const savedColor = localStorage.getItem('reelColor') || '#2d3250';
-                reelColorInput.value = savedColor;
-                reelColorInput.style.borderColor = 'rgba(255, 215, 0, 0.3)';
-            }
-        });
-    }
-
-    // לחיצה על ה-preview פותחת את ה-color picker
-    if (reelColorPreview) {
-        reelColorPreview.addEventListener('click', () => {
-            if (reelColorPicker) reelColorPicker.click();
-        });
-    }
-
-    // presets (radio buttons)
-    reelColorRadios.forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            const colorScheme = e.target.value;
-            applyReelColorPreset(colorScheme);
-            saveReelColor(colorScheme, true);
-
-            // עדכן את ה-preview עם הצבע מה-preset
-            const scheme = reelColorSchemes[colorScheme];
-            if (scheme) {
-                updateReelColorPicker(scheme.mid);
-            }
-        });
-    });
-
-    // טען צבע שמור
-    loadReelColor();
-}
-
 // שמור תמונות ב-localStorage
 function saveImagesToStorage() {
     try {
@@ -2588,19 +2355,45 @@ function setupInventoryAuthLock() {
 
 // הגדרת כפתור דשבורד - לפתיחה בטאב חדש
 function setupDashboardButton() {
-    const dashboardBtn = document.getElementById('dashboard-btn');
+    // המתן לטעינת DOM אם צריך
+    const initButton = () => {
+        const dashboardBtn = document.getElementById('dashboard-btn');
 
-    if (dashboardBtn) {
-        dashboardBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        if (dashboardBtn) {
+            console.log('🔍 נמצא כפתור דשבורד:', dashboardBtn);
 
-            // פתח בטאב חדש
-            window.open('dashboard.html', '_blank');
-            console.log('🏠 פותח דשבורד בטאב חדש...');
-        });
+            // הסר listeners קודמים (למקרה שנקרא פעמיים)
+            const newBtn = dashboardBtn.cloneNode(true);
+            dashboardBtn.parentNode.replaceChild(newBtn, dashboardBtn);
 
-        console.log('✅ כפתור דשבורד מוכן');
+            newBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                console.log('🏠 נלחץ כפתור דשבורד - פותח בטאב חדש...');
+
+                // פתח בטאב חדש
+                const newWindow = window.open('dashboard.html', '_blank');
+
+                if (!newWindow) {
+                    console.error('❌ לא ניתן לפתוח טאב חדש - אולי חסום על ידי popup blocker');
+                    alert('⚠️ לא ניתן לפתוח דשבורד בטאב חדש.\nאנא אפשר פתיחת חלונות קופצים לאתר זה.');
+                } else {
+                    console.log('✅ דשבורד נפתח בטאב חדש');
+                }
+            });
+
+            console.log('✅ כפתור דשבורד מוכן');
+        } else {
+            console.error('❌ לא נמצא כפתור דשבורד (dashboard-btn)');
+        }
+    };
+
+    // אם ה-DOM כבר נטען, אתחל מיד
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initButton);
+    } else {
+        initButton();
     }
 }
 
@@ -2617,7 +2410,6 @@ if (window.dynamicImagesManager) {
 loadImagesFromStorage(); // טען תמונות שמורות (מערכת ישנה - לתאימות)
 // ✅ הוסר: loadInventory() - המלאי נטען אוטומטית ב-dynamicImagesManager
 initColorPicker(); // אתחל color picker
-initReelColorPicker(); // אתחל בחירת צבע גלילים
 initReels();
 loadBackgroundColor(); // טען צבע רקע שמור - אחרי initReels כדי שהצבע יוחל על הסמלים
 manageTutorial(); // נהל את המדריך

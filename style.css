@@ -33,7 +33,7 @@ body {
 .reel-container {
     flex: 1;
     height: 100vh;
-    /* רקע גליל - צבע דינמי עם אפקט תלת-ממד */
+    /* רקע גליל - צבע קבוע עם אפקט תלת-ממד */
     background:
         linear-gradient(90deg,
             rgba(0, 0, 0, 0.4) 0%,
@@ -42,11 +42,11 @@ body {
             rgba(0, 0, 0, 0.4) 100%
         ),
         linear-gradient(180deg,
-            var(--reel-color-light, #3a3f5c) 0%,
-            var(--reel-color-mid, #2d3250) 15%,
-            var(--reel-color-dark, #252a42) 50%,
-            var(--reel-color-mid, #2d3250) 85%,
-            var(--reel-color-light, #3a3f5c) 100%
+            #3a3f5c 0%,
+            #2d3250 15%,
+            #252a42 50%,
+            #2d3250 85%,
+            #3a3f5c 100%
         );
     border-radius: 0;
     box-shadow: none;
@@ -627,89 +627,6 @@ body {
 
 #background-color-input::placeholder {
     color: rgba(255, 255, 255, 0.4);
-}
-
-/* בחירת צבע גלילים */
-.reel-color-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-top: 15px;
-}
-
-.reel-color-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.reel-color-option:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 215, 0, 0.3);
-    transform: translateY(-2px);
-}
-
-.reel-color-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.reel-color-option input[type="radio"]:checked + .color-swatch {
-    box-shadow:
-        0 0 0 3px rgba(255, 215, 0, 0.6),
-        0 4px 15px rgba(255, 215, 0, 0.4);
-    transform: scale(1.05);
-}
-
-.reel-color-option input[type="radio"]:checked ~ .color-name {
-    color: #ffd700;
-    font-weight: 700;
-}
-
-.color-swatch {
-    width: 100%;
-    height: 50px;
-    border-radius: 8px;
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-    box-shadow: inset 3px 0 8px rgba(0, 0, 0, 0.4),
-                inset -3px 0 8px rgba(0, 0, 0, 0.4);
-}
-
-.color-name {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-    text-align: center;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-@media (max-width: 768px) {
-    .reel-color-options {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 10px;
-    }
-
-    .reel-color-option {
-        padding: 10px;
-    }
-
-    .color-swatch {
-        height: 40px;
-    }
-
-    .color-name {
-        font-size: 12px;
-    }
 }
 
 .small-btn {
