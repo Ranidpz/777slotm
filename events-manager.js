@@ -170,19 +170,19 @@ const eventsManager = {
                     </div>
                     ${ownerBadge}
                     <div class="event-details">
-                        <p>📍 ${event.location || 'לא צוין מקום'}</p>
-                        <p>📅 ${date}</p>
-                        <p>🔑 Session: <code style="font-size: 0.85em; background: rgba(255,215,0,0.1); padding: 2px 6px; border-radius: 4px;">${event.sessionId || 'אין'}</code></p>
-                        <p>🎮 ${event.stats?.totalPlayers || 0} שחקנים</p>
-                        <p>🏆 ${event.stats?.totalWinners || 0} זוכים</p>
+                        <p><i data-lucide="map-pin" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-left: 6px;"></i> ${event.location || 'לא צוין מקום'}</p>
+                        <p><i data-lucide="calendar" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-left: 6px;"></i> ${date}</p>
+                        <p><i data-lucide="key" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-left: 6px;"></i> Session: <code style="font-size: 0.85em; background: rgba(255,215,0,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace;">${event.sessionId || 'אין'}</code></p>
+                        <p><i data-lucide="gamepad-2" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-left: 6px;"></i> ${event.stats?.totalPlayers || 0} שחקנים</p>
+                        <p><i data-lucide="trophy" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-left: 6px;"></i> ${event.stats?.totalWinners || 0} זוכים</p>
                         <p class="session-time" id="session-time-${event.id}"></p>
                     </div>
                     <div class="event-actions" onclick="event.stopPropagation()">
-                        <button class="btn-primary" onclick="eventsManager.openEvent('${event.id}')">פתח משחק</button>
-                        <button class="btn-secondary" onclick="eventsManager.viewScoreboard('${event.id}')">לוח זוכים</button>
-                        <button class="btn-danger" onclick="eventsManager.deleteEvent('${event.id}')" title="מחק אירוע זה לצמיתות">🗑️ מחק</button>
+                        <button class="btn-primary" onclick="eventsManager.openEvent('${event.id}')"><i data-lucide="play" style="width: 18px; height: 18px;"></i> פתח משחק</button>
+                        <button class="btn-secondary" onclick="eventsManager.viewScoreboard('${event.id}')"><i data-lucide="award" style="width: 18px; height: 18px;"></i> לוח זוכים</button>
+                        <button class="btn-danger" onclick="eventsManager.deleteEvent('${event.id}')" title="מחק אירוע זה לצמיתות"><i data-lucide="trash-2" style="width: 18px; height: 18px;"></i> מחק</button>
                         ${authManager.isSuperAdmin() ?
-                            `<button class="btn-warning" onclick="eventsManager.showTransferOwnershipModal('${event.id}')" title="העבר בעלות למשתמש אחר">🔄 העבר בעלות</button>` :
+                            `<button class="btn-warning" onclick="eventsManager.showTransferOwnershipModal('${event.id}')" title="העבר בעלות למשתמש אחר"><i data-lucide="repeat" style="width: 18px; height: 18px;"></i> העבר בעלות</button>` :
                             ''}
                     </div>
                 </div>
@@ -190,6 +190,11 @@ const eventsManager = {
         }).join('');
 
         container.innerHTML = html;
+
+        // ✅ אתחל אייקונים של Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
 
         // ✅ עדכן סטטוס session לכל אירוע
         this.filteredEvents.forEach(event => {
