@@ -278,7 +278,10 @@ const dynamicImagesManager = {
                 if (image) {
                     image.prizeName = prizeName;
                     this.saveToStorage();
-                    this.syncToFirebase();
+                    // שמור גם ב-Firebase
+                    if (window.sessionManager && sessionManager.sessionId) {
+                        this.saveToFirebase(sessionManager.sessionId);
+                    }
                     console.log(`✏️ שם פרס עודכן: "${prizeName}" (ID: ${imageId})`);
                 }
             }
