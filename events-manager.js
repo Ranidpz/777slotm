@@ -180,11 +180,9 @@ const eventsManager = {
                     <div class="event-actions" onclick="event.stopPropagation()">
                         <button class="btn-primary" onclick="eventsManager.openEvent('${event.id}')">פתח משחק</button>
                         <button class="btn-secondary" onclick="eventsManager.viewScoreboard('${event.id}')">לוח זוכים</button>
+                        <button class="btn-danger" onclick="eventsManager.deleteEvent('${event.id}')" title="מחק אירוע זה לצמיתות">🗑️ מחק</button>
                         ${authManager.isSuperAdmin() ?
                             `<button class="btn-warning" onclick="eventsManager.showTransferOwnershipModal('${event.id}')" title="העבר בעלות למשתמש אחר">🔄 העבר בעלות</button>` :
-                            ''}
-                        ${authManager.hasPermission('canDeleteEvents') ?
-                            `<button class="btn-danger" onclick="eventsManager.deleteEvent('${event.id}')" title="מחק אירוע זה לצמיתות">🗑️ מחק</button>` :
                             ''}
                     </div>
                 </div>
@@ -218,10 +216,11 @@ const eventsManager = {
                     // Session פעיל
                     statusBadge.innerHTML = `
                         <span class="status-indicator active"></span>
-                        <span class="status-text">פעיל (לחץ לניתוק)</span>
+                        <span class="status-text">פעיל</span>
                     `;
                     statusBadge.className = 'session-status-badge active clickable';
                     statusBadge.style.cursor = 'pointer';
+                    statusBadge.title = 'לחץ לניתוק Session';
 
                     // ✅ הוסף click handler לניתוק session
                     statusBadge.onclick = async () => {
@@ -732,17 +731,46 @@ const eventsManager = {
             this.allUsers.sort((a, b) => a.displayName.localeCompare(b.displayName, 'he'));
 
             // בנה רשימה
-            let html = '<option value="">-- בחר משתמש --</option>';
-            this.allUsers.forEach(user => {
-                const roleText = user.role === 'super_admin' ? '👑 מנהל על' : '🎬 מפיק';
-                html += `<option value="${user.uid}">${user.displayName} (${user.email}) - ${roleText}</option>`;
-            });
-
-            select.innerHTML = html;
+            this.renderTransferUsersList();
         } catch (error) {
             console.error('❌ שגיאה בטעינת משתמשים:', error);
             select.innerHTML = '<option value="">❌ שגיאה בטעינה</option>';
         }
+    },
+
+    // סנן משתמשים לפי חיפוש
+    filterTransferUsers(searchTerm) {
+        this.renderTransferUsersList(searchTerm);
+    },
+
+    // הצג רשימת משתמשים מסוננת
+    renderTransferUsersList(searchTerm = '') {
+        const select = document.getElementById('transfer-new-owner');
+        const search = searchTerm.toLowerCase().trim();
+
+        // סנן משתמשים
+        const filteredUsers = search
+            ? this.allUsers.filter(user =>
+                user.displayName.toLowerCase().includes(search) ||
+                user.email.toLowerCase().includes(search)
+            )
+            : this.allUsers;
+
+        // בנה HTML
+        let html = '<option value="">-- בחר משתמש --</option>';
+        filteredUsers.forEach(user => {
+            const roleText = user.role === 'super_admin' ? '👑 מנהל על' : '🎬 מפיק';
+            html += `<option value="${user.uid}">${user.displayName} (${user.email}) - ${roleText}</option>`;
+        });
+
+        // אם אין תוצאות
+        if (filteredUsers.length === 0 && search) {
+            html += '<option value="" disabled>❌ לא נמצאו משתמשים</option>';
+        }
+
+        select.innerHTML = html;
+
+        console.log(`🔍 נמצאו ${filteredUsers.length} משתמשים עבור "${searchTerm}"`);
     },
 
     // אשר העברת בעלות
