@@ -73,37 +73,8 @@ body {
     border-right: none;
 }
 
-/* אפקט ברק על הגלילים */
-.reel-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -50%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.03) 50%,
-        transparent 100%
-    );
-    animation: shine 4s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 10;
-}
-
-@keyframes shine {
-    0%, 100% {
-        left: -50%;
-        opacity: 0;
-    }
-    50% {
-        left: 100%;
-        opacity: 1;
-    }
-}
-
 /* קווי הבהוב בצדדים */
-.reel-container::after {
+.reel-container::before {
     content: '';
     position: absolute;
     top: 0;
