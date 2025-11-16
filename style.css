@@ -683,15 +683,20 @@ body {
 .image-upload-grid {
     display: flex;
     flex-wrap: wrap;
+    flex-direction: row;
     gap: 10px;
     margin-bottom: 20px;
     width: 100%;
-    justify-content: start;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .image-upload-item {
     width: 180px;
+    max-width: 180px;
+    min-width: 180px;
     flex-shrink: 0;
+    flex-grow: 0;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -700,12 +705,16 @@ body {
 @media (max-width: 768px) {
     .image-upload-item {
         width: 160px;
+        max-width: 160px;
+        min-width: 160px;
     }
 }
 
 @media (max-width: 480px) {
     .image-upload-item {
         width: 150px;
+        max-width: 150px;
+        min-width: 150px;
     }
 
     .image-upload-grid {
