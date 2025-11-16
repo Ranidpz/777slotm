@@ -50,6 +50,9 @@ const eventsManager = {
             // מיין לפי תאריך יצירה (החדש ביותר קודם)
             this.events.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+            // ✅ בדיקת כפילויות sessionId
+            this.checkDuplicateSessionIds();
+
             this.filteredEvents = [...this.events];
             this.displayEvents();
 
@@ -57,6 +60,81 @@ const eventsManager = {
         } catch (error) {
             console.error('❌ שגיאה בטעינת אירועים:', error);
             container.innerHTML = '<div class="no-events">❌ שגיאה בטעינת אירועים</div>';
+        }
+    },
+
+    // בדיקת כפילויות sessionId ותיקון אוטומטי
+    checkDuplicateSessionIds() {
+        const sessionIds = {};
+        const duplicates = [];
+
+        // מצא כפילויות
+        this.events.forEach(event => {
+            if (event.sessionId) {
+                if (sessionIds[event.sessionId]) {
+                    duplicates.push({
+                        eventId: event.id,
+                        eventName: event.name,
+                        sessionId: event.sessionId,
+                        originalEvent: sessionIds[event.sessionId]
+                    });
+                } else {
+                    sessionIds[event.sessionId] = {
+                        id: event.id,
+                        name: event.name
+                    };
+                }
+            }
+        });
+
+        // אם נמצאו כפילויות - דווח ותקן
+        if (duplicates.length > 0) {
+            console.error('🚨 נמצאו אירועים עם sessionId זהה!');
+            duplicates.forEach(dup => {
+                console.error(`⚠️ כפילות: "${dup.eventName}" (${dup.eventId}) משתף sessionId עם "${dup.originalEvent.name}" (${dup.originalEvent.id})`);
+            });
+
+            // הצע תיקון אוטומטי
+            if (confirm(
+                `⚠️ זוהתה בעיה קריטית!\n\n` +
+                `${duplicates.length} אירוע/ים משתפים sessionId זהה.\n` +
+                `זה עלול לגרום לבעיות במעקב אחרי שחקנים וזוכים.\n\n` +
+                `האם ליצור sessionId חדש ייחודי לכל אירוע?\n\n` +
+                `(מומלץ מאוד!)`
+            )) {
+                this.fixDuplicateSessionIds(duplicates);
+            }
+        }
+    },
+
+    // תקן כפילויות sessionId
+    async fixDuplicateSessionIds(duplicates) {
+        console.log('🔧 מתקן כפילויות sessionId...');
+
+        try {
+            for (const dup of duplicates) {
+                // צור sessionId חדש וייחודי
+                const newSessionId = `slot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+                console.log(`🔄 מעדכן אירוע "${dup.eventName}" עם sessionId חדש: ${newSessionId}`);
+
+                // עדכן ב-Firebase
+                await firebase.database().ref(`events/${dup.eventId}`).update({
+                    sessionId: newSessionId
+                });
+
+                // המתן קצת בין עדכונים למנוע התנגשויות
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            console.log('✅ כל הכפילויות תוקנו!');
+            alert(`✅ ${duplicates.length} אירוע/ים עודכנו בהצלחה עם sessionId ייחודי!`);
+
+            // טען מחדש את האירועים
+            await this.loadEvents();
+        } catch (error) {
+            console.error('❌ שגיאה בתיקון כפילויות:', error);
+            alert('❌ שגיאה בתיקון. נסה שוב או צור קשר עם התמיכה.');
         }
     },
 
