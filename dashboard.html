@@ -252,6 +252,54 @@
         </div>
     </div>
 
+    <!-- Modal: Delete Event Confirmation -->
+    <div id="delete-event-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header" style="background: rgba(239, 68, 68, 0.1); border-bottom: 2px solid var(--danger);">
+                <h2 style="color: var(--danger);">⚠️ מחיקת אירוע</h2>
+                <button class="modal-close" onclick="eventsManager.closeDeleteModal()">&times;</button>
+            </div>
+
+            <div class="modal-body" style="padding: 30px;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 4em; margin-bottom: 16px;">🗑️</div>
+                    <h3 style="font-size: 1.3em; margin-bottom: 16px; color: var(--text-primary);">
+                        האם אתה בטוח שברצונך למחוק את האירוע:
+                    </h3>
+                    <p style="font-size: 1.5em; font-weight: 700; color: var(--primary); margin-bottom: 24px;" id="delete-event-name"></p>
+                </div>
+
+                <div style="background: rgba(239, 68, 68, 0.1); border-right: 4px solid var(--danger); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                    <p style="font-weight: 600; margin-bottom: 12px; color: var(--danger);">⚠️ פעולה זו תמחק לצמיתות:</p>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 6px 0; color: var(--text-primary);">• את האירוע עצמו</li>
+                        <li style="padding: 6px 0; color: var(--text-primary);">• את כל הזוכים והשחקנים</li>
+                        <li style="padding: 6px 0; color: var(--text-primary);">• את ה-Session המקושר</li>
+                        <li style="padding: 6px 0; color: var(--text-primary);">• את כל ההגדרות והמלאי</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(255, 193, 7, 0.1); border-right: 4px solid var(--warning); padding: 16px; border-radius: 8px;">
+                    <p style="font-weight: 700; color: var(--warning); text-align: center;">
+                        ❌ פעולה בלתי הפיכה!
+                    </p>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
+                        כדי לאשר, הקלד את המילה: <span style="color: var(--danger);">מחיקה</span>
+                    </label>
+                    <input type="text" id="delete-confirmation-input" placeholder='הקלד "מחיקה" כדי לאשר' onkeypress="if(event.key === 'Enter') eventsManager.confirmDelete()" style="width: 100%; padding: 12px 16px; border-radius: 8px; border: 2px solid var(--border); background: var(--surface-light); color: var(--text-primary); font-size: 16px; font-family: 'Assistant', sans-serif; min-height: 44px;">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="eventsManager.closeDeleteModal()">ביטול</button>
+                <button class="btn-danger" onclick="eventsManager.confirmDelete()" style="background: var(--danger); color: white;">🗑️ מחק לצמיתות</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Dashboard Scripts -->
     <script src="auth-manager.js"></script>
     <script src="events-manager.js"></script>

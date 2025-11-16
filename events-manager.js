@@ -457,47 +457,56 @@ const eventsManager = {
         }
     },
 
-    // מחק אירוע - מחיקה מלאה מכל מקום במאגר
-    async deleteEvent(eventId) {
+    // מחק אירוע - פתיחת modal אישור
+    deleteEvent(eventId) {
         const event = this.events.find(e => e.id === eventId);
         if (!event) {
             alert('❌ אירוע לא נמצא');
             return;
         }
 
-        // אישור ראשון - בסיסי
-        const firstConfirm = confirm(
-            `⚠️ האם אתה בטוח שברצונך למחוק את האירוע:\n\n` +
-            `"${event.name}"\n\n` +
-            `פעולה זו תמחק לצמיתות:\n` +
-            `• את האירוע עצמו\n` +
-            `• את כל הזוכים והשחקנים\n` +
-            `• את ה-Session המקושר\n` +
-            `• את כל ההגדרות והמלאי\n\n` +
-            `❌ פעולה זו בלתי הפיכה!`
-        );
+        // שמור את ה-eventId למחיקה
+        this.deleteEventId = eventId;
 
-        if (!firstConfirm) {
-            console.log('❌ מחיקה בוטלה על ידי המשתמש');
+        // עדכן שם האירוע במודל
+        document.getElementById('delete-event-name').textContent = event.name || 'ללא שם';
+
+        // נקה את שדה האישור
+        document.getElementById('delete-confirmation-input').value = '';
+
+        // פתח את המודל
+        document.getElementById('delete-event-modal').classList.remove('hidden');
+
+        // Focus על שדה הקלט
+        setTimeout(() => {
+            document.getElementById('delete-confirmation-input').focus();
+        }, 100);
+    },
+
+    // סגור modal מחיקה
+    closeDeleteModal() {
+        document.getElementById('delete-event-modal').classList.add('hidden');
+        this.deleteEventId = null;
+        document.getElementById('delete-confirmation-input').value = '';
+    },
+
+    // אשר מחיקה
+    async confirmDelete() {
+        const userInput = document.getElementById('delete-confirmation-input').value;
+
+        // בדוק אם המשתמש הקליד "מחיקה"
+        if (userInput !== 'מחיקה') {
+            alert('❌ נא להקליד "מחיקה" בדיוק כדי לאשר את המחיקה.');
+            document.getElementById('delete-confirmation-input').focus();
             return;
         }
 
-        // אישור שני - הקלד "מחיקה" כדי לאשר
-        const userInput = prompt(
-            `🚨 אישור אחרון!\n\n` +
-            `כדי למחוק את האירוע "${event.name}" לצמיתות,\n` +
-            `אנא הקלד את המילה: מחיקה\n\n` +
-            `(כתוב בדיוק "מחיקה" ללא מרכאות)`
-        );
+        const eventId = this.deleteEventId;
+        const event = this.events.find(e => e.id === eventId);
 
-        // בדוק אם המשתמש הקליד נכון
-        if (userInput !== 'מחיקה') {
-            if (userInput === null) {
-                console.log('❌ מחיקה בוטלה על ידי המשתמש');
-            } else {
-                console.log('❌ טקסט לא נכון - מחיקה בוטלה');
-                alert('❌ הטקסט שהוקלד אינו נכון.\n\nהמחיקה בוטלה לבטיחותך.');
-            }
+        if (!event) {
+            alert('❌ אירוע לא נמצא');
+            this.closeDeleteModal();
             return;
         }
 
@@ -532,12 +541,17 @@ const eventsManager = {
             }
 
             console.log('✅ מחיקה מלאה הושלמה בהצלחה');
+
+            // סגור את המודל
+            this.closeDeleteModal();
+
             alert(`✅ האירוע "${event.name}" נמחק בהצלחה!\n\nכל הנתונים המקושרים נמחקו לצמיתות.`);
 
             // טען מחדש את רשימת האירועים
             await this.loadEvents();
         } catch (error) {
             console.error('❌ שגיאה במחיקת אירוע:', error);
+            this.closeDeleteModal();
             alert('❌ שגיאה במחיקת האירוע. נסה שוב או פנה לתמיכה.');
         }
     },
