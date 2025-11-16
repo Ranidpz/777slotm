@@ -402,8 +402,9 @@ body {
 
 .event-card:hover {
     border-color: var(--primary);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    background: rgba(26, 26, 46, 0.8);
 }
 
 .event-header {
@@ -465,6 +466,10 @@ body {
 
 .status-indicator.closed {
     background: var(--danger);
+}
+
+.status-indicator.ready {
+    background: #9ca3af;
 }
 
 .status-indicator.unknown {

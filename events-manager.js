@@ -160,7 +160,7 @@ const eventsManager = {
                 </div>` : '';
 
             return `
-                <div class="event-card" data-event-id="${event.id}">
+                <div class="event-card" data-event-id="${event.id}" onclick="eventsManager.handleCardClick(event, '${event.id}')" style="cursor: pointer;">
                     <div class="event-header">
                         <h3>${event.name || 'אירוע ללא שם'}</h3>
                         <span class="session-status-badge" id="session-status-${event.id}">
@@ -172,19 +172,19 @@ const eventsManager = {
                     <div class="event-details">
                         <p>📍 ${event.location || 'לא צוין מקום'}</p>
                         <p>📅 ${date}</p>
+                        <p>🔑 Session: <code style="font-size: 0.85em; background: rgba(255,215,0,0.1); padding: 2px 6px; border-radius: 4px;">${event.sessionId || 'אין'}</code></p>
                         <p>🎮 ${event.stats?.totalPlayers || 0} שחקנים</p>
                         <p>🏆 ${event.stats?.totalWinners || 0} זוכים</p>
                         <p class="session-time" id="session-time-${event.id}"></p>
                     </div>
-                    <div class="event-actions">
+                    <div class="event-actions" onclick="event.stopPropagation()">
                         <button class="btn-primary" onclick="eventsManager.openEvent('${event.id}')">פתח משחק</button>
                         <button class="btn-secondary" onclick="eventsManager.viewScoreboard('${event.id}')">לוח זוכים</button>
-                        <button class="btn-secondary" onclick="eventsManager.editEvent('${event.id}')">ערוך</button>
                         ${authManager.isSuperAdmin() ?
                             `<button class="btn-warning" onclick="eventsManager.showTransferOwnershipModal('${event.id}')" title="העבר בעלות למשתמש אחר">🔄 העבר בעלות</button>` :
                             ''}
                         ${authManager.hasPermission('canDeleteEvents') ?
-                            `<button class="btn-danger" onclick="eventsManager.deleteEvent('${event.id}')">מחק</button>` :
+                            `<button class="btn-danger" onclick="eventsManager.deleteEvent('${event.id}')" title="מחק אירוע זה לצמיתות">🗑️ מחק</button>` :
                             ''}
                     </div>
                 </div>
@@ -278,13 +278,14 @@ const eventsManager = {
                     sessionTime.innerHTML = `🔴 נסגר ב: ${timeStr}`;
                     sessionTime.style.color = '#ef4444';
                 } else {
-                    // אין נתונים
+                    // אין נתונים - Session חדש שטרם נפתח
                     statusBadge.innerHTML = `
-                        <span class="status-indicator unknown"></span>
-                        <span class="status-text">לא ידוע</span>
+                        <span class="status-indicator ready"></span>
+                        <span class="status-text">מוכן</span>
                     `;
-                    statusBadge.className = 'session-status-badge unknown';
-                    sessionTime.innerHTML = '';
+                    statusBadge.className = 'session-status-badge ready';
+                    sessionTime.innerHTML = '⚪ טרם נפתח';
+                    sessionTime.style.color = '#9ca3af';
                 }
             });
         } catch (error) {
@@ -333,6 +334,23 @@ const eventsManager = {
         }
 
         this.displayEvents();
+    },
+
+    // טיפול בלחיצה על כרטיס אירוע - פתיחת עריכה
+    handleCardClick(clickEvent, eventId) {
+        // בדוק אם הלחיצה הייתה על כפתור או אלמנט אינטראקטיבי
+        const target = clickEvent.target;
+
+        // אל תפתח עריכה אם לחצו על כפתור, קישור או אלמנט אינטראקטיבי אחר
+        if (target.closest('button') ||
+            target.closest('a') ||
+            target.closest('.session-status-badge') ||
+            target.closest('.event-owner-badge.clickable')) {
+            return;
+        }
+
+        // פתח עריכת האירוע
+        this.editEvent(eventId);
     },
 
     // הצג מודל יצירת אירוע
