@@ -1184,28 +1184,63 @@ document.getElementById('scoreboard-btn').addEventListener('click', () => {
 document.getElementById('save-settings').addEventListener('click', async () => {
     console.log('💾 לחיצה על שמור הגדרות...');
 
-    // ✅ קרא למנגנון החדש שמטפל בהכל
-    const success = await eventSettingsManager.saveSettings();
+    // הצג loader
+    const loader = document.createElement('div');
+    loader.className = 'saving-loader';
+    loader.innerHTML = `
+        <div class="loader-icon">🎰</div>
+        <div class="loader-text">שומר הגדרות...</div>
+        <div class="loader-subtext">אנא המתן</div>
+    `;
+    document.body.appendChild(loader);
 
-    if (!success) {
-        console.log('⚠️ שמירה נכשלה או בוטלה');
-        return;
+    // המתן קצר להצגת האנימציה
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    try {
+        // ✅ קרא למנגנון החדש שמטפל בהכל
+        const success = await eventSettingsManager.saveSettings();
+
+        if (!success) {
+            console.log('⚠️ שמירה נכשלה או בוטלה');
+            loader.remove();
+            return;
+        }
+
+        console.log('✅ ההגדרות נשמרו בהצלחה!');
+
+        // רענן את הגלגלים עם התמונות החדשות
+        initReels();
+        console.log('🔄 גלגלים אותחלו מחדש עם התמונות החדשות');
+
+        // החל את צבע הרקע המעודכן
+        if (gameState.backgroundColor) {
+            applyBackgroundColor(gameState.backgroundColor);
+            console.log('🎨 צבע רקע הוחל:', gameState.backgroundColor);
+        }
+
+        // הצג הודעת הצלחה
+        loader.innerHTML = `
+            <div class="loader-icon">✅</div>
+            <div class="loader-text">ההגדרות נשמרו בהצלחה!</div>
+        `;
+
+        // המתן 1.5 שניות והסר את הלוודר
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        loader.remove();
+
+        // סגור את מסך ההגדרות
+        settingsScreen.classList.add('hidden');
+    } catch (error) {
+        console.error('❌ שגיאה בשמירת הגדרות:', error);
+        loader.innerHTML = `
+            <div class="loader-icon">❌</div>
+            <div class="loader-text">שגיאה בשמירת ההגדרות</div>
+            <div class="loader-subtext">${error.message || 'שגיאה לא ידועה'}</div>
+        `;
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        loader.remove();
     }
-
-    console.log('✅ ההגדרות נשמרו בהצלחה!');
-
-    // רענן את הגלגלים עם התמונות החדשות
-    initReels();
-    console.log('🔄 גלגלים אותחלו מחדש עם התמונות החדשות');
-
-    // החל את צבע הרקע המעודכן
-    if (gameState.backgroundColor) {
-        applyBackgroundColor(gameState.backgroundColor);
-        console.log('🎨 צבע רקע הוחל:', gameState.backgroundColor);
-    }
-
-    // סגור את מסך ההגדרות
-    settingsScreen.classList.add('hidden');
 });
 
 // הסרנו את כפתור ה-X - סגירה רק דרך קיצור מקלדת ד/ס/S או Escape
