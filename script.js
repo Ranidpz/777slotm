@@ -2004,6 +2004,135 @@ function setupQRPopupClose() {
     }
 }
 
+// הגדרת toggle למלאי ופרסים
+function setupInventoryToggle() {
+    const toggle = document.getElementById('prizes-active-toggle');
+    const inventoryContainer = document.getElementById('dynamic-images-container');
+    const toggleStatus = document.getElementById('prizes-toggle-status');
+
+    if (!toggle || !inventoryContainer) {
+        console.warn('⚠️ לא נמצאו אלמנטים של מלאי ופרסים');
+        return;
+    }
+
+    // פונקציה להצגת/הסתרת מלאי
+    function toggleInventoryVisibility(isVisible, animate = true) {
+        if (isVisible) {
+            // הצג את המלאי
+            inventoryContainer.classList.remove('inventory-section-hidden', 'inventory-section-hiding');
+            inventoryContainer.classList.add('inventory-section-visible');
+
+            if (toggleStatus) {
+                toggleStatus.textContent = '✓ משתמש בתמונות פרסים';
+            }
+        } else {
+            // הסתר את המלאי
+            if (animate) {
+                inventoryContainer.classList.add('inventory-section-hiding');
+                // לאחר סיום האנימציה - הסתר לגמרי
+                setTimeout(() => {
+                    inventoryContainer.classList.remove('inventory-section-visible', 'inventory-section-hiding');
+                    inventoryContainer.classList.add('inventory-section-hidden');
+                }, 300); // התאם לזמן האנימציה ב-CSS
+            } else {
+                inventoryContainer.classList.remove('inventory-section-visible', 'inventory-section-hiding');
+                inventoryContainer.classList.add('inventory-section-hidden');
+            }
+
+            if (toggleStatus) {
+                toggleStatus.textContent = '✗ משתמש באימוג׳ים בלבד';
+            }
+        }
+    }
+
+    // טען מצב שמור מ-localStorage
+    const savedToggleState = localStorage.getItem('prizesToggleActive');
+    const isActive = savedToggleState !== 'false'; // ברירת מחדל: true
+
+    toggle.checked = isActive;
+    toggleInventoryVisibility(isActive, false); // ללא אנימציה בטעינה ראשונית
+
+    // מאזין לשינויים ב-toggle
+    toggle.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+
+        // שמור מצב ב-localStorage
+        localStorage.setItem('prizesToggleActive', isChecked);
+
+        // הצג/הסתר עם אנימציה
+        toggleInventoryVisibility(isChecked, true);
+
+        console.log(`🎰 מלאי ופרסים ${isChecked ? 'מופעל' : 'מכובה'}`);
+    });
+}
+
+// הגדרת נעילת מלאי ופרסים בהתחברות
+function setupInventoryAuthLock() {
+    const inventoryContainer = document.getElementById('dynamic-images-container');
+
+    if (!inventoryContainer) {
+        console.warn('⚠️ לא נמצא אלמנט מלאי');
+        return;
+    }
+
+    // פונקציה לבדיקת מצב התחברות ונעילה
+    function checkAuthAndLockInventory() {
+        if (typeof userAuthManager !== 'undefined' && userAuthManager.isLoggedIn()) {
+            // משתמש מחובר - בטל נעילה
+            inventoryContainer.classList.remove('inventory-section-locked');
+            console.log('🔓 מלאי ופרסים זמין - משתמש מחובר');
+        } else {
+            // משתמש לא מחובר - נעל
+            inventoryContainer.classList.add('inventory-section-locked');
+            console.log('🔒 מלאי ופרסים נעול - נדרשת התחברות');
+
+            // הוסף מאזין ללחיצה על האזור הנעול
+            inventoryContainer.addEventListener('click', (e) => {
+                if (inventoryContainer.classList.contains('inventory-section-locked')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (typeof userAuthManager !== 'undefined') {
+                        userAuthManager.requiresAuth(() => {
+                            // אחרי התחברות - בטל נעילה
+                            inventoryContainer.classList.remove('inventory-section-locked');
+                            console.log('✅ מלאי ופרסים זמין לאחר התחברות');
+                        });
+                    }
+                }
+            }, { capture: true });
+        }
+    }
+
+    // בדיקה ראשונית
+    checkAuthAndLockInventory();
+
+    // עדכן כשמצב ההתחברות משתנה
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged(() => {
+            checkAuthAndLockInventory();
+        });
+    }
+}
+
+// הגדרת כפתור דשבורד - לניווט באותו חלון
+function setupDashboardButton() {
+    const dashboardBtn = document.getElementById('dashboard-btn');
+
+    if (dashboardBtn) {
+        dashboardBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // מנע התנהגות ברירת מחדל
+            e.stopPropagation(); // עצור התפשטות אירוע
+
+            // נווט באותו חלון
+            window.location.href = 'dashboard.html';
+            console.log('🏠 מעביר לדשבורד...');
+        });
+
+        console.log('✅ כפתור דשבורד מוכן');
+    }
+}
+
 // אתחול
 loadSettings(); // טען הגדרות שמורות
 initSounds();
@@ -2028,6 +2157,9 @@ setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
 setupBannerFontSizeControl(); // הגדר גודל גופן לטקסט נגלל
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 updateScrollingBanner(); // הצג את הטקסט הנגלל בהתחלה
+setupInventoryToggle(); // ✅ הגדר toggle למלאי ופרסים
+setupInventoryAuthLock(); // ✅ הגדר נעילת מלאי לפי התחברות
+setupDashboardButton(); // ✅ הגדר כפתור דשבורד
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');

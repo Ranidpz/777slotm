@@ -3194,3 +3194,64 @@ input:checked + .toggle-slider:before {
     opacity: 0.7;
 }
 
+/* Fade animation for inventory section */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.inventory-section-hidden {
+    display: none;
+    opacity: 0;
+}
+
+.inventory-section-visible {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.inventory-section-hiding {
+    animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+/* Lock inventory section when not authenticated */
+.inventory-section-locked {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.inventory-section-locked::before {
+    content: '🔒 נדרשת התחברות למערכת';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffd700;
+    padding: 20px 40px;
+    border-radius: 12px;
+    font-size: 1.2em;
+    font-weight: 700;
+    z-index: 10;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+

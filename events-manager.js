@@ -362,24 +362,88 @@ const eventsManager = {
         }
     },
 
-    // מחק אירוע
+    // מחק אירוע - מחיקה מלאה מכל מקום במאגר
     async deleteEvent(eventId) {
         const event = this.events.find(e => e.id === eventId);
-        if (!event) return;
+        if (!event) {
+            alert('❌ אירוע לא נמצא');
+            return;
+        }
 
-        const confirmed = confirm(`❌ האם למחוק את האירוע "${event.name}"?\n\nפעולה זו תמחק גם את כל הזוכים והנתונים!`);
-        if (!confirmed) return;
+        // אישור ראשון - בסיסי
+        const firstConfirm = confirm(
+            `⚠️ האם אתה בטוח שברצונך למחוק את האירוע:\n\n` +
+            `"${event.name}"\n\n` +
+            `פעולה זו תמחק לצמיתות:\n` +
+            `• את האירוע עצמו\n` +
+            `• את כל הזוכים והשחקנים\n` +
+            `• את ה-Session המקושר\n` +
+            `• את כל ההגדרות והמלאי\n\n` +
+            `❌ פעולה זו בלתי הפיכה!`
+        );
+
+        if (!firstConfirm) {
+            console.log('❌ מחיקה בוטלה על ידי המשתמש');
+            return;
+        }
+
+        // אישור שני - הקלד "מחיקה" כדי לאשר
+        const userInput = prompt(
+            `🚨 אישור אחרון!\n\n` +
+            `כדי למחוק את האירוע "${event.name}" לצמיתות,\n` +
+            `אנא הקלד את המילה: מחיקה\n\n` +
+            `(כתוב בדיוק "מחיקה" ללא מרכאות)`
+        );
+
+        // בדוק אם המשתמש הקליד נכון
+        if (userInput !== 'מחיקה') {
+            if (userInput === null) {
+                console.log('❌ מחיקה בוטלה על ידי המשתמש');
+            } else {
+                console.log('❌ טקסט לא נכון - מחיקה בוטלה');
+                alert('❌ הטקסט שהוקלד אינו נכון.\n\nהמחיקה בוטלה לבטיחותך.');
+            }
+            return;
+        }
 
         try {
+            console.log('🗑️ מתחיל מחיקה מלאה של אירוע:', eventId);
+
+            // 1. מחק את ה-Session המקושר (אם קיים)
+            if (event.sessionId) {
+                console.log('🗑️ מוחק session:', event.sessionId);
+                await firebase.database().ref(`sessions/${event.sessionId}`).remove();
+                console.log('✅ Session נמחק');
+            }
+
+            // 2. מחק את האירוע עצמו (כולל הזוכים, השחקנים, המלאי וההגדרות)
+            console.log('🗑️ מוחק אירוע:', eventId);
             await firebase.database().ref(`events/${eventId}`).remove();
+            console.log('✅ אירוע נמחק');
 
-            console.log('🗑️ אירוע נמחק:', eventId);
-            alert('✅ האירוע נמחק בהצלחה');
+            // 3. עדכן סטטיסטיקות משתמש (הפחת מספר אירועים)
+            const ownerId = event.ownerId;
+            if (ownerId) {
+                const userStatsRef = firebase.database().ref(`users/${ownerId}/stats`);
+                const statsSnapshot = await userStatsRef.once('value');
+                const currentStats = statsSnapshot.val() || { totalEvents: 0 };
 
+                const newTotalEvents = Math.max(0, (currentStats.totalEvents || 0) - 1);
+
+                await userStatsRef.update({
+                    totalEvents: newTotalEvents
+                });
+                console.log('✅ סטטיסטיקות משתמש עודכנו');
+            }
+
+            console.log('✅ מחיקה מלאה הושלמה בהצלחה');
+            alert(`✅ האירוע "${event.name}" נמחק בהצלחה!\n\nכל הנתונים המקושרים נמחקו לצמיתות.`);
+
+            // טען מחדש את רשימת האירועים
             await this.loadEvents();
         } catch (error) {
             console.error('❌ שגיאה במחיקת אירוע:', error);
-            alert('❌ שגיאה במחיקת האירוע');
+            alert('❌ שגיאה במחיקת האירוע. נסה שוב או פנה לתמיכה.');
         }
     },
 
