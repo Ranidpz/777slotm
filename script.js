@@ -2126,20 +2126,24 @@ async function updateScrollingBanner() {
     }
 
     // שלב טקסט מותאם + זוכים
+    // ✅ תיקון: הפס מוצג רק אם יש טקסט מותאם (גם אם יש זוכים)
+    // אם המשתמש מחק את הטקסט - הפס נעלם לגמרי
     let combinedText = '';
     console.log('📝 טקסט נגלל נוכחי:', gameState.scrollingBannerText);
     console.log('🏆 טקסט זוכים:', winnersText);
 
-    if (gameState.scrollingBannerText && gameState.scrollingBannerText.length > 0) {
+    // הצג את הפס רק אם יש טקסט מותאם
+    if (gameState.scrollingBannerText && gameState.scrollingBannerText.trim().length > 0) {
         combinedText = gameState.scrollingBannerText;
         if (winnersText) {
             combinedText += winnersText; // הוסף זוכים
             console.log('🔗 שילבתי טקסט + זוכים');
         }
-    } else if (winnersText) {
-        // אם אין טקסט מותאם אבל יש זוכים - הצג רק את הזוכים
-        combinedText = winnersText;
-        console.log('🏆 מציג רק זוכים (אין טקסט מותאם)');
+        console.log('✅ יש טקסט מותאם - מציג את הפס');
+    } else {
+        // אם אין טקסט מותאם - הפס נעלם לגמרי (גם אם יש זוכים)
+        combinedText = '';
+        console.log('🚫 אין טקסט מותאם - מסתיר את הפס (גם אם יש זוכים)');
     }
 
     // ✅ כפול את הטקסט 5 פעמים כדי שלא יהיו הפסקות בגלילה
@@ -2163,7 +2167,7 @@ async function updateScrollingBanner() {
         console.log('✅ גובה פס:', bannerHeight + 'px');
     } else {
         banner.classList.add('hidden');
-        console.log('🚫 פס מתגלגל מוסתר - אין טקסט');
+        console.log('🚫 פס מתגלגל מוסתר - אין טקסט מותאם');
     }
 }
 

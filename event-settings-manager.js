@@ -144,6 +144,10 @@ const eventSettingsManager = {
 
         localStorage.setItem('simpleWinScreen', gameState.simpleWinScreen);
 
+        // שמור טקסט נגלל וגודל גופן
+        localStorage.setItem('scrollingBannerText', gameState.scrollingBannerText || '');
+        localStorage.setItem('scrollingBannerFontSize', gameState.scrollingBannerFontSize || 42);
+
         // שמור צלילים מותאמים
         if (typeof saveCustomSounds === 'function') {
             saveCustomSounds();
