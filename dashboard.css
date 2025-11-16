@@ -25,8 +25,8 @@
 }
 
 body {
-    font-family: 'Assistant', sans-serif;
-    background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+    font-family: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f0f1a;
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
@@ -60,10 +60,7 @@ body {
 .login-header h1 {
     font-size: 2.5em;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary);
     margin-bottom: 15px;
 }
 
@@ -130,10 +127,7 @@ body {
 .dashboard-title {
     font-size: 1.8em;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary);
 }
 
 .header-right {
@@ -191,12 +185,12 @@ body {
 }
 
 .role-badge.admin {
-    background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+    background: var(--danger);
     color: white;
 }
 
 .role-badge.manager {
-    background: linear-gradient(135deg, var(--secondary) 0%, #22c55e 100%);
+    background: var(--secondary);
     color: white;
 }
 
@@ -331,9 +325,10 @@ body {
 .btn-primary,
 .btn-secondary {
     padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 1em;
+    border-radius: 8px;
+    font-size: 16px;
     font-weight: 600;
+    font-family: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -343,14 +338,15 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     color: #1a1a2e;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5);
+    background: #F4C430;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .btn-secondary {
@@ -361,18 +357,19 @@ body {
 
 .btn-secondary:hover {
     border-color: var(--primary);
-    transform: translateY(-2px);
+    background: rgba(255, 215, 0, 0.1);
+    transform: translateY(-1px);
 }
 
 .search-input,
 .filter-select {
     padding: 12px 20px;
-    border-radius: 10px;
+    border-radius: 8px;
     background: var(--surface);
     border: 2px solid var(--border);
     color: var(--text-primary);
-    font-size: 1em;
-    font-family: 'Assistant', sans-serif;
+    font-size: 16px;
+    font-family: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     transition: all 0.3s ease;
 }
 
@@ -573,24 +570,27 @@ body {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
     color: var(--danger);
+    font-family: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .btn-danger:hover {
     background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
 }
 
 .btn-warning {
     background: rgba(255, 193, 7, 0.1);
     border: 1px solid rgba(255, 193, 7, 0.3);
     color: #ffc107;
-    font-size: 0.9em;
+    font-size: 16px;
+    font-family: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     padding: 8px 12px;
 }
 
 .btn-warning:hover {
     background: rgba(255, 193, 7, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .loading,
@@ -687,14 +687,15 @@ body {
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 12px 15px;
-    border-radius: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
     background: var(--surface-light);
     border: 2px solid var(--border);
     color: var(--text-primary);
-    font-size: 1em;
-    font-family: 'Assistant', sans-serif;
+    font-size: 16px;
+    font-family: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     transition: all 0.3s ease;
+    min-height: 44px;
 }
 
 .form-group input:focus,
