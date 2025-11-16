@@ -2132,18 +2132,18 @@ function setupInventoryAuthLock() {
     }, 500);
 }
 
-// הגדרת כפתור דשבורד - לניווט באותו חלון
+// הגדרת כפתור דשבורד - לפתיחה בטאב חדש
 function setupDashboardButton() {
     const dashboardBtn = document.getElementById('dashboard-btn');
 
     if (dashboardBtn) {
         dashboardBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // מנע התנהגות ברירת מחדל
-            e.stopPropagation(); // עצור התפשטות אירוע
+            e.preventDefault();
+            e.stopPropagation();
 
-            // נווט באותו חלון
-            window.location.href = 'dashboard.html';
-            console.log('🏠 מעביר לדשבורד...');
+            // פתח בטאב חדש
+            window.open('dashboard.html', '_blank');
+            console.log('🏠 פותח דשבורד בטאב חדש...');
         });
 
         console.log('✅ כפתור דשבורד מוכן');

@@ -127,6 +127,11 @@ const dynamicImagesManager = {
         }
 
         console.log(`✅ רונדר הושלם - ${this.images.length} תמונות בתוספת תיבת הוספה`);
+
+        // אתחול אייקוני Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     },
 
     // צור תיבת "הוסף פרס" עם פלוס
@@ -223,7 +228,8 @@ const dynamicImagesManager = {
 
                 ${this.images.length > this.minImages ? `
                 <button class="remove-image-btn-new" data-image-id="${image.id}" title="מחק פרס">
-                    🗑️ מחק
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                    מחק
                 </button>
                 ` : ''}
             </div>
