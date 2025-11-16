@@ -96,13 +96,16 @@ const eventsManager = {
 
             // הצע תיקון אוטומטי
             if (confirm(
-                `⚠️ זוהתה בעיה קריטית!\n\n` +
+                `⚠️ זוהתה בעיה ביטחונית\n\n` +
                 `${duplicates.length} אירוע/ים משתפים sessionId זהה.\n` +
                 `זה עלול לגרום לבעיות במעקב אחרי שחקנים וזוכים.\n\n` +
                 `האם ליצור sessionId חדש ייחודי לכל אירוע?\n\n` +
-                `(מומלץ מאוד!)`
+                `(מומלץ מאוד!)\n\n` +
+                `לחץ OK לתיקון, Cancel להתעלם בינתיים.`
             )) {
                 this.fixDuplicateSessionIds(duplicates);
+            } else {
+                console.log('ℹ️ המשתמש בחר להתעלם מהבעיה בינתיים');
             }
         }
     },
