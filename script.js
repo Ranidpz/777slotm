@@ -1916,15 +1916,21 @@ function loadSettings() {
 
     // טען טקסט נגלל
     const savedScrollingText = localStorage.getItem('scrollingBannerText');
-    if (savedScrollingText) {
+    // ✅ תיקון: בדוק אם הערך קיים ב-localStorage (גם אם הוא ריק)
+    // null = לא קיים, '' = קיים אבל ריק (המשתמש מחק אותו)
+    if (savedScrollingText !== null) {
         gameState.scrollingBannerText = savedScrollingText;
         const bannerTextArea = document.getElementById('scrolling-banner-text');
         if (bannerTextArea) {
             bannerTextArea.value = savedScrollingText;
         }
-        console.log('📜 טקסט נגלל נטען:', savedScrollingText);
+        if (savedScrollingText === '') {
+            console.log('📜 טקסט נגלל ריק נטען (המשתמש מחק אותו)');
+        } else {
+            console.log('📜 טקסט נגלל נטען:', savedScrollingText);
+        }
     } else {
-        // אם אין טקסט שמור, השתמש בברירת מחדל
+        // רק אם לא קיים בכלל ב-localStorage - השתמש בברירת מחדל
         const defaultText = '🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰';
         gameState.scrollingBannerText = defaultText;
         const bannerTextArea = document.getElementById('scrolling-banner-text');
@@ -1932,7 +1938,7 @@ function loadSettings() {
             bannerTextArea.value = defaultText;
         }
         localStorage.setItem('scrollingBannerText', defaultText);
-        console.log('📜 טקסט ברירת מחדל נטען');
+        console.log('📜 טקסט ברירת מחדל נטען (פעם ראשונה)');
     }
 
     // טען גודל גופן לטקסט נגלל

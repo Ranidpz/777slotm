@@ -108,7 +108,8 @@ class SessionManager {
           if (settings.whatsappNumber) gameState.whatsappNumber = settings.whatsappNumber;
           if (settings.simpleWinScreen !== undefined) gameState.simpleWinScreen = settings.simpleWinScreen;
           if (settings.qrCustomText) gameState.qrCustomText = settings.qrCustomText;
-          if (settings.scrollingBannerText) gameState.scrollingBannerText = settings.scrollingBannerText;
+          // ✅ תיקון: קבל גם טקסט ריק ('' = המשתמש מחק את הטקסט)
+          if (settings.scrollingBannerText !== undefined) gameState.scrollingBannerText = settings.scrollingBannerText;
           if (settings.scrollingBannerFontSize) gameState.scrollingBannerFontSize = settings.scrollingBannerFontSize;
 
           console.log('✅ הגדרות משחק עודכנו מ-Firebase');
