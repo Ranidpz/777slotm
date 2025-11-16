@@ -108,7 +108,19 @@
 
     <script src="firebase-config.js"></script>
     <script>
-        const db = firebase.database();
+        // וודא ש-Firebase אותחל
+        let db;
+
+        // המתן לטעינת Firebase
+        window.addEventListener('load', () => {
+            if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                log('❌ Firebase לא אותחל! בדוק את firebase-config.js', 'error');
+                return;
+            }
+
+            db = firebase.database();
+            log('🚀 Firebase אותחל בהצלחה!', 'success');
+        });
         let orphanedSessions = [];
 
         function log(message, type = 'info') {
@@ -121,6 +133,11 @@
         }
 
         async function analyzeSessions() {
+            if (!db) {
+                log('❌ Firebase לא מוכן! רענן את הדף', 'error');
+                return;
+            }
+
             log('🔍 מתחיל ניתוח sessions...', 'info');
 
             try {
@@ -195,13 +212,12 @@
         }
 
         async function deleteAllSessions() {
-            const confirmed = confirm('⚠️ זהירות! האם למחוק את כל ה-sessions?\n\nזו פעולה קיצונית!\n\nהקלד "מחק הכל" כדי לאשר:');
-            if (!confirmed) {
-                log('❌ המחיקה בוטלה', 'info');
+            if (!db) {
+                log('❌ Firebase לא מוכן! רענן את הדף', 'error');
                 return;
             }
 
-            const doubleConfirm = prompt('הקלד "מחק הכל" כדי לאשר:');
+            const doubleConfirm = prompt('⚠️ זהירות! למחוק את כל ה-sessions?\n\nהקלד "מחק הכל" כדי לאשר:');
             if (doubleConfirm !== 'מחק הכל') {
                 log('❌ טקסט אישור שגוי - המחיקה בוטלה', 'error');
                 return;
@@ -216,12 +232,6 @@
                 log(`❌ שגיאה: ${error.message}`, 'error');
             }
         }
-
-        // הרץ ניתוח אוטומטי בטעינת הדף
-        window.addEventListener('load', () => {
-            log('🚀 סקריפט ניקוי Sessions נטען', 'success');
-            log('👉 לחץ על "נתח Sessions" כדי להתחיל', 'info');
-        });
     </script>
 </body>
 </html>
