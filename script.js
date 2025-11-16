@@ -1188,11 +1188,18 @@ document.getElementById('save-settings').addEventListener('click', async () => {
     const loader = document.createElement('div');
     loader.className = 'saving-loader';
     loader.innerHTML = `
-        <div class="loader-icon">🎰</div>
+        <div class="loader-icon">
+            <i data-lucide="loader-circle" style="width: 80px; height: 80px;"></i>
+        </div>
         <div class="loader-text">שומר הגדרות...</div>
         <div class="loader-subtext">אנא המתן</div>
     `;
     document.body.appendChild(loader);
+
+    // אתחל את האייקון
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 
     // המתן קצר להצגת האנימציה
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -1221,9 +1228,16 @@ document.getElementById('save-settings').addEventListener('click', async () => {
 
         // הצג הודעת הצלחה
         loader.innerHTML = `
-            <div class="loader-icon">✅</div>
+            <div class="loader-icon success">
+                <i data-lucide="check-circle" style="width: 80px; height: 80px;"></i>
+            </div>
             <div class="loader-text">ההגדרות נשמרו בהצלחה!</div>
         `;
+
+        // אתחל את האייקון
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
 
         // המתן 1.5 שניות והסר את הלוודר
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -1234,10 +1248,18 @@ document.getElementById('save-settings').addEventListener('click', async () => {
     } catch (error) {
         console.error('❌ שגיאה בשמירת הגדרות:', error);
         loader.innerHTML = `
-            <div class="loader-icon">❌</div>
+            <div class="loader-icon error">
+                <i data-lucide="alert-circle" style="width: 80px; height: 80px;"></i>
+            </div>
             <div class="loader-text">שגיאה בשמירת ההגדרות</div>
             <div class="loader-subtext">${error.message || 'שגיאה לא ידועה'}</div>
         `;
+
+        // אתחל את האייקון
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
         await new Promise(resolve => setTimeout(resolve, 2000));
         loader.remove();
     }

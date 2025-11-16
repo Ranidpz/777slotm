@@ -3260,16 +3260,14 @@ input:checked + .toggle-slider:before {
 }
 
 /* Saving Loader Animation */
-@keyframes slotMachineBounce {
-    0%, 100% { transform: translateY(0) scale(1); }
-    25% { transform: translateY(-15px) scale(1.1); }
-    50% { transform: translateY(0) scale(1); }
-    75% { transform: translateY(-8px) scale(1.05); }
+@keyframes loaderSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-@keyframes spinGlow {
-    0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
-    50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+@keyframes pulseGlow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4)); }
+    50% { filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.8)); }
 }
 
 .saving-loader {
@@ -3288,9 +3286,30 @@ input:checked + .toggle-slider:before {
 }
 
 .saving-loader .loader-icon {
-    font-size: 80px;
-    animation: slotMachineBounce 0.8s ease-in-out infinite, spinGlow 1.5s ease-in-out infinite;
     margin-bottom: 24px;
+    color: #ffd700;
+}
+
+.saving-loader .loader-icon svg {
+    animation: loaderSpin 1s linear infinite, pulseGlow 1.5s ease-in-out infinite;
+}
+
+.saving-loader .loader-icon.success {
+    color: #4CAF50;
+}
+
+.saving-loader .loader-icon.success svg {
+    animation: none;
+    filter: drop-shadow(0 0 12px rgba(76, 175, 80, 0.6));
+}
+
+.saving-loader .loader-icon.error {
+    color: #f44336;
+}
+
+.saving-loader .loader-icon.error svg {
+    animation: none;
+    filter: drop-shadow(0 0 12px rgba(244, 67, 54, 0.6));
 }
 
 .saving-loader .loader-text {
