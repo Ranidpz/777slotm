@@ -2324,7 +2324,7 @@ input:checked + .toggle-slider:before {
 }
 
 #simple-prize-image-container {
-    max-width: 500px;
+    max-width: 320px;
     width: 100%;
     padding: 30px;
     border-radius: 25px;
