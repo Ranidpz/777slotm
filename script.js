@@ -27,7 +27,8 @@ const gameState = {
     winScreenUnlockTime: 0, // זמן שבו ניתן לסגור את מסך הזכייה
     qrCustomText: 'אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸', // טקסט מותאם למסך QR
     scrollingBannerText: '🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰', // טקסט נגלל במסך הראשי
-    scrollingBannerFontSize: 32 // גודל גופן לטקסט נגלל (בפיקסלים)
+    scrollingBannerFontSize: 32, // גודל גופן לטקסט נגלל (בפיקסלים)
+    simpleWinText: 'Please collect your prize at the counter' // טקסט במסך זכייה פשוט
 };
 
 // אלמנטים
@@ -807,6 +808,9 @@ function showSimpleWinScreen() {
         console.error('❌ לא נמצא אלמנט simple-win-popup');
         return;
     }
+
+    // עדכן את הטקסט המותאם אישית
+    updateSimpleWinText();
 
     // הצג פרטי פרס
     if (gameState.lastWinPrizeDetails) {
@@ -1948,6 +1952,27 @@ function loadSettings() {
         console.log('📜 טקסט ברירת מחדל נטען (פעם ראשונה)');
     }
 
+    // טען טקסט מסך זכייה פשוט
+    const savedSimpleWinText = localStorage.getItem('simpleWinText');
+    if (savedSimpleWinText !== null) {
+        gameState.simpleWinText = savedSimpleWinText;
+        const simpleWinTextArea = document.getElementById('simple-win-text');
+        if (simpleWinTextArea) {
+            simpleWinTextArea.value = savedSimpleWinText;
+        }
+        console.log('📝 טקסט מסך זכייה פשוט נטען:', savedSimpleWinText);
+    } else {
+        // רק אם לא קיים בכלל ב-localStorage - השתמש בברירת מחדל
+        const defaultText = 'Please collect your prize at the counter';
+        gameState.simpleWinText = defaultText;
+        const simpleWinTextArea = document.getElementById('simple-win-text');
+        if (simpleWinTextArea) {
+            simpleWinTextArea.value = defaultText;
+        }
+        localStorage.setItem('simpleWinText', defaultText);
+        console.log('📝 טקסט מסך זכייה פשוט - ברירת מחדל נטען (פעם ראשונה)');
+    }
+
     // טען גודל גופן לטקסט נגלל
     const savedFontSize = localStorage.getItem('scrollingBannerFontSize');
     if (savedFontSize) {
@@ -2075,6 +2100,46 @@ function setupScrollingBannerInput() {
                 console.log('🔄 טקסט נגלל אופס לברירת מחדל');
             }
         });
+    }
+}
+
+// הגדרת מאזינים לטקסט מסך זכייה פשוט
+function setupSimpleWinTextInput() {
+    const simpleWinTextArea = document.getElementById('simple-win-text');
+    const clearBtn = document.getElementById('clear-simple-win-text');
+
+    if (simpleWinTextArea) {
+        // שמור בזמן הקלדה ועדכן תצוגה
+        simpleWinTextArea.addEventListener('input', (e) => {
+            const value = e.target.value;
+            gameState.simpleWinText = value;
+            localStorage.setItem('simpleWinText', value);
+            updateSimpleWinText();
+            console.log('📝 טקסט מסך זכייה פשוט עודכן');
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (simpleWinTextArea) {
+                const defaultText = 'Please collect your prize at the counter';
+                simpleWinTextArea.value = defaultText;
+                gameState.simpleWinText = defaultText;
+                localStorage.setItem('simpleWinText', defaultText);
+                updateSimpleWinText();
+                console.log('🔄 טקסט מסך זכייה פשוט אופס לברירת מחדל');
+            }
+        });
+    }
+}
+
+// עדכון טקסט מסך זכייה פשוט
+function updateSimpleWinText() {
+    const simpleWinSubtitle = document.getElementById('simple-win-subtitle');
+
+    if (simpleWinSubtitle && gameState.simpleWinText) {
+        simpleWinSubtitle.textContent = gameState.simpleWinText;
+        console.log('✅ טקסט מסך זכייה פשוט עודכן:', gameState.simpleWinText);
     }
 }
 
@@ -2467,8 +2532,10 @@ setupWhatsAppInput(); // הגדר שדה WhatsApp
 setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
 setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
 setupBannerFontSizeControl(); // הגדר גודל גופן לטקסט נגלל
+setupSimpleWinTextInput(); // הגדר שדה טקסט מסך זכייה פשוט
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 updateScrollingBanner(); // הצג את הטקסט הנגלל בהתחלה
+updateSimpleWinText(); // הצג את הטקסט של מסך זכייה פשוט בהתחלה
 setupInventoryToggle(); // ✅ הגדר toggle למלאי ופרסים
 setupInventoryAuthLock(); // ✅ הגדר נעילת מלאי לפי התחברות
 setupDashboardButton(); // ✅ הגדר כפתור דשבורד

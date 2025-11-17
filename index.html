@@ -126,7 +126,7 @@
 
                 <!-- Left Column: Text -->
                 <div class="simple-text-column">
-                    <p class="simple-win-subtitle" dir="ltr">Please collect your prize at the counter</p>
+                    <p class="simple-win-subtitle" id="simple-win-subtitle" dir="ltr">Please collect your prize at the counter</p>
                     <p id="simple-prize-name" style="display: none;"></p>
                 </div>
             </div>
@@ -376,6 +376,17 @@
                         <span id="banner-font-size-value">32</span>
                         <span style="font-size: 0.9em; color: #ccc;">px</span>
                     </div>
+                </div>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="setting-group">
+                <h3>טקסט במסך זכייה פשוט</h3>
+                <p class="setting-description">הטקסט שיוצג למטה בצד של תמונת הפרס במסך זכייה פשוט</p>
+                <div class="custom-text-container">
+                    <textarea id="simple-win-text" placeholder="Please collect your prize at the counter" rows="2" maxlength="200"></textarea>
+                    <button id="clear-simple-win-text" class="small-btn">נקה</button>
                 </div>
             </div>
 
