@@ -347,22 +347,173 @@
             background: linear-gradient(90deg, #4ade80 0%, #86efac 100%);
         }
 
+        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
             .header h1 {
                 font-size: 2em;
             }
 
+            .header p {
+                font-size: 1em;
+            }
+
+            /* Stats cards - 2 columns on mobile */
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                padding: 15px 10px;
+            }
+
+            .stat-card .number {
+                font-size: 2em;
+            }
+
+            .stat-card .label {
+                font-size: 0.85em;
+            }
+
+            /* Prize stats header - smaller on mobile */
+            .prize-stats-header h2 {
+                font-size: 1.5em !important;
+            }
+
+            .prize-stats-header p {
+                font-size: 0.85em !important;
+            }
+
+            /* Prize stats grid - single column on mobile */
+            #prize-stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px;
+            }
+
+            .prize-stat-card {
+                padding: 15px;
+            }
+
+            .prize-stat-image,
+            .prize-stat-symbol {
+                width: 50px;
+                height: 50px;
+            }
+
+            .prize-stat-name {
+                font-size: 1em;
+            }
+
+            .prize-stat-row {
+                font-size: 0.9em;
+            }
+
+            /* Winner cards - stack on mobile */
             .winner-card {
                 grid-template-columns: auto 1fr;
                 gap: 10px;
+                padding: 15px;
+            }
+
+            .winner-rank {
+                font-size: 1.5em;
+                min-width: 40px;
+            }
+
+            .winner-name {
+                font-size: 1.2em;
+            }
+
+            .winner-time {
+                font-size: 0.8em;
             }
 
             .winner-prize {
                 grid-column: 1 / -1;
+                padding: 10px 15px;
+                margin-top: 5px;
+            }
+
+            .prize-symbol {
+                font-size: 1.5em;
+            }
+
+            .prize-name {
+                font-size: 1em;
             }
 
             .trophy-icon {
                 display: none;
+            }
+
+            /* Footer - smaller text and stacked links */
+            .scoreboard-footer {
+                padding: 20px 10px 30px;
+                margin-top: 30px;
+            }
+
+            .footer-link {
+                font-size: 0.85em;
+                padding: 3px 8px;
+            }
+
+            .footer-separator {
+                margin: 0 5px;
+            }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            /* Stack stats vertically on very small screens */
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card .number {
+                font-size: 1.8em;
+            }
+
+            .winner-card {
+                padding: 12px;
+            }
+
+            .winner-rank {
+                font-size: 1.3em;
+                min-width: 35px;
+            }
+
+            .winner-name {
+                font-size: 1.1em;
+            }
+
+            .prize-stat-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .prize-stat-image,
+            .prize-stat-symbol {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -391,11 +542,14 @@
 
         <!-- Prize Inventory Statistics -->
         <div id="prize-stats-container" style="display: none;">
-            <div class="header" style="margin-top: 20px; margin-bottom: 20px;">
-                <h2 style="font-size: 2em;">🎁 סטטיסטיקות פרסים</h2>
-                <p style="font-size: 1em;">מעקב אחרי המלאי של כל פרס</p>
+            <div class="header prize-stats-header" style="margin-top: 20px; margin-bottom: 20px; cursor: pointer; user-select: none;" onclick="togglePrizeStats()">
+                <h2 style="font-size: 2em; display: inline-flex; align-items: center; gap: 10px;">
+                    🎁 סטטיסטיקות פרסים
+                    <span id="prize-stats-toggle" style="font-size: 0.6em; transition: transform 0.3s;">▼</span>
+                </h2>
+                <p style="font-size: 1em;">לחץ כדי להרחיב/לצמצם</p>
             </div>
-            <div id="prize-stats-grid"></div>
+            <div id="prize-stats-grid" style="display: grid;"></div>
         </div>
 
         <div id="winners-container">
@@ -492,25 +646,34 @@
             // עבור על כל הזוכים וספור כמה פעמים כל פרס חולק
             winnersData.forEach(winner => {
                 const prizeName = winner.prizeName || winner.prize || 'פרס לא ידוע';
+                const prizeImage = winner.prizeImage || winner.symbol || null;
+
                 if (!prizeCount[prizeName]) {
                     prizeCount[prizeName] = {
                         name: prizeName,
                         distributed: 0,
-                        imageData: winner.prizeImage || null
+                        imageData: prizeImage,
+                        totalPrizes: null,
+                        remaining: null
                     };
+                } else {
+                    // עדכן תמונה אם עדיין אין או אם יש תמונה חדשה יותר
+                    if (!prizeCount[prizeName].imageData && prizeImage) {
+                        prizeCount[prizeName].imageData = prizeImage;
+                    }
                 }
                 prizeCount[prizeName].distributed++;
             });
 
-            // המר לפורמט הנדרש
+            // המר לפורמט הנדרש - אם אין נתוני מלאי, פשוט הצג כמה חולק
             return Object.values(prizeCount).map(prize => ({
                 name: prize.name,
                 imageData: prize.imageData,
-                totalPrizes: '∞',
+                totalPrizes: '?',  // לא ידוע - אין נתוני Firebase
                 distributed: prize.distributed,
-                remaining: '∞',
-                percentRemaining: 100,
-                isInfinite: true
+                remaining: '?',  // לא ידוע - אין נתוני Firebase
+                percentRemaining: 0,
+                isInfinite: false  // לא בלתי מוגבל, פשוט לא ידוע
             }));
         }
 
@@ -558,6 +721,10 @@
             document.getElementById('prize-stats-container').style.display = 'block';
 
             const container = document.getElementById('prize-stats-grid');
+            // התחל עם הגריד מוסתר (מצומצם)
+            if (container.style.display === '') {
+                container.style.display = 'none';
+            }
 
             const html = prizeStats.map(prize => {
                 // קבע סוג צבע לפי אחוז נותר
@@ -810,6 +977,20 @@
 
             loadWinners();
         });
+
+        // Toggle prize stats visibility
+        function togglePrizeStats() {
+            const grid = document.getElementById('prize-stats-grid');
+            const toggle = document.getElementById('prize-stats-toggle');
+
+            if (grid.style.display === 'none' || grid.style.display === '') {
+                grid.style.display = 'grid';
+                toggle.style.transform = 'rotate(180deg)';
+            } else {
+                grid.style.display = 'none';
+                toggle.style.transform = 'rotate(0deg)';
+            }
+        }
 
         // Reset scoreboard with confirmation
         async function resetScoreboard() {
