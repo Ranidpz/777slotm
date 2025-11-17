@@ -331,45 +331,33 @@
 
             <div class="settings-divider"></div>
 
-            <!-- שורה ראשונה: מסך זכייה + WhatsApp -->
+            <!-- הגדרות מסך זכייה -->
             <div class="settings-row">
-                <div class="setting-group half">
-                    <h3>🎉 מצב מסך זכייה</h3>
+                <div class="setting-group third">
+                    <h3>🎉 מסך זכייה</h3>
                     <p class="setting-description">בחר כיצד להציג את מסך הזכייה</p>
                     <label class="checkbox-label">
                         <input type="checkbox" id="simple-win-screen">
-                        <span>מסך זכייה פשוט (ללא WhatsApp)</span>
+                        <span>מסך פשוט (ללא QR)</span>
                     </label>
-                    <p class="setting-note" style="margin-top: 8px; font-size: 0.9em; color: #999;">סימון = מסך פשוט עם הפרס בלבד<br>ביטול = מסך מלא עם WhatsApp (אם הוזן מספר)</p>
+                    <p class="setting-note" style="margin-top: 8px; font-size: 0.9em; color: #999;">סימון = מסך פשוט<br>ביטול = מסך מלא עם QR</p>
                 </div>
 
-                <div class="setting-group half">
-                    <h3>הודעת WhatsApp בזכייה</h3>
-                    <p class="setting-description">הזן מספר (עם קידומת: 972501234567)</p>
+                <div class="setting-group third">
+                    <h3>📱 קוד QR ווסטאפ</h3>
+                    <p class="setting-description">מספר WhatsApp שלכם</p>
                     <div class="whatsapp-input-container">
                         <input type="text" id="whatsapp-number" placeholder="972501234567" maxlength="20">
                         <button id="clear-whatsapp" class="small-btn">נקה</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- שורה שנייה: טקסט מותאם במסך QR + טקסט זכייה פשוט -->
-            <div class="settings-row">
-                <div class="setting-group half">
-                    <h3>טקסט מותאם במסך QR</h3>
-                    <p class="setting-description">טקסט מתחת לשלבים במסך זכייה מלא</p>
+                <div class="setting-group third">
+                    <h3>📝 טקסט הערות</h3>
+                    <p class="setting-description">טקסט נוסף במסך זכייה</p>
                     <div class="custom-text-container">
-                        <textarea id="qr-custom-text" placeholder="אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸" rows="3" maxlength="200"></textarea>
-                        <button id="clear-custom-text" class="small-btn">נקה</button>
-                    </div>
-                </div>
-
-                <div class="setting-group half">
-                    <h3>טקסט במסך זכייה פשוט</h3>
-                    <p class="setting-description">הטקסט שיוצג למטה בצד של תמונת הפרס במסך זכייה פשוט</p>
-                    <div class="custom-text-container">
-                        <textarea id="simple-win-text" placeholder="Please collect your prize at the counter" rows="3" maxlength="200"></textarea>
-                        <button id="clear-simple-win-text" class="small-btn">נקה</button>
+                        <textarea id="win-notes-text" placeholder="Please collect your prize at the counter" rows="3" maxlength="200"></textarea>
+                        <button id="clear-win-notes" class="small-btn">נקה</button>
                     </div>
                 </div>
             </div>

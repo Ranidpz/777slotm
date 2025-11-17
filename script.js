@@ -1914,15 +1914,25 @@ function loadSettings() {
         console.log('🎉 מצב מסך זכייה פשוט נטען:', gameState.simpleWinScreen);
     }
 
-    // טען טקסט מותאם ל-QR
-    const savedCustomText = localStorage.getItem('qrCustomText');
+    // טען טקסט הערות (משותף לשני מסכי זכייה)
+    const savedCustomText = localStorage.getItem('qrCustomText') || localStorage.getItem('simpleWinText');
     if (savedCustomText) {
         gameState.qrCustomText = savedCustomText;
-        const customTextArea = document.getElementById('qr-custom-text');
-        if (customTextArea) {
-            customTextArea.value = savedCustomText;
+        gameState.simpleWinText = savedCustomText;
+        const winNotesTextArea = document.getElementById('win-notes-text');
+        if (winNotesTextArea) {
+            winNotesTextArea.value = savedCustomText;
         }
-        console.log('💬 טקסט מותאם ל-QR נטען');
+        console.log('📝 טקסט הערות נטען');
+    } else {
+        // ברירת מחדל
+        const defaultText = 'Please collect your prize at the counter';
+        gameState.qrCustomText = defaultText;
+        gameState.simpleWinText = defaultText;
+        const winNotesTextArea = document.getElementById('win-notes-text');
+        if (winNotesTextArea) {
+            winNotesTextArea.value = defaultText;
+        }
     }
 
     // טען טקסט נגלל
@@ -1952,26 +1962,7 @@ function loadSettings() {
         console.log('📜 טקסט ברירת מחדל נטען (פעם ראשונה)');
     }
 
-    // טען טקסט מסך זכייה פשוט
-    const savedSimpleWinText = localStorage.getItem('simpleWinText');
-    if (savedSimpleWinText !== null) {
-        gameState.simpleWinText = savedSimpleWinText;
-        const simpleWinTextArea = document.getElementById('simple-win-text');
-        if (simpleWinTextArea) {
-            simpleWinTextArea.value = savedSimpleWinText;
-        }
-        console.log('📝 טקסט מסך זכייה פשוט נטען:', savedSimpleWinText);
-    } else {
-        // רק אם לא קיים בכלל ב-localStorage - השתמש בברירת מחדל
-        const defaultText = 'Please collect your prize at the counter';
-        gameState.simpleWinText = defaultText;
-        const simpleWinTextArea = document.getElementById('simple-win-text');
-        if (simpleWinTextArea) {
-            simpleWinTextArea.value = defaultText;
-        }
-        localStorage.setItem('simpleWinText', defaultText);
-        console.log('📝 טקסט מסך זכייה פשוט - ברירת מחדל נטען (פעם ראשונה)');
-    }
+    // ✅ הוסר - טקסט הערות מנוהל בקוד למעלה
 
     // טען גודל גופן לטקסט נגלל
     const savedFontSize = localStorage.getItem('scrollingBannerFontSize');
@@ -2046,31 +2037,46 @@ function setupWhatsAppInput() {
     }
 }
 
-// הגדרת מאזינים לטקסט מותאם ל-QR
-function setupCustomTextInput() {
-    const customTextArea = document.getElementById('qr-custom-text');
-    const clearBtn = document.getElementById('clear-custom-text');
+// הגדרת מאזינים לטקסט הערות (משותף לשני מסכי הזכייה)
+function setupWinNotesTextInput() {
+    const winNotesTextArea = document.getElementById('win-notes-text');
+    const clearBtn = document.getElementById('clear-win-notes');
 
-    if (customTextArea) {
-        // שמור בזמן הקלדה
-        customTextArea.addEventListener('input', (e) => {
+    if (winNotesTextArea) {
+        // שמור בזמן הקלדה - ישמש גם ל-QR וגם למסך פשוט
+        winNotesTextArea.addEventListener('input', (e) => {
             const value = e.target.value;
+            // שמור בשני המקומות לתאימות לאחור
             gameState.qrCustomText = value;
+            gameState.simpleWinText = value;
             localStorage.setItem('qrCustomText', value);
-            console.log('💬 טקסט מותאם ל-QR עודכן');
+            localStorage.setItem('simpleWinText', value);
+            // עדכן תצוגה
+            updateQRCustomMessage();
+            updateSimpleWinText();
+            console.log('📝 טקסט הערות עודכן');
         });
     }
 
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            if (customTextArea) {
-                customTextArea.value = 'אל תשכחו! כדי לקבל את הפרס אתם צריכים לשלוח לנו תמונה שלכם עם מסך הזכייה בוואטסאפ 📸';
-                gameState.qrCustomText = customTextArea.value;
-                localStorage.setItem('qrCustomText', customTextArea.value);
-                console.log('🔄 טקסט מותאם ל-QR אופס לברירת מחדל');
+            if (winNotesTextArea) {
+                winNotesTextArea.value = 'Please collect your prize at the counter';
+                gameState.qrCustomText = winNotesTextArea.value;
+                gameState.simpleWinText = winNotesTextArea.value;
+                localStorage.setItem('qrCustomText', winNotesTextArea.value);
+                localStorage.setItem('simpleWinText', winNotesTextArea.value);
+                updateQRCustomMessage();
+                updateSimpleWinText();
+                console.log('🔄 טקסט הערות אופס לברירת מחדל');
             }
         });
     }
+}
+
+// ✅ שמור פונקציה ישנה לתאימות לאחור
+function setupCustomTextInput() {
+    setupWinNotesTextInput();
 }
 
 // הגדרת מאזינים לטקסט נגלל
@@ -2103,34 +2109,10 @@ function setupScrollingBannerInput() {
     }
 }
 
-// הגדרת מאזינים לטקסט מסך זכייה פשוט
+// ✅ הוסר - טקסט הערות מנוהל ב-setupWinNotesTextInput
 function setupSimpleWinTextInput() {
-    const simpleWinTextArea = document.getElementById('simple-win-text');
-    const clearBtn = document.getElementById('clear-simple-win-text');
-
-    if (simpleWinTextArea) {
-        // שמור בזמן הקלדה ועדכן תצוגה
-        simpleWinTextArea.addEventListener('input', (e) => {
-            const value = e.target.value;
-            gameState.simpleWinText = value;
-            localStorage.setItem('simpleWinText', value);
-            updateSimpleWinText();
-            console.log('📝 טקסט מסך זכייה פשוט עודכן');
-        });
-    }
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            if (simpleWinTextArea) {
-                const defaultText = 'Please collect your prize at the counter';
-                simpleWinTextArea.value = defaultText;
-                gameState.simpleWinText = defaultText;
-                localStorage.setItem('simpleWinText', defaultText);
-                updateSimpleWinText();
-                console.log('🔄 טקסט מסך זכייה פשוט אופס לברירת מחדל');
-            }
-        });
-    }
+    // תאימות לאחור - מפנה לפונקציה החדשה
+    setupWinNotesTextInput();
 }
 
 // עדכון טקסט מסך זכייה פשוט
@@ -2529,13 +2511,13 @@ setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
 // ✅ הוסר: setupInventoryInputs() - ממשק המלאי נמצא ב-dynamicImagesManager
 setupSimpleWinScreenToggle(); // הגדר צ'ק בוקס מסך זכייה פשוט
 setupWhatsAppInput(); // הגדר שדה WhatsApp
-setupCustomTextInput(); // הגדר שדה טקסט מותאם ל-QR
+setupWinNotesTextInput(); // הגדר שדה טקסט הערות (משותף לשני מסכי זכייה)
 setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
 setupBannerFontSizeControl(); // הגדר גודל גופן לטקסט נגלל
-setupSimpleWinTextInput(); // הגדר שדה טקסט מסך זכייה פשוט
 setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
 updateScrollingBanner(); // הצג את הטקסט הנגלל בהתחלה
 updateSimpleWinText(); // הצג את הטקסט של מסך זכייה פשוט בהתחלה
+updateQRCustomMessage(); // הצג את הטקסט במסך QR בהתחלה
 setupInventoryToggle(); // ✅ הגדר toggle למלאי ופרסים
 setupInventoryAuthLock(); // ✅ הגדר נעילת מלאי לפי התחברות
 setupDashboardButton(); // ✅ הגדר כפתור דשבורד
