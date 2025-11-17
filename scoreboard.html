@@ -240,15 +240,14 @@
 
         .prize-stat-card {
             background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
             border-radius: 15px;
             border: 2px solid rgba(255, 215, 0, 0.2);
+            overflow: hidden;
             transition: all 0.3s ease;
         }
 
         .prize-stat-card:hover {
             border-color: rgba(255, 215, 0, 0.4);
-            transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
         }
 
@@ -256,9 +255,14 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .prize-stat-header:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .prize-stat-image {
@@ -290,6 +294,15 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            padding: 0 20px 20px 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+
+        .prize-stat-info.expanded {
+            max-height: 300px;
+            padding: 0 20px 20px 20px;
         }
 
         .prize-stat-row {
@@ -542,13 +555,13 @@
 
         <!-- Prize Inventory Statistics -->
         <div id="prize-stats-container" style="display: none;">
-            <div class="header prize-stats-header" style="margin-top: 20px; margin-bottom: 20px; cursor: pointer; user-select: none;" onclick="togglePrizeStats()">
+            <div class="header" style="margin-top: 20px; margin-bottom: 20px;">
                 <h2 style="font-size: 2em;">
                     🎁 סטטיסטיקות פרסים
                 </h2>
-                <p style="font-size: 1em;">לחץ כדי להרחיב/לצמצם</p>
+                <p style="font-size: 1em;">לחץ על כל פרס כדי להרחיב/לצמצם פרטים</p>
             </div>
-            <div id="prize-stats-grid" style="display: grid; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, opacity 0.3s ease;"></div>
+            <div id="prize-stats-grid"></div>
         </div>
 
         <div id="winners-container">
@@ -737,7 +750,7 @@
                 container.style.display = 'none';
             }
 
-            const html = prizeStats.map(prize => {
+            const html = prizeStats.map((prize, index) => {
                 // קבע סוג צבע לפי אחוז נותר
                 let valueClass = '';
                 let progressClass = 'high';
@@ -761,12 +774,12 @@
                     : `<div class="prize-stat-symbol">🎁</div>`;
 
                 return `
-                    <div class="prize-stat-card">
-                        <div class="prize-stat-header">
+                    <div class="prize-stat-card" data-prize-index="${index}">
+                        <div class="prize-stat-header" onclick="togglePrizeDetails(${index})">
                             ${imageHTML}
                             <div class="prize-stat-name">${prize.name}</div>
                         </div>
-                        <div class="prize-stat-info">
+                        <div class="prize-stat-info" id="prize-info-${index}">
                             <div class="prize-stat-row">
                                 <span class="prize-stat-label">סה״כ פרסים:</span>
                                 <span class="prize-stat-value ${prize.isInfinite ? 'infinite' : ''}">${prize.totalPrizes}</span>
@@ -779,7 +792,7 @@
                                 <span class="prize-stat-label">נשאר:</span>
                                 <span class="prize-stat-value ${valueClass}">${prize.remaining}</span>
                             </div>
-                            ${!prize.isInfinite ? `
+                            ${!prize.isInfinite && prize.totalPrizes !== '?' ? `
                                 <div class="prize-progress-bar">
                                     <div class="prize-progress-fill ${progressClass}" style="width: ${prize.percentRemaining}%"></div>
                                 </div>
@@ -991,18 +1004,14 @@
             loadWinners();
         });
 
-        // Toggle prize stats visibility with smooth animation
-        function togglePrizeStats() {
-            const grid = document.getElementById('prize-stats-grid');
+        // Toggle individual prize details
+        function togglePrizeDetails(index) {
+            const infoElement = document.getElementById(`prize-info-${index}`);
 
-            if (grid.style.maxHeight === '0px' || grid.style.maxHeight === '') {
-                // פתח - הצג את הגריד
-                grid.style.maxHeight = '2000px'; // גובה מקסימלי גדול מספיק
-                grid.style.opacity = '1';
+            if (infoElement.classList.contains('expanded')) {
+                infoElement.classList.remove('expanded');
             } else {
-                // סגור - הסתר את הגריד
-                grid.style.maxHeight = '0px';
-                grid.style.opacity = '0';
+                infoElement.classList.add('expanded');
             }
         }
 
