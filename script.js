@@ -783,13 +783,24 @@ function checkWin() {
 
 // הצג QR code אם הוגדר מספר WhatsApp
 function showQRCodeIfNeeded() {
-    // בדוק אם להציג מסך פשוט או מלא
-    if (gameState.simpleWinScreen) {
-        // מסך זכייה פשוט
-        showSimpleWinScreen();
-    } else {
-        // מסך זכייה מלא עם WhatsApp (אם הוגדר)
+    // בדוק אם להציג מסך זכייה בכלל
+    if (!gameState.simpleWinScreen) {
+        // מסך מוסתר - לא מציגים כלום
+        console.log('🚫 מסך זכייה מוסתר - לא מציג');
+        return;
+    }
+
+    // בדוק אם יש מספר WhatsApp
+    const hasWhatsApp = gameState.whatsappNumber && gameState.whatsappNumber.trim() !== '';
+
+    if (hasWhatsApp) {
+        // יש מספר WhatsApp - מסך מלא עם QR
+        console.log('📱 מציג מסך מלא עם QR');
         showFullWinScreen();
+    } else {
+        // אין מספר WhatsApp - מסך פשוט
+        console.log('🎉 מציג מסך פשוט');
+        showSimpleWinScreen();
     }
 }
 
@@ -1907,12 +1918,22 @@ function loadSettings() {
     const savedSimpleWinScreen = localStorage.getItem('simpleWinScreen');
     if (savedSimpleWinScreen !== null) {
         gameState.simpleWinScreen = savedSimpleWinScreen === 'true';
-        const simpleWinCheckbox = document.getElementById('simple-win-screen');
-        if (simpleWinCheckbox) {
-            simpleWinCheckbox.checked = gameState.simpleWinScreen;
-        }
-        console.log('🎉 מצב מסך זכייה פשוט נטען:', gameState.simpleWinScreen);
+    } else {
+        // ברירת מחדל - מסך מוצג
+        gameState.simpleWinScreen = true;
     }
+
+    // עדכן checkbox וטקסט
+    const simpleWinCheckbox = document.getElementById('simple-win-screen');
+    if (simpleWinCheckbox) {
+        simpleWinCheckbox.checked = gameState.simpleWinScreen;
+        // עדכן את הטקסט
+        const spanElement = simpleWinCheckbox.nextElementSibling;
+        if (spanElement) {
+            spanElement.textContent = gameState.simpleWinScreen ? 'מוצג' : 'מוסתר';
+        }
+    }
+    console.log('🎉 מצב מסך זכייה נטען:', gameState.simpleWinScreen ? 'מוצג ✅' : 'מוסתר ❌');
 
     // טען טקסט הערות (משותף לשני מסכי זכייה)
     const savedCustomText = localStorage.getItem('qrCustomText') || localStorage.getItem('simpleWinText');
@@ -1977,7 +1998,7 @@ function loadSettings() {
     }
 }
 
-// הגדרת מאזינים למסך זכייה פשוט
+// הגדרת מאזינים למסך זכייה
 function setupSimpleWinScreenToggle() {
     const simpleWinCheckbox = document.getElementById('simple-win-screen');
 
@@ -1985,12 +2006,18 @@ function setupSimpleWinScreenToggle() {
         simpleWinCheckbox.addEventListener('change', (e) => {
             gameState.simpleWinScreen = e.target.checked;
             localStorage.setItem('simpleWinScreen', gameState.simpleWinScreen);
-            console.log('🎉 מצב מסך זכייה פשוט עודכן:', gameState.simpleWinScreen ? 'פשוט' : 'מלא');
+            console.log('🎉 מצב מסך זכייה עודכן:', gameState.simpleWinScreen ? 'מוצג ✅' : 'מוסתר ❌');
+
+            // עדכן את הטקסט של ה-span
+            const spanElement = simpleWinCheckbox.nextElementSibling;
+            if (spanElement) {
+                spanElement.textContent = gameState.simpleWinScreen ? 'מוצג' : 'מוסתר';
+            }
 
             // עדכן גם ב-Firebase אם יש session פעיל
             if (window.sessionManager && sessionManager.sessionId) {
                 firebase.database().ref(`sessions/${sessionManager.sessionId}/settings/simpleWinScreen`).set(gameState.simpleWinScreen)
-                    .then(() => console.log('🎉 מצב מסך זכייה עודכן ב-Firebase'))
+                    .then(() => console.log('☁️ הגדרת מסך זכייה נשמרה ב-Firebase'))
                     .catch((error) => console.error('❌ שגיאה בעדכון מסך זכייה ב-Firebase:', error));
             }
         });

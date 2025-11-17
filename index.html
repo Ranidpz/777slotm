@@ -335,12 +335,12 @@
             <div class="settings-row">
                 <div class="setting-group third">
                     <h3>🎉 מסך זכייה</h3>
-                    <p class="setting-description">בחר כיצד להציג את מסך הזכייה</p>
+                    <p class="setting-description">הצג או הסתר מסך זכייה</p>
                     <label class="checkbox-label">
-                        <input type="checkbox" id="simple-win-screen">
-                        <span>מסך פשוט (ללא QR)</span>
+                        <input type="checkbox" id="simple-win-screen" checked>
+                        <span>מוצג</span>
                     </label>
-                    <p class="setting-note" style="margin-top: 8px; font-size: 0.9em; color: #999;">סימון = מסך פשוט<br>ביטול = מסך מלא עם QR</p>
+                    <p class="setting-note" style="margin-top: 8px; font-size: 0.9em; color: #999;">סימון = מסך מוצג<br>ביטול = מסך מוסתר</p>
                 </div>
 
                 <div class="setting-group third">
@@ -350,13 +350,14 @@
                         <input type="text" id="whatsapp-number" placeholder="972501234567" maxlength="20">
                         <button id="clear-whatsapp" class="small-btn">נקה</button>
                     </div>
+                    <p class="setting-note" style="margin-top: 8px; font-size: 0.9em; color: #999;">יש מספר = מסך עם QR<br>אין מספר = מסך פשוט</p>
                 </div>
 
                 <div class="setting-group third">
                     <h3>📝 טקסט הערות</h3>
                     <p class="setting-description">טקסט נוסף במסך זכייה</p>
-                    <div class="custom-text-container">
-                        <textarea id="win-notes-text" placeholder="Please collect your prize at the counter" rows="3" maxlength="200"></textarea>
+                    <div class="whatsapp-input-container">
+                        <input type="text" id="win-notes-text" placeholder="Please collect your prize at the counter" maxlength="200">
                         <button id="clear-win-notes" class="small-btn">נקה</button>
                     </div>
                 </div>
