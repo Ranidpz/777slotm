@@ -2219,6 +2219,37 @@ input:checked + .toggle-slider:before {
     align-self: flex-start;
 }
 
+/* Win Notes Text Input (זהה לטקסט נגלל) */
+#win-notes-text {
+    flex: 1;
+    min-width: 300px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 1em;
+    font-family: 'Assistant', sans-serif;
+    font-weight: 500;
+    resize: vertical;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+#win-notes-text:focus {
+    outline: none;
+    border-color: #ffd700;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#win-notes-text::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+#clear-win-notes {
+    padding: 12px 20px;
+    align-self: flex-start;
+}
+
 /* Scrolling Banner Text Input */
 #scrolling-banner-text {
     flex: 1;
