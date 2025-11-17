@@ -29,6 +29,7 @@ const dynamicImagesManager = {
     // הוסף תא תמונה חדש (ריק)
     addEmptySlot() {
         const prizeIndex = this.images.length;
+        const defaultName = `פרס ${prizeIndex + 1}`;
         const newImage = {
             id: Date.now() + Math.random(), // ID ייחודי
             code: `PRIZE_${String(prizeIndex + 1).padStart(3, '0')}`, // ✅ קוד ייחודי: PRIZE_001, PRIZE_002...
@@ -36,8 +37,8 @@ const dynamicImagesManager = {
             inventory: null, // null = אינסוף, מספר = כמות מוגבלת
             initialInventory: null,
             distributedCount: 0, // ✅ NEW: מונה כמה פרסים חולקו בסה"כ
-            label: `תמונה ${prizeIndex + 1}`, // תווית
-            prizeName: '', // ✅ שם מותאם אישית לפרס
+            label: defaultName, // תווית
+            prizeName: defaultName, // ✅ שם מותאם אישית לפרס - ברירת מחדל זהה ל-label
             symbolIndex: prizeIndex // מיקום בגלגלים
         };
 
@@ -569,6 +570,11 @@ const dynamicImagesManager = {
                     if (img.distributedCount === undefined) {
                         img.distributedCount = 0; // ✅ NEW: Initialize for old data
                     }
+                    // ✅ תקן prizeName אם הוא חסר או ריק
+                    if (!img.prizeName || img.prizeName === '') {
+                        img.prizeName = img.label || `פרס ${index + 1}`;
+                        console.log(`🔧 תוקן prizeName ל-"${img.prizeName}" עבור אינדקס ${index}`);
+                    }
                 });
 
                 // ✅ CRITICAL FIX: אינדקס מחדש את symbolIndex כדי למנוע ערכים שגויים
@@ -596,14 +602,19 @@ const dynamicImagesManager = {
             const prizesData = {};
             this.images.forEach((img) => {
                 if (img.imageData) { // שמור רק תמונות שהועלו
+                    // קבע את שם הפרס - העדף prizeName, אחרת label, אחרת ברירת מחדל
+                    const finalPrizeName = img.prizeName || img.label || `פרס ${img.symbolIndex + 1}`;
+
                     prizesData[img.code] = {
                         code: img.code,
-                        name: img.label,
-                        prizeName: img.prizeName || '', // ✅ שם מותאם אישית
+                        name: finalPrizeName, // ✅ שם הפרס המלא
+                        label: img.label || finalPrizeName, // תווית
+                        prizeName: finalPrizeName, // ✅ שם מותאם אישית (זהה ל-name)
                         symbol: img.imageData ? '🖼️' : '🎁', // סמל ברירת מחדל
                         imageUrl: img.imageData, // base64 או blob URL
-                        inventory: img.inventory,
-                        initialInventory: img.initialInventory,
+                        imageData: img.imageData, // ✅ הוסף גם imageData
+                        inventory: img.inventory !== undefined && img.inventory !== null ? img.inventory : null,
+                        initialInventory: img.initialInventory !== undefined && img.initialInventory !== null ? img.initialInventory : null,
                         distributedCount: img.distributedCount || 0, // ✅ NEW
                         symbolIndex: img.symbolIndex,
                         updatedAt: firebase.database.ServerValue.TIMESTAMP
@@ -632,17 +643,22 @@ const dynamicImagesManager = {
 
             if (prizesData) {
                 // המר מאובייקט למערך
-                this.images = Object.values(prizesData).map(prize => ({
-                    id: Date.now() + Math.random(),
-                    code: prize.code,
-                    imageData: prize.imageUrl,
-                    inventory: prize.inventory,
-                    initialInventory: prize.initialInventory,
-                    distributedCount: prize.distributedCount || 0, // ✅ NEW
-                    label: prize.name,
-                    prizeName: prize.prizeName || '', // ✅ שם מותאם אישית
-                    symbolIndex: prize.symbolIndex
-                }));
+                this.images = Object.values(prizesData).map((prize, idx) => {
+                    // קבע את שם הפרס מכמה מקומות אפשריים
+                    const prizeName = prize.prizeName || prize.name || prize.label || `פרס ${idx + 1}`;
+
+                    return {
+                        id: Date.now() + Math.random(),
+                        code: prize.code,
+                        imageData: prize.imageUrl || prize.imageData,
+                        inventory: prize.inventory !== undefined ? prize.inventory : null,
+                        initialInventory: prize.initialInventory !== undefined ? prize.initialInventory : null,
+                        distributedCount: prize.distributedCount || 0, // ✅ NEW
+                        label: prizeName,
+                        prizeName: prizeName, // ✅ שם מותאם אישית
+                        symbolIndex: prize.symbolIndex !== undefined ? prize.symbolIndex : idx
+                    };
+                });
 
                 // ✅ CRITICAL FIX: אינדקס מחדש את symbolIndex כדי למנוע ערכים שגויים
                 this.reindexSymbols();

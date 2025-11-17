@@ -622,19 +622,27 @@
 
                 if (prizesData) {
                     // המר מאובייקט למערך
-                    prizeInventoryData = Object.values(prizesData).map(prize => {
-                        console.log('📦 Processing prize:', prize);
-                        return {
+                    prizeInventoryData = Object.values(prizesData).map((prize, idx) => {
+                        console.log(`📦 Processing prize #${idx}:`, prize);
+
+                        // נסה למצוא את שם הפרס ממקומות שונים
+                        const prizeName = prize.prizeName || prize.name || prize.label || `פרס ${idx + 1}`;
+
+                        const prizeData = {
                             id: Date.now() + Math.random(),
                             code: prize.code,
                             imageData: prize.imageUrl || prize.imageData,
-                            inventory: prize.inventory,
-                            initialInventory: prize.initialInventory,
+                            inventory: prize.inventory !== undefined ? prize.inventory : null,
+                            initialInventory: prize.initialInventory !== undefined ? prize.initialInventory : null,
                             distributedCount: prize.distributedCount || 0,
-                            label: prize.name,
-                            prizeName: prize.prizeName || prize.name || '',
+                            label: prizeName,
+                            name: prizeName,
+                            prizeName: prizeName,
                             symbolIndex: prize.symbolIndex
                         };
+
+                        console.log(`✅ Mapped prize #${idx}:`, prizeData);
+                        return prizeData;
                     });
 
                     console.log('☁️ נטענו נתוני מלאי מ-Firebase:', prizeInventoryData.length, 'פרסים');
@@ -716,8 +724,11 @@
                     percentRemaining = Math.round((remaining / totalPrizes) * 100);
                 }
 
+                // נסה למצוא את שם הפרס ממספר מקומות אפשריים
+                const prizeName = prize.prizeName || prize.label || prize.name || `פרס ${index + 1}`;
+
                 const stats = {
-                    name: prize.prizeName || `פרס ${index + 1}`,
+                    name: prizeName,
                     imageData: prize.imageData,
                     totalPrizes: totalPrizes === null ? '∞' : totalPrizes,
                     distributed: distributed,
@@ -727,6 +738,7 @@
                 };
 
                 console.log(`📊 Prize stats for "${stats.name}":`, stats);
+                console.log(`📦 Original prize data:`, prize);
                 return stats;
             });
         }
