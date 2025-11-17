@@ -543,13 +543,12 @@
         <!-- Prize Inventory Statistics -->
         <div id="prize-stats-container" style="display: none;">
             <div class="header prize-stats-header" style="margin-top: 20px; margin-bottom: 20px; cursor: pointer; user-select: none;" onclick="togglePrizeStats()">
-                <h2 style="font-size: 2em; display: inline-flex; align-items: center; gap: 10px;">
+                <h2 style="font-size: 2em;">
                     🎁 סטטיסטיקות פרסים
-                    <span id="prize-stats-toggle" style="font-size: 0.6em; transition: transform 0.3s;">▼</span>
                 </h2>
                 <p style="font-size: 1em;">לחץ כדי להרחיב/לצמצם</p>
             </div>
-            <div id="prize-stats-grid" style="display: grid;"></div>
+            <div id="prize-stats-grid" style="display: grid; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, opacity 0.3s ease;"></div>
         </div>
 
         <div id="winners-container">
@@ -601,37 +600,36 @@
             }
 
             try {
-                // נסה קודם מ-localStorage (מהיר)
-                const saved = localStorage.getItem('dynamicImages');
-                if (saved) {
-                    prizeInventoryData = JSON.parse(saved);
-                    console.log('📦 נטענו נתוני מלאי מ-localStorage:', prizeInventoryData.length, 'פרסים');
-                }
-
                 // טען מ-Firebase (עדכני)
                 const prizesRef = firebase.database().ref(`sessions/${currentSessionId}/prizes`);
                 const snapshot = await prizesRef.once('value');
                 const prizesData = snapshot.val();
 
+                console.log('🔍 Raw Firebase data:', prizesData);
+
                 if (prizesData) {
                     // המר מאובייקט למערך
-                    prizeInventoryData = Object.values(prizesData).map(prize => ({
-                        id: Date.now() + Math.random(),
-                        code: prize.code,
-                        imageData: prize.imageUrl,
-                        inventory: prize.inventory,
-                        initialInventory: prize.initialInventory,
-                        distributedCount: prize.distributedCount || 0,
-                        label: prize.name,
-                        prizeName: prize.prizeName || '',
-                        symbolIndex: prize.symbolIndex
-                    }));
+                    prizeInventoryData = Object.values(prizesData).map(prize => {
+                        console.log('📦 Processing prize:', prize);
+                        return {
+                            id: Date.now() + Math.random(),
+                            code: prize.code,
+                            imageData: prize.imageUrl || prize.imageData,
+                            inventory: prize.inventory,
+                            initialInventory: prize.initialInventory,
+                            distributedCount: prize.distributedCount || 0,
+                            label: prize.name,
+                            prizeName: prize.prizeName || prize.name || '',
+                            symbolIndex: prize.symbolIndex
+                        };
+                    });
 
                     console.log('☁️ נטענו נתוני מלאי מ-Firebase:', prizeInventoryData.length, 'פרסים');
+                    console.log('📊 Prize inventory data:', prizeInventoryData);
                     return true;
                 } else {
                     console.log('📭 אין נתוני פרסים ב-Firebase');
-                    return prizeInventoryData.length > 0; // true אם יש מ-localStorage
+                    return false;
                 }
             } catch (e) {
                 console.error('❌ שגיאה בטעינת נתוני מלאי:', e);
@@ -681,8 +679,11 @@
         function calculatePrizeStats() {
             // אם אין נתוני מלאי, חשב מהזוכים
             if (prizeInventoryData.length === 0) {
+                console.log('⚠️ אין נתוני מלאי - משתמש בחישוב מזוכים');
                 return calculateStatsFromWinners();
             }
+
+            console.log('✅ משתמש בנתוני מלאי מ-Firebase');
 
             return prizeInventoryData.map((prize, index) => {
                 const totalPrizes = prize.initialInventory; // כמות התחלתית
@@ -695,7 +696,7 @@
                     percentRemaining = Math.round((remaining / totalPrizes) * 100);
                 }
 
-                return {
+                const stats = {
                     name: prize.prizeName || `פרס ${index + 1}`,
                     imageData: prize.imageData,
                     totalPrizes: totalPrizes === null ? '∞' : totalPrizes,
@@ -704,6 +705,9 @@
                     percentRemaining: percentRemaining,
                     isInfinite: prize.inventory === null
                 };
+
+                console.log(`📊 Prize stats for "${stats.name}":`, stats);
+                return stats;
             });
         }
 
@@ -978,17 +982,18 @@
             loadWinners();
         });
 
-        // Toggle prize stats visibility
+        // Toggle prize stats visibility with smooth animation
         function togglePrizeStats() {
             const grid = document.getElementById('prize-stats-grid');
-            const toggle = document.getElementById('prize-stats-toggle');
 
-            if (grid.style.display === 'none' || grid.style.display === '') {
-                grid.style.display = 'grid';
-                toggle.style.transform = 'rotate(180deg)';
+            if (grid.style.maxHeight === '0px' || grid.style.maxHeight === '') {
+                // פתח - הצג את הגריד
+                grid.style.maxHeight = '2000px'; // גובה מקסימלי גדול מספיק
+                grid.style.opacity = '1';
             } else {
-                grid.style.display = 'none';
-                toggle.style.transform = 'rotate(0deg)';
+                // סגור - הסתר את הגריד
+                grid.style.maxHeight = '0px';
+                grid.style.opacity = '0';
             }
         }
 
