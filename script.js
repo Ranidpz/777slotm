@@ -2573,3 +2573,47 @@ if (typeof sessionManager !== 'undefined' && sessionManager) {
     isRemoteControlActive = true;
 }
 
+// ========================================
+// Floating Dashboard Button Management
+// ========================================
+const floatingDashboardBtn = document.getElementById('floating-dashboard-btn');
+
+function showFloatingDashboard() {
+    if (floatingDashboardBtn) {
+        floatingDashboardBtn.style.display = 'flex';
+        // Small delay for fade-in animation
+        setTimeout(() => {
+            floatingDashboardBtn.classList.add('show');
+        }, 10);
+    }
+}
+
+function hideFloatingDashboard() {
+    if (floatingDashboardBtn) {
+        floatingDashboardBtn.classList.remove('show');
+        // Hide after animation completes
+        setTimeout(() => {
+            floatingDashboardBtn.style.display = 'none';
+        }, 500); // Match CSS transition duration
+    }
+}
+
+// MutationObserver to watch for settings screen visibility changes
+const settingsObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+            const isHidden = settingsScreen.classList.contains('hidden');
+            if (isHidden) {
+                hideFloatingDashboard();
+            } else {
+                showFloatingDashboard();
+            }
+        }
+    });
+});
+
+// Start observing settings screen
+if (settingsScreen) {
+    settingsObserver.observe(settingsScreen, { attributes: true });
+}
+

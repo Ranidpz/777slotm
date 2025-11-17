@@ -3602,3 +3602,40 @@ input:checked + .toggle-slider:before {
     cursor: not-allowed;
 }
 
+/* Floating Dashboard Button - Bottom Right Corner */
+.floating-dashboard-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease, opacity 0.5s ease;
+    opacity: 0;
+}
+
+.floating-dashboard-btn.show {
+    opacity: 1;
+}
+
+.floating-dashboard-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.7);
+}
+
+.floating-dashboard-btn:active {
+    transform: scale(0.95);
+}
+
+.floating-dashboard-btn svg {
+    color: white;
+}
+

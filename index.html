@@ -435,14 +435,6 @@
                         לוח תוצאות
                     </button>
 
-                    <!-- Dashboard Icon Button -->
-                    <button id="dashboard-btn" class="icon-btn dashboard-btn-style" title="דשבורד" onclick="window.open('dashboard.html', '_blank') || (window.location.href='dashboard.html')">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                        </svg>
-                        דשבורד
-                    </button>
                 </div>
 
                 <!-- Powered by Playzone -->
@@ -453,6 +445,14 @@
             </div>
         </div>
     </div>
+
+    <!-- Floating Dashboard Button (visible only when settings are open) -->
+    <button id="floating-dashboard-btn" class="floating-dashboard-btn" title="דשבורד" onclick="window.open('dashboard.html', '_blank') || (window.location.href='dashboard.html')" style="display: none;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+    </button>
 
     <!-- Tutorial Modal -->
     <div id="tutorial-modal" class="tutorial-overlay">
