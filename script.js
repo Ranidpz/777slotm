@@ -2580,21 +2580,15 @@ const floatingDashboardBtn = document.getElementById('floating-dashboard-btn');
 
 function showFloatingDashboard() {
     if (floatingDashboardBtn) {
-        floatingDashboardBtn.style.display = 'flex';
-        // Small delay for fade-in animation
-        setTimeout(() => {
-            floatingDashboardBtn.classList.add('show');
-        }, 10);
+        // Add show class - CSS handles display and opacity
+        floatingDashboardBtn.classList.add('show');
     }
 }
 
 function hideFloatingDashboard() {
     if (floatingDashboardBtn) {
+        // Remove show class - CSS handles hiding
         floatingDashboardBtn.classList.remove('show');
-        // Hide after animation completes
-        setTimeout(() => {
-            floatingDashboardBtn.style.display = 'none';
-        }, 500); // Match CSS transition duration
     }
 }
 
