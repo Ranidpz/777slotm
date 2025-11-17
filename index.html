@@ -209,9 +209,10 @@
 
     <div id="settings-screen" class="hidden">
         <div class="settings-content">
-            <h2>הגדרות</h2>
-            
-            <!-- שורה 1: סוג משחק + צבע רקע + שליטה מרחוק -->
+            <div class="settings-scrollable-content">
+                <h2>הגדרות</h2>
+
+                <!-- שורה 1: סוג משחק + צבע רקע + שליטה מרחוק -->
             <div class="settings-row">
                 <div class="setting-group third">
                     <h3>סוג המשחק</h3>
@@ -409,6 +410,7 @@
                     <span class="toggle-status" id="prizes-toggle-status">✓ משתמש בתמונות פרסים</span>
                 </div>
             </div>
+            </div>
 
             <div class="settings-sticky-footer">
                 <div style="display: flex; gap: 10px; align-items: stretch; justify-content: center; max-width: 800px;">
@@ -437,10 +439,14 @@
 
                 </div>
 
-                <!-- Powered by Playzone -->
+                <!-- Powered by Playzone + Dashboard Button -->
                 <div class="footer-powered-by">
                     <span>Powered by</span>
                     <a href="https://playzone.co.il" target="_blank" rel="noopener">Playzone</a>
+                    <span style="margin: 0 10px; color: rgba(255, 255, 255, 0.3);">|</span>
+                    <button onclick="window.open('dashboard.html', '_blank') || (window.location.href='dashboard.html')" style="background: none; border: none; color: #667eea; cursor: pointer; font-size: 0.9em; text-decoration: underline; padding: 0; transition: color 0.2s ease;" onmouseover="this.style.color='#764ba2'" onmouseout="this.style.color='#667eea'">
+                        🏠 דשבורד
+                    </button>
                 </div>
             </div>
         </div>

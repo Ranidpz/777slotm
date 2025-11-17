@@ -314,35 +314,44 @@ body {
 
 .settings-content {
     background: #0f0f1a;
-    padding: 32px;
+    padding: 0;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 1400px;
     width: 80%;
     max-height: 90vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     color: white;
     box-sizing: border-box;
     font-family: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Settings Scrollable Content - תוכן הניתן לגלילה */
+.settings-scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 32px;
 }
 
 /* סקרולבר מעוצב */
-.settings-content::-webkit-scrollbar {
+.settings-scrollable-content::-webkit-scrollbar {
     width: 8px;
 }
 
-.settings-content::-webkit-scrollbar-track {
+.settings-scrollable-content::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
 }
 
-.settings-content::-webkit-scrollbar-thumb {
+.settings-scrollable-content::-webkit-scrollbar-thumb {
     background: rgba(255, 215, 0, 0.5);
     border-radius: 10px;
 }
 
-.settings-content::-webkit-scrollbar-thumb:hover {
+.settings-scrollable-content::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 215, 0, 0.7);
 }
 
@@ -1965,21 +1974,19 @@ input:checked + .toggle-slider:before {
 
 /* Settings Sticky Footer */
 .settings-sticky-footer {
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 15px;
     justify-content: center;
     align-items: center;
     padding: 20px 30px;
-    margin: 30px -32px -32px -32px;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     border-top: 2px solid rgba(255, 215, 0, 0.3);
     box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
     z-index: 100;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
 }
 
 /* Settings Buttons Container */
