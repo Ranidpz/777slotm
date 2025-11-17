@@ -736,20 +736,20 @@
         function displayPrizeStats() {
             const prizeStats = calculatePrizeStats();
 
+            console.log('📊 Total prize stats:', prizeStats.length);
+
             if (prizeStats.length === 0) {
-                // אין נתוני מלאי - הסתר את הסקשן
+                // אין נתוני מלאי ואין זוכים - הסתר את הסקשן
                 document.getElementById('prize-stats-container').style.display = 'none';
+                console.log('⚠️ מסתיר סטטיסטיקות פרסים - אין נתונים');
                 return;
             }
 
             // הצג את הסקשן
             document.getElementById('prize-stats-container').style.display = 'block';
+            console.log('✅ מציג סטטיסטיקות פרסים');
 
             const container = document.getElementById('prize-stats-grid');
-            // התחל עם הגריד מוסתר (מצומצם)
-            if (container.style.display === '') {
-                container.style.display = 'none';
-            }
 
             const html = prizeStats.map((prize, index) => {
                 // קבע סוג צבע לפי אחוז נותר
