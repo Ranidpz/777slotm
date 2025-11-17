@@ -641,10 +641,15 @@
         function calculateStatsFromWinners() {
             const prizeCount = {};
 
+            console.log('🔍 מחשב סטטיסטיקות מ-', winnersData.length, 'זוכים');
+
             // עבור על כל הזוכים וספור כמה פעמים כל פרס חולק
             winnersData.forEach(winner => {
                 const prizeName = winner.prizeName || winner.prize || 'פרס לא ידוע';
-                const prizeImage = winner.prizeImage || winner.symbol || null;
+                // נסה למצוא את התמונה בכל המקומות האפשריים
+                const prizeImage = winner.prizeImage || winner.prizeSymbol || winner.symbol || null;
+
+                console.log(`📦 Winner: ${winner.playerName}, Prize: ${prizeName}, Image:`, prizeImage ? 'יש תמונה' : 'אין תמונה');
 
                 if (!prizeCount[prizeName]) {
                     prizeCount[prizeName] = {
@@ -662,6 +667,8 @@
                 }
                 prizeCount[prizeName].distributed++;
             });
+
+            console.log('📊 Prize count:', prizeCount);
 
             // המר לפורמט הנדרש - אם אין נתוני מלאי, פשוט הצג כמה חולק
             return Object.values(prizeCount).map(prize => ({
