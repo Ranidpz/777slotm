@@ -974,10 +974,12 @@
                 }
             }
 
+            // טען תחילה את sessionId דרך loadWinners, ואז טען את מלאי הפרסים
+            currentSessionId = getSessionId();
+
             // טען נתוני מלאי פרסים והצג סטטיסטיקות
-            loadPrizeInventory().then(() => {
-                displayPrizeStats();
-            });
+            await loadPrizeInventory();
+            displayPrizeStats();
 
             loadWinners();
         });
