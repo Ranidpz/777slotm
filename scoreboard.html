@@ -556,9 +556,8 @@
         <!-- Prize Inventory Statistics -->
         <div id="prize-stats-container" style="display: none;">
             <div class="header prize-stats-header-main" style="margin-top: 20px; margin-bottom: 20px; cursor: pointer; user-select: none;" onclick="toggleAllPrizeStats()">
-                <h2 style="font-size: 2em; display: inline-flex; align-items: center; gap: 10px;">
+                <h2 style="font-size: 2em;">
                     🎁 סטטיסטיקות פרסים
-                    <span id="prize-stats-main-toggle" style="font-size: 0.6em; transition: transform 0.3s;">▼</span>
                 </h2>
                 <p style="font-size: 1em;">לחץ כדי להציג/להסתיר • לחץ על כל פרס לפרטים נוספים</p>
             </div>
@@ -1011,18 +1010,15 @@
         // Toggle all prize stats visibility (main header)
         function toggleAllPrizeStats() {
             const grid = document.getElementById('prize-stats-grid');
-            const toggle = document.getElementById('prize-stats-main-toggle');
 
             if (grid.style.maxHeight === '0px' || grid.style.maxHeight === '') {
                 // פתח - הצג את הגריד
                 grid.style.maxHeight = '3000px'; // גובה מקסימלי גדול מספיק
                 grid.style.opacity = '1';
-                toggle.style.transform = 'rotate(180deg)';
             } else {
                 // סגור - הסתר את הגריד
                 grid.style.maxHeight = '0px';
                 grid.style.opacity = '0';
-                toggle.style.transform = 'rotate(0deg)';
             }
         }
 
