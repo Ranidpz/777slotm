@@ -555,13 +555,14 @@
 
         <!-- Prize Inventory Statistics -->
         <div id="prize-stats-container" style="display: none;">
-            <div class="header" style="margin-top: 20px; margin-bottom: 20px;">
-                <h2 style="font-size: 2em;">
+            <div class="header prize-stats-header-main" style="margin-top: 20px; margin-bottom: 20px; cursor: pointer; user-select: none;" onclick="toggleAllPrizeStats()">
+                <h2 style="font-size: 2em; display: inline-flex; align-items: center; gap: 10px;">
                     🎁 סטטיסטיקות פרסים
+                    <span id="prize-stats-main-toggle" style="font-size: 0.6em; transition: transform 0.3s;">▼</span>
                 </h2>
-                <p style="font-size: 1em;">לחץ על כל פרס כדי להרחיב/לצמצם פרטים</p>
+                <p style="font-size: 1em;">לחץ כדי להציג/להסתיר • לחץ על כל פרס לפרטים נוספים</p>
             </div>
-            <div id="prize-stats-grid"></div>
+            <div id="prize-stats-grid" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease, opacity 0.3s ease; opacity: 0;"></div>
         </div>
 
         <div id="winners-container">
@@ -937,6 +938,9 @@
             } else {
                 document.getElementById('top-prize').textContent = '-';
             }
+
+            // הפעל אנימציות מספרים
+            animateStats();
         }
 
         // Format timestamp to readable string
@@ -1004,6 +1008,24 @@
             loadWinners();
         });
 
+        // Toggle all prize stats visibility (main header)
+        function toggleAllPrizeStats() {
+            const grid = document.getElementById('prize-stats-grid');
+            const toggle = document.getElementById('prize-stats-main-toggle');
+
+            if (grid.style.maxHeight === '0px' || grid.style.maxHeight === '') {
+                // פתח - הצג את הגריד
+                grid.style.maxHeight = '3000px'; // גובה מקסימלי גדול מספיק
+                grid.style.opacity = '1';
+                toggle.style.transform = 'rotate(180deg)';
+            } else {
+                // סגור - הסתר את הגריד
+                grid.style.maxHeight = '0px';
+                grid.style.opacity = '0';
+                toggle.style.transform = 'rotate(0deg)';
+            }
+        }
+
         // Toggle individual prize details
         function togglePrizeDetails(index) {
             const infoElement = document.getElementById(`prize-info-${index}`);
@@ -1012,6 +1034,45 @@
                 infoElement.classList.remove('expanded');
             } else {
                 infoElement.classList.add('expanded');
+            }
+        }
+
+        // אנימציה של מספרים רצים
+        function animateNumber(element, target, duration = 1000) {
+            const start = 0;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // easing function (ease-out)
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = Math.floor(start + (target - start) * easeOut);
+
+                element.textContent = current;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target; // ודא שהמספר הסופי מדויק
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // הפעלת אנימציות מספרים בסטטיסטיקות
+        function animateStats() {
+            // אנימציה לכרטיסי סטטיסטיקות עליונים
+            const totalWinners = parseInt(document.getElementById('total-winners').textContent) || 0;
+            const todayWinners = parseInt(document.getElementById('today-winners').textContent) || 0;
+
+            if (totalWinners > 0) {
+                animateNumber(document.getElementById('total-winners'), totalWinners, 1500);
+            }
+            if (todayWinners > 0) {
+                animateNumber(document.getElementById('today-winners'), todayWinners, 1200);
             }
         }
 
