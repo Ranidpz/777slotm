@@ -356,8 +356,8 @@
                 <div class="setting-group third">
                     <h3>📝 טקסט הערות</h3>
                     <p class="setting-description">טקסט נוסף במסך זכייה</p>
-                    <div class="whatsapp-input-container">
-                        <input type="text" id="win-notes-text" placeholder="Please collect your prize at the counter" maxlength="200">
+                    <div class="custom-text-container">
+                        <textarea id="win-notes-text" placeholder="Please collect your prize at the counter" rows="2" maxlength="200"></textarea>
                         <button id="clear-win-notes" class="small-btn">נקה</button>
                     </div>
                 </div>
@@ -365,19 +365,27 @@
 
             <div class="settings-divider"></div>
 
-            <div class="setting-group">
-                <h3>טקסט נגלל במסך הראשי</h3>
-                <p class="setting-description">טקסט שיופיע בפס שחור מתגלגל למטה (השאר ריק כדי להסתיר)</p>
-                <div class="custom-text-container">
-                    <textarea id="scrolling-banner-text" placeholder="🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰" rows="3" maxlength="300"></textarea>
-                    <button id="clear-scrolling-text" class="small-btn">נקה</button>
+            <!-- טקסט נגלל - 2 עמודות -->
+            <div class="settings-row">
+                <div class="setting-group half">
+                    <h3>טקסט נגלל במסך הראשי</h3>
+                    <p class="setting-description">טקסט שיופיע בפס שחור מתגלגל למטה (השאר ריק כדי להסתיר)</p>
+                    <div class="custom-text-container">
+                        <textarea id="scrolling-banner-text" placeholder="🎰 ברוכים הבאים למכונת המזל! בהצלחה! 🎰" rows="3" maxlength="300"></textarea>
+                        <button id="clear-scrolling-text" class="small-btn">נקה</button>
+                    </div>
                 </div>
-                <div class="font-size-control">
-                    <label for="banner-font-size">גודל גופן:</label>
-                    <div class="slider-container">
-                        <input type="range" id="banner-font-size" min="16" max="64" value="32" step="2">
-                        <span id="banner-font-size-value">32</span>
-                        <span style="font-size: 0.9em; color: #ccc;">px</span>
+
+                <div class="setting-group half">
+                    <h3>גודל גופן</h3>
+                    <p class="setting-description">גודל הטקסט הנגלל</p>
+                    <div class="font-size-control">
+                        <label for="banner-font-size">גודל גופן:</label>
+                        <div class="slider-container">
+                            <input type="range" id="banner-font-size" min="16" max="64" value="32" step="2">
+                            <span id="banner-font-size-value">32</span>
+                            <span style="font-size: 0.9em; color: #ccc;">px</span>
+                        </div>
                     </div>
                 </div>
             </div>
