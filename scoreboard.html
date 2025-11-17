@@ -485,10 +485,40 @@
             }
         }
 
+        // חשב סטטיסטיקות מהזוכים (אם אין נתוני מלאי)
+        function calculateStatsFromWinners() {
+            const prizeCount = {};
+
+            // עבור על כל הזוכים וספור כמה פעמים כל פרס חולק
+            winnersData.forEach(winner => {
+                const prizeName = winner.prizeName || winner.prize || 'פרס לא ידוע';
+                if (!prizeCount[prizeName]) {
+                    prizeCount[prizeName] = {
+                        name: prizeName,
+                        distributed: 0,
+                        imageData: winner.prizeImage || null
+                    };
+                }
+                prizeCount[prizeName].distributed++;
+            });
+
+            // המר לפורמט הנדרש
+            return Object.values(prizeCount).map(prize => ({
+                name: prize.name,
+                imageData: prize.imageData,
+                totalPrizes: '∞',
+                distributed: prize.distributed,
+                remaining: '∞',
+                percentRemaining: 100,
+                isInfinite: true
+            }));
+        }
+
         // חשב סטטיסטיקות לכל פרס
         function calculatePrizeStats() {
+            // אם אין נתוני מלאי, חשב מהזוכים
             if (prizeInventoryData.length === 0) {
-                return [];
+                return calculateStatsFromWinners();
             }
 
             return prizeInventoryData.map((prize, index) => {
@@ -617,6 +647,8 @@
 
                     displayWinners();
                     updateStats();
+                    // עדכן גם סטטיסטיקות פרסים
+                    displayPrizeStats();
                 });
 
                 console.log('✅ Winners listener set up for session');
