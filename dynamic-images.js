@@ -522,6 +522,10 @@ const dynamicImagesManager = {
             targetImage.distributedCount++;
             console.log(`♾️ מלאי אינסופי - מונה חלוקה: ${targetImage.distributedCount}`);
             this.saveToStorage();
+            // ✅ עדכן פרס ב-Firebase בזמן אמת
+            if (window.sessionManager && sessionManager.sessionId) {
+                this.updatePrizeInFirebase(sessionManager.sessionId, targetImage.code);
+            }
             this.render();
             return true;
         }
@@ -535,6 +539,10 @@ const dynamicImagesManager = {
             targetImage.distributedCount++;
             console.log(`📦 מלאי הופחת ל-${targetImage.inventory}, סה"כ חולק: ${targetImage.distributedCount}`);
             this.saveToStorage();
+            // ✅ עדכן פרס ב-Firebase בזמן אמת
+            if (window.sessionManager && sessionManager.sessionId) {
+                this.updatePrizeInFirebase(sessionManager.sessionId, targetImage.code);
+            }
             this.render(); // רענן את התצוגה
             return true;
         } else {
@@ -585,6 +593,37 @@ const dynamicImagesManager = {
         } catch (e) {
             console.error('❌ שגיאה בטעינת תמונות:', e);
             this.images = [];
+        }
+    },
+
+    // ✅ עדכן פרס בודד ב-Firebase (יעיל יותר למלאי)
+    async updatePrizeInFirebase(sessionId, prizeCode) {
+        if (!sessionId || !prizeCode) {
+            console.warn('⚠️ חסרים נתונים - לא ניתן לעדכן פרס ב-Firebase');
+            return;
+        }
+
+        try {
+            const prize = this.images.find(img => img.code === prizeCode);
+            if (!prize || !prize.imageData) {
+                console.warn('⚠️ פרס לא נמצא או אין תמונה');
+                return;
+            }
+
+            const finalPrizeName = prize.prizeName || prize.label || `פרס ${prize.symbolIndex + 1}`;
+            const prizeRef = firebase.database().ref(`sessions/${sessionId}/prizes/${prizeCode}`);
+
+            await prizeRef.update({
+                inventory: prize.inventory !== undefined && prize.inventory !== null ? prize.inventory : null,
+                distributedCount: prize.distributedCount || 0,
+                name: finalPrizeName,
+                prizeName: finalPrizeName,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            console.log(`☁️ פרס ${prizeCode} עודכן ב-Firebase - מלאי: ${prize.inventory}, חולק: ${prize.distributedCount}`);
+        } catch (error) {
+            console.error('❌ שגיאה בעדכון פרס ב-Firebase:', error);
         }
     },
 
