@@ -2535,33 +2535,36 @@ function setupDashboardButton() {
     loadSettings();
     initSounds();
 
-    // אתחל מערכת תמונות דינמית חדשה
+    // אתחל מערכת תמונות דינמית חדשה (אחרי ניקוי localStorage!)
     if (window.dynamicImagesManager) {
         dynamicImagesManager.init();
         console.log('✅ מערכת תמונות דינמית אותחלה');
     }
-})();
 
-loadImagesFromStorage(); // טען תמונות שמורות (מערכת ישנה - לתאימות)
-// ✅ הוסר: loadInventory() - המלאי נטען אוטומטית ב-dynamicImagesManager
-initColorPicker(); // אתחל color picker
-initReels();
-loadBackgroundColor(); // טען צבע רקע שמור - אחרי initReels כדי שהצבע יוחל על הסמלים
-manageTutorial(); // נהל את המדריך
-setupCustomSoundUpload(); // הגדר העלאת צלילים מותאמים
-// ✅ הוסר: setupInventoryInputs() - ממשק המלאי נמצא ב-dynamicImagesManager
-setupSimpleWinScreenToggle(); // הגדר צ'ק בוקס מסך זכייה פשוט
-setupWhatsAppInput(); // הגדר שדה WhatsApp
-setupWinNotesTextInput(); // הגדר שדה טקסט הערות (משותף לשני מסכי זכייה)
-setupScrollingBannerInput(); // הגדר שדה טקסט נגלל
-setupBannerFontSizeControl(); // הגדר גודל גופן לטקסט נגלל
-setupQRPopupClose(); // הגדר סגירת QR popup בלחיצה
-updateScrollingBanner(); // הצג את הטקסט הנגלל בהתחלה
-updateSimpleWinText(); // הצג את הטקסט של מסך זכייה פשוט בהתחלה
-updateQRCustomMessage(); // הצג את הטקסט במסך QR בהתחלה
-setupInventoryToggle(); // ✅ הגדר toggle למלאי ופרסים
-setupInventoryAuthLock(); // ✅ הגדר נעילת מלאי לפי התחברות
-setupDashboardButton(); // ✅ הגדר כפתור דשבורד
+    // טען תמונות שמורות (מערכת ישנה - לתאימות)
+    loadImagesFromStorage();
+
+    // המשך אתחולים
+    initColorPicker();
+    initReels();
+    loadBackgroundColor();
+    manageTutorial();
+    setupCustomSoundUpload();
+    setupSimpleWinScreenToggle();
+    setupWhatsAppInput();
+    setupWinNotesTextInput();
+    setupScrollingBannerInput();
+    setupBannerFontSizeControl();
+    setupQRPopupClose();
+    updateScrollingBanner();
+    updateSimpleWinText();
+    updateQRCustomMessage();
+    setupInventoryToggle();
+    setupInventoryAuthLock();
+    setupDashboardButton();
+
+    console.log('🎰 אתחול המשחק הושלם!');
+})();
 
 console.log('🎰 777 Slot Machine Ready!');
 console.log('Press ENTER, Click or Touch to spin!');
