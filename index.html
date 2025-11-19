@@ -560,6 +560,43 @@
         </div>
     </div>
 
+    <!-- ניקוי localStorage מיידי אם אין event ב-URL (לפני כל הסקריפטים!) -->
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('event');
+
+            if (!eventId) {
+                // אין event ב-URL - נקה הכל מיד!
+                console.log('🧹 מצב תבנית - מנקה localStorage מיידית');
+
+                // נקה תמונות ומלאי
+                localStorage.removeItem('customImages');
+                localStorage.removeItem('slotMachineImages');
+
+                // נקה הגדרות
+                const keysToRemove = [
+                    'winFrequency', 'randomBonusPercent', 'gameMode', 'whatsappNumber',
+                    'simpleWinScreen', 'qrCustomText', 'simpleWinText', 'backgroundColor',
+                    'scrollingBannerText', 'scrollingBannerFontSize', 'soundEnabled',
+                    'customSpin', 'customWin', 'customLose', 'sessionId',
+                    'remoteControlEnabled', 'slotMachineSessionId', 'currentEventId'
+                ];
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                // נקה תמונות מותאמות
+                for (let i = 0; i < 20; i++) {
+                    localStorage.removeItem(`customSymbol_${i}`);
+                    localStorage.removeItem(`prize_inventory_${i}`);
+                }
+
+                // הגדר ברירות מחדל
+                localStorage.setItem('scrollingBannerText', 'ברוכים הבאים למשחק 777.playzones.app לסיבוב הגלגל לחצו על המסך או על מקש Enter במקלדת. למסך ההגדרות לחצו S. תהנו!');
+                localStorage.setItem('remoteControlEnabled', 'false');
+            }
+        })();
+    </script>
+
     <script src="dynamic-images.js"></script>
     <script src="firebase-config.js"></script>
     <script src="user-auth.js"></script>
