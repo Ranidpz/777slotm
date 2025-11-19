@@ -29,71 +29,39 @@ const userAuthManager = {
             if (user) {
                 this.currentUser = user;
                 console.log('✅ משתמש מחובר:', user.email);
-                this.updateUIForLoggedInUser();
             } else {
                 this.currentUser = null;
                 console.log('👤 משתמש אורח (לא רשום)');
-                this.updateUIForGuest();
             }
         });
     },
 
-    // עדכן ממשק למשתמש מחובר
-    updateUIForLoggedInUser() {
-        // הסר נעילה מכפתורי הגדרות
-        this.unlockSettingsButtons();
-
-        // הצג שם משתמש בממשק (אם יש)
-        const userNameDisplay = document.getElementById('current-user-name');
-        if (userNameDisplay) {
-            userNameDisplay.textContent = this.currentUser.displayName || this.currentUser.email;
-        }
+    // בדוק אם מחובר
+    isLoggedIn() {
+        return this.currentUser !== null;
     },
 
-    // עדכן ממשק למשתמש אורח
-    updateUIForGuest() {
-        // נעל כפתורי הגדרות
-        this.lockSettingsButtons();
+    // קבל UID של המשתמש
+    getUserId() {
+        return this.currentUser ? this.currentUser.uid : null;
     },
 
-    // נעל כפתורי הגדרות
-    lockSettingsButtons() {
-        const settingsButtons = document.querySelectorAll('.settings-action-btn');
-        settingsButtons.forEach(btn => {
-            btn.setAttribute('data-requires-auth', 'true');
-        });
-    },
-
-    // בטל נעילה של כפתורי הגדרות
-    unlockSettingsButtons() {
-        const settingsButtons = document.querySelectorAll('.settings-action-btn');
-        settingsButtons.forEach(btn => {
-            btn.removeAttribute('data-requires-auth');
-        });
-    },
-
-    // בדוק אם פעולה דורשת התחברות
-    requiresAuth(callback) {
-        if (this.currentUser) {
-            // משתמש מחובר - הרץ את הפעולה
-            callback();
-        } else {
-            // משתמש לא מחובר - הצג חלון התחברות
-            this.showLoginModal(callback);
-        }
-    },
-
-    // הצג חלון התחברות
+    // הצג מודל התחברות
     showLoginModal(afterLoginCallback = null) {
-        // שמור callback בגלובל כדי שנוכל לגשת אליו מה-onclick
+        // שמור callback
         window._authCallback = afterLoginCallback;
 
-        // יצירת מודל התחברות דינמי
+        // בדוק אם כבר יש מודל פתוח
+        if (document.getElementById('auth-modal')) {
+            return;
+        }
+
+        // צור מודל
         const modal = document.createElement('div');
         modal.id = 'auth-modal';
-        modal.className = 'auth-modal';
+        modal.className = 'auth-modal show';
         modal.innerHTML = `
-            <div class="auth-modal-overlay" onclick="userAuthManager.closeLoginModal()"></div>
+            <div class="auth-modal-overlay"></div>
             <div class="auth-modal-content">
                 <div class="auth-modal-header">
                     <h2>התחבר למערכת</h2>
@@ -101,7 +69,7 @@ const userAuthManager = {
                 </div>
 
                 <div class="auth-modal-body">
-                    <button class="google-signin-btn" onclick="userAuthManager.handleGoogleSignIn()">
+                    <button class="google-signin-btn" id="google-signin-btn">
                         <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -113,34 +81,51 @@ const userAuthManager = {
                 </div>
 
                 <div class="auth-modal-footer">
-                    <button class="cancel-btn" onclick="userAuthManager.closeLoginModal()">ביטול</button>
+                    <button class="cancel-btn" id="cancel-signin-btn">ביטול</button>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
 
-        // הצג את המודל
-        setTimeout(() => modal.classList.add('show'), 10);
+        // הוסף event listeners אחרי שהמודל נוסף ל-DOM
+        setTimeout(() => {
+            const googleBtn = document.getElementById('google-signin-btn');
+            const cancelBtn = document.getElementById('cancel-signin-btn');
+            const overlay = modal.querySelector('.auth-modal-overlay');
+
+            if (googleBtn) {
+                googleBtn.onclick = () => {
+                    console.log('🔵 נלחץ כפתור התחברות');
+                    this.signInWithGoogle();
+                };
+            }
+
+            if (cancelBtn) {
+                cancelBtn.onclick = () => {
+                    console.log('🔴 נלחץ ביטול');
+                    this.closeLoginModal();
+                };
+            }
+
+            if (overlay) {
+                overlay.onclick = () => {
+                    this.closeLoginModal();
+                };
+            }
+        }, 50);
     },
 
-    // פונקציה שנקראת מה-onclick
-    async handleGoogleSignIn() {
-        console.log('🔵 נלחץ כפתור התחברות עם Google');
-        await this.signInWithGoogle(window._authCallback);
-    },
-
-    // סגור חלון התחברות
+    // סגור מודל התחברות
     closeLoginModal() {
         const modal = document.getElementById('auth-modal');
         if (modal) {
-            modal.classList.remove('show');
-            setTimeout(() => modal.remove(), 300);
+            modal.remove();
         }
     },
 
     // התחבר עם Google
-    async signInWithGoogle(afterLoginCallback = null) {
+    async signInWithGoogle() {
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
             const result = await firebase.auth().signInWithPopup(provider);
@@ -149,28 +134,15 @@ const userAuthManager = {
             console.log('✅ התחברות הצליחה:', user.email);
 
             // צור/עדכן פרופיל משתמש
-            const isNewUser = await this.createOrUpdateUserProfile(user);
+            await this.createOrUpdateUserProfile(user);
 
-            // סגור את המודל
+            // סגור מודל
             this.closeLoginModal();
 
-            // הצג הודעת הצלחה
-            alert('✅ התחברת בהצלחה!');
-
-            // אם זה משתמש חדש - צור אירוע ראשון ועבור לדשבורד
-            if (isNewUser) {
-                await this.handleNewUserFirstEvent(user);
-            } else {
-                // משתמש קיים - בדוק אם יש sessionId נוכחי
-                const currentSessionId = this.getCurrentSessionId();
-
-                if (currentSessionId) {
-                    // יש סשן פעיל - צור אירוע חדש מהסשן ועבור לדשבורד
-                    await this.createEventFromCurrentSession(user, currentSessionId);
-                } else if (afterLoginCallback && typeof afterLoginCallback === 'function') {
-                    // אין סשן - הרץ callback רגיל
-                    afterLoginCallback();
-                }
+            // הרץ callback אם יש
+            if (window._authCallback && typeof window._authCallback === 'function') {
+                window._authCallback();
+                window._authCallback = null;
             }
 
             return user;
@@ -195,17 +167,17 @@ const userAuthManager = {
         const snapshot = await userRef.once('value');
 
         if (!snapshot.exists()) {
-            // משתמש חדש - צור פרופיל
+            // משתמש חדש
             const newUser = {
                 email: user.email,
                 displayName: user.displayName || 'משתמש חדש',
                 photoURL: user.photoURL || null,
-                role: 'event_manager', // ברירת מחדל - מפיק
+                role: 'event_manager',
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 lastLogin: firebase.database.ServerValue.TIMESTAMP,
                 permissions: {
                     canCreateEvents: true,
-                    canDeleteEvents: true,  // ✅ מפיקים יכולים למחוק אירועים
+                    canDeleteEvents: true,
                     canManageInventory: true,
                     canEditEvents: true,
                     maxActiveSessions: 10
@@ -219,68 +191,14 @@ const userAuthManager = {
 
             await userRef.set(newUser);
             console.log('✅ פרופיל משתמש חדש נוצר');
-            return true; // משתמש חדש
         } else {
-            // משתמש קיים - עדכן פרטים
+            // משתמש קיים
             await userRef.update({
                 displayName: user.displayName || snapshot.val().displayName,
                 photoURL: user.photoURL || snapshot.val().photoURL,
                 lastLogin: firebase.database.ServerValue.TIMESTAMP
             });
             console.log('✅ פרופיל משתמש עודכן');
-            return false; // משתמש קיים
-        }
-    },
-
-    // טיפול במשתמש חדש - צור אירוע ראשון ועבור לדשבורד
-    async handleNewUserFirstEvent(user) {
-        console.log('🎉 משתמש חדש! יוצר אירוע ראשון...');
-
-        try {
-            // צור אירוע ראשון אוטומטי
-            const eventId = `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const sessionId = `slot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            const defaultEventName = `האירוע הראשון של ${user.displayName || 'שלי'}`;
-
-            const newEvent = {
-                name: defaultEventName,
-                location: '',
-                eventDate: null,
-                description: 'אירוע ראשון שנוצר אוטומטית',
-                ownerId: user.uid,
-                ownerName: user.displayName || user.email,
-                sessionId,
-                status: 'active',
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-                stats: {
-                    totalPlayers: 0,
-                    totalWinners: 0,
-                    totalSpins: 0
-                }
-            };
-
-            await firebase.database().ref(`events/${eventId}`).set(newEvent);
-
-            // עדכן סטטיסטיקות משתמש
-            const userRef = firebase.database().ref(`users/${user.uid}/stats`);
-            await userRef.update({
-                totalEvents: 1
-            });
-
-            console.log('✅ אירוע ראשון נוצר:', eventId);
-
-            // הצג הודעה והעבר לדשבורד
-            if (confirm('🎉 ברוך הבא! נוצר לך אירוע ראשון.\n\nהאם לעבור לדשבורד לניהול האירוע?')) {
-                window.location.href = 'dashboard.html';
-            }
-        } catch (error) {
-            console.error('❌ שגיאה ביצירת אירוע ראשון:', error);
-            alert('⚠️ התחברת בהצלחה, אך הייתה בעיה ביצירת האירוע הראשון. נסה ליצור אירוע ידנית בדשבורד.');
-
-            if (confirm('לעבור לדשבורד?')) {
-                window.location.href = 'dashboard.html';
-            }
         }
     },
 
@@ -288,107 +206,15 @@ const userAuthManager = {
     async signOut() {
         try {
             await firebase.auth().signOut();
+            this.currentUser = null;
             console.log('👋 התנתקת בהצלחה');
-            alert('התנתקת בהצלחה');
-            window.location.reload();
         } catch (error) {
             console.error('❌ שגיאה בהתנתקות:', error);
-            alert('שגיאה בהתנתקות');
-        }
-    },
-
-    // בדוק אם המשתמש מחובר
-    isLoggedIn() {
-        return this.currentUser !== null;
-    },
-
-    // קבל UID של המשתמש
-    getUserId() {
-        return this.currentUser?.uid || null;
-    },
-
-    // קבל את ה-sessionId הנוכחי מה-sessionStorage
-    getCurrentSessionId() {
-        return sessionStorage.getItem('slotMachineSessionId') || null;
-    },
-
-    // צור אירוע חדש מהסשן הנוכחי והישאר באותו דף
-    async createEventFromCurrentSession(user, currentSessionId) {
-        console.log('🎉 יוצר אירוע חדש מהסשן הנוכחי...');
-
-        try {
-            const eventId = `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            // קרא נתוני מלאי נוכחיים מ-localStorage אם יש
-            let inventory = [];
-            const savedInventory = localStorage.getItem('customImages');
-            if (savedInventory) {
-                try {
-                    inventory = JSON.parse(savedInventory);
-                } catch (e) {
-                    console.warn('⚠️ לא ניתן לקרוא מלאי מ-localStorage');
-                }
-            }
-
-            // שם אירוע - תאריך נוכחי
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('he-IL', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-            const defaultEventName = `אירוע ב-${dateStr}`;
-
-            const newEvent = {
-                name: defaultEventName,
-                location: '',
-                eventDate: null,
-                description: 'אירוע שנוצר מתוך המשחק',
-                ownerId: user.uid,
-                ownerName: user.displayName || user.email,
-                sessionId: currentSessionId,  // ✅ קישור לסשן הנוכחי
-                status: 'active',
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-                stats: {
-                    totalPlayers: 0,
-                    totalWinners: 0,
-                    totalSpins: 0
-                },
-                inventory: inventory  // ✅ שמור את המלאי הנוכחי
-            };
-
-            await firebase.database().ref(`events/${eventId}`).set(newEvent);
-
-            // עדכן סטטיסטיקות משתמש
-            const userRef = firebase.database().ref(`users/${user.uid}/stats`);
-            const statsSnapshot = await userRef.once('value');
-            const currentStats = statsSnapshot.val() || { totalEvents: 0 };
-
-            await userRef.update({
-                totalEvents: (currentStats.totalEvents || 0) + 1
-            });
-
-            console.log('✅ אירוע חדש נוצר:', eventId);
-
-            // ✅ שמור את ה-eventId ב-localStorage (קישור לאירוע)
-            localStorage.setItem('currentEventId', eventId);
-
-            // ✅ עדכן את ה-URL עם event ו-session (ללא רענון דף!)
-            const newUrl = `${window.location.pathname}?event=${eventId}&session=${currentSessionId}`;
-            window.history.pushState({ eventId, sessionId: currentSessionId }, '', newUrl);
-            console.log('🔗 URL עודכן:', newUrl);
-
-            // ✅ הצג הודעה קטנה ונעימה - לא לעבור לדשבורד!
-            alert(`✅ אירוע "${defaultEventName}" נוצר בהצלחה!\n\nמעכשיו כל שמירה תעדכן את האירוע הזה.`);
-
-            return eventId;
-        } catch (error) {
-            console.error('❌ שגיאה ביצירת אירוע:', error);
-            alert('⚠️ התחברת בהצלחה, אך הייתה בעיה ביצירת האירוע.');
-            return null;
         }
     }
 };
 
-// ייצוא גלובלי
-window.userAuthManager = userAuthManager;
+// אתחול אוטומטי כאשר הדף נטען
+document.addEventListener('DOMContentLoaded', () => {
+    userAuthManager.init();
+});

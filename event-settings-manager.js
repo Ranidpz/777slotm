@@ -160,40 +160,238 @@ const eventSettingsManager = {
         if (!userAuthManager.isLoggedIn()) {
             console.log('⚠️ משתמש לא מחובר - מפנה להתחברות');
 
-            // הצג חלון התחברות
-            userAuthManager.requiresAuth(async () => {
+            // הצג חלון התחברות עם callback לשמירה אחרי התחברות
+            userAuthManager.showLoginModal(async () => {
                 // אחרי התחברות - נסה שוב לשמור
                 await this.saveSettings();
             });
             return false;
         }
 
-        // ✅ המשתמש מחובר - המשך בשמירה
+        // ✅ המשתמש מחובר
         const userId = userAuthManager.getUserId();
 
-        try {
-            // 1. שמור ב-localStorage (לשימוש מקומי offline)
-            await this.saveToLocalStorage();
+        // ✅ בדיקה 2: האם יש אירוע ב-URL?
+        if (this.hasEvent()) {
+            // יש אירוע - בדוק בעלות
+            const isOwner = await this.checkOwnership(this.currentEventId);
 
-            // 2. שמור ב-Firebase Session (לשלט מרחוק)
-            await this.saveToFirebaseSession();
-
-            // 3. צור/עדכן Event ב-Firebase
-            if (this.hasEvent()) {
-                // יש אירוע קיים - עדכן אותו
-                await this.updateEvent(userId);
-            } else {
-                // אין אירוע - צור חדש
-                await this.createNewEvent(userId);
+            if (!isOwner) {
+                // לא בעלים - הצג מודל "אין הרשאה"
+                this.showNoPermissionModal();
+                return false;
             }
 
-            console.log('✅ כל ההגדרות נשמרו בהצלחה!');
-            return true;
-        } catch (error) {
-            console.error('❌ שגיאה בשמירת הגדרות:', error);
-            alert('❌ שגיאה בשמירת הגדרות. נסה שוב.');
-            return false;
+            // בעלים - עדכן את האירוע
+            try {
+                await this.saveToLocalStorage();
+                await this.saveToFirebaseSession();
+                await this.updateEvent(userId);
+                console.log('✅ אירוע עודכן בהצלחה!');
+                return true;
+            } catch (error) {
+                console.error('❌ שגיאה בעדכון אירוע:', error);
+                alert('❌ שגיאה בשמירת הגדרות. נסה שוב.');
+                return false;
+            }
+        } else {
+            // אין אירוע - הצג מודל יצירת אירוע חדש
+            this.showCreateEventModal(userId);
+            return false; // השמירה תמשיך אחרי יצירת האירוע
         }
+    },
+
+    // הצג מודל יצירת אירוע חדש
+    showCreateEventModal(userId) {
+        // בדוק אם כבר יש מודל פתוח
+        if (document.getElementById('create-event-modal')) {
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'create-event-modal';
+        modal.className = 'auth-modal show';
+        modal.innerHTML = `
+            <div class="auth-modal-overlay"></div>
+            <div class="auth-modal-content">
+                <div class="auth-modal-header">
+                    <h2>יצירת אירוע חדש</h2>
+                    <p>הזן שם לאירוע כדי לשמור את ההגדרות</p>
+                </div>
+
+                <div class="auth-modal-body">
+                    <input type="text" id="new-event-name"
+                           placeholder="שם האירוע (לדוגמה: חתונה של דני ומיכל)"
+                           style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid rgba(255, 215, 0, 0.3); background: rgba(255, 255, 255, 0.1); color: white; font-size: 1.1em; text-align: center; margin-bottom: 20px;">
+
+                    <button class="google-signin-btn" id="create-event-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span>צור אירוע ועבור לדשבורד</span>
+                    </button>
+                </div>
+
+                <div class="auth-modal-footer">
+                    <button class="cancel-btn" id="cancel-create-event-btn">ביטול</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // הוסף event listeners
+        setTimeout(() => {
+            const createBtn = document.getElementById('create-event-btn');
+            const cancelBtn = document.getElementById('cancel-create-event-btn');
+            const nameInput = document.getElementById('new-event-name');
+            const overlay = modal.querySelector('.auth-modal-overlay');
+
+            if (createBtn) {
+                createBtn.onclick = async () => {
+                    const eventName = nameInput.value.trim() || `אירוע ב-${new Date().toLocaleDateString('he-IL')}`;
+                    modal.remove();
+                    await this.createNewEventWithName(userId, eventName);
+                };
+            }
+
+            if (cancelBtn) {
+                cancelBtn.onclick = () => modal.remove();
+            }
+
+            if (overlay) {
+                overlay.onclick = () => modal.remove();
+            }
+
+            // פוקוס על שדה השם
+            if (nameInput) {
+                nameInput.focus();
+                nameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        createBtn.click();
+                    }
+                });
+            }
+        }, 50);
+    },
+
+    // הצג מודל "אין הרשאה לעריכה"
+    showNoPermissionModal() {
+        const modal = document.createElement('div');
+        modal.id = 'no-permission-modal';
+        modal.className = 'auth-modal show';
+        modal.innerHTML = `
+            <div class="auth-modal-overlay"></div>
+            <div class="auth-modal-content">
+                <div class="auth-modal-header">
+                    <h2 style="color: #ff6b6b;">אין הרשאה</h2>
+                    <p>אתה לא הבעלים של אירוע זה ולא יכול לערוך אותו</p>
+                </div>
+
+                <div class="auth-modal-body">
+                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">
+                        כדי לערוך אירוע, עליך להיות הבעלים שלו או לבקש הרשאה ממנהל האירוע.
+                    </p>
+
+                    <button class="google-signin-btn" id="go-to-dashboard-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span>עבור לדשבורד שלי</span>
+                    </button>
+                </div>
+
+                <div class="auth-modal-footer">
+                    <button class="cancel-btn" id="close-no-permission-btn">סגור</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        setTimeout(() => {
+            const dashboardBtn = document.getElementById('go-to-dashboard-btn');
+            const closeBtn = document.getElementById('close-no-permission-btn');
+            const overlay = modal.querySelector('.auth-modal-overlay');
+
+            if (dashboardBtn) {
+                dashboardBtn.onclick = () => {
+                    window.location.href = 'dashboard.html';
+                };
+            }
+
+            if (closeBtn) {
+                closeBtn.onclick = () => modal.remove();
+            }
+
+            if (overlay) {
+                overlay.onclick = () => modal.remove();
+            }
+        }, 50);
+    },
+
+    // צור אירוע חדש עם שם מותאם
+    async createNewEventWithName(userId, eventName) {
+        console.log('🎉 יוצר אירוע חדש:', eventName);
+
+        const eventId = `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const sessionId = window.sessionManager?.sessionId || sessionStorage.getItem('slotMachineSessionId');
+
+        // שמור קודם ב-localStorage
+        await this.saveToLocalStorage();
+
+        // קרא מלאי נוכחי
+        let inventory = [];
+        const savedInventory = localStorage.getItem('customImages');
+        if (savedInventory) {
+            try {
+                inventory = JSON.parse(savedInventory);
+            } catch (e) {
+                console.warn('⚠️ לא ניתן לקרוא מלאי');
+            }
+        }
+
+        // קבל פרטי משתמש
+        const user = userAuthManager.currentUser;
+        const userName = user.displayName || user.email;
+
+        const newEvent = {
+            name: eventName,
+            location: '',
+            eventDate: null,
+            description: '',
+            ownerId: userId,
+            ownerName: userName,
+            sessionId: sessionId,
+            status: 'active',
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            lastUpdated: firebase.database.ServerValue.TIMESTAMP,
+            settings: {
+                winFrequency: gameState.winFrequency,
+                randomBonusPercent: gameState.randomBonusPercent,
+                soundEnabled: gameState.soundEnabled,
+                gameMode: gameState.mode,
+                backgroundColor: gameState.backgroundColor || '#000000',
+                whatsappNumber: gameState.whatsappNumber || ''
+            },
+            stats: {
+                totalPlayers: 0,
+                totalWinners: 0,
+                totalSpins: 0
+            },
+            inventory: inventory
+        };
+
+        await firebase.database().ref(`events/${eventId}`).set(newEvent);
+
+        // עדכן סטטיסטיקות משתמש
+        const userRef = firebase.database().ref(`users/${userId}/stats`);
+        const statsSnapshot = await userRef.once('value');
+        const currentStats = statsSnapshot.val() || { totalEvents: 0 };
+
+        await userRef.update({
+            totalEvents: (currentStats.totalEvents || 0) + 1
+        });
+
+        console.log('✅ אירוע חדש נוצר:', eventId);
+
+        // עבור לדשבורד
+        alert(`✅ אירוע "${eventName}" נוצר בהצלחה!\n\nמעביר אותך לדשבורד לניהול האירועים שלך.`);
+        window.location.href = 'dashboard.html';
     },
 
     // שמור ב-localStorage
@@ -303,87 +501,6 @@ const eventSettingsManager = {
         }
     },
 
-    // צור אירוע חדש ב-Firebase
-    async createNewEvent(userId) {
-        console.log('🎉 יוצר אירוע חדש...');
-
-        const eventId = `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const sessionId = sessionManager.sessionId || sessionStorage.getItem('slotMachineSessionId');
-
-        // שם אירוע - תאריך נוכחי
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('he-IL', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-        const eventName = `אירוע ב-${dateStr}`;
-
-        // קרא מלאי נוכחי
-        let inventory = [];
-        const savedInventory = localStorage.getItem('customImages');
-        if (savedInventory) {
-            try {
-                inventory = JSON.parse(savedInventory);
-            } catch (e) {
-                console.warn('⚠️ לא ניתן לקרוא מלאי');
-            }
-        }
-
-        // קבל פרטי משתמש
-        const user = userAuthManager.currentUser;
-        const userName = user.displayName || user.email;
-
-        const newEvent = {
-            name: eventName,
-            location: '',
-            eventDate: null,
-            description: 'אירוע שנוצר מתוך המשחק',
-            ownerId: userId,
-            ownerName: userName,
-            sessionId: sessionId,
-            status: 'active',
-            createdAt: firebase.database.ServerValue.TIMESTAMP,
-            lastUpdated: firebase.database.ServerValue.TIMESTAMP,
-            settings: {
-                winFrequency: gameState.winFrequency,
-                randomBonusPercent: gameState.randomBonusPercent,
-                soundEnabled: gameState.soundEnabled,
-                gameMode: gameState.mode,
-                backgroundColor: gameState.backgroundColor || '#000000',
-                whatsappNumber: gameState.whatsappNumber || ''
-            },
-            stats: {
-                totalPlayers: 0,
-                totalWinners: 0,
-                totalSpins: 0
-            },
-            inventory: inventory
-        };
-
-        await firebase.database().ref(`events/${eventId}`).set(newEvent);
-
-        // עדכן סטטיסטיקות משתמש
-        const userRef = firebase.database().ref(`users/${userId}/stats`);
-        const statsSnapshot = await userRef.once('value');
-        const currentStats = statsSnapshot.val() || { totalEvents: 0 };
-
-        await userRef.update({
-            totalEvents: (currentStats.totalEvents || 0) + 1
-        });
-
-        // שמור את ה-eventId
-        this.currentEventId = eventId;
-        localStorage.setItem('currentEventId', eventId);
-
-        // ✅ עדכן את ה-URL עם event ו-session (ללא רענון דף!)
-        const newUrl = `${window.location.pathname}?event=${eventId}&session=${sessionId}`;
-        window.history.pushState({ eventId, sessionId }, '', newUrl);
-        console.log('🔗 URL עודכן:', newUrl);
-
-        console.log('✅ אירוע חדש נוצר:', eventId);
-        alert(`✅ אירוע "${eventName}" נוצר בהצלחה!\n\nמעכשיו כל שמירה תעדכן את האירוע הזה.`);
-    },
 
     // עדכן אירוע קיים ב-Firebase
     async updateEvent(userId) {
