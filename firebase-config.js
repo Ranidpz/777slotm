@@ -99,12 +99,13 @@ async function createSession(sessionId, maxPlayers = 3, maxAttempts = 3) {
   }
 }
 
-// Clean up old sessions (older than 1 hour)
+// Clean up old CLOSED sessions (older than 24 hours)
+// Active sessions are NEVER deleted - only closed ones after 24 hours
 async function cleanupOldSessions() {
   if (!database) return;
 
   try {
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000); // 24 שעות
     const sessionsRef = database.ref('sessions');
 
     const snapshot = await sessionsRef.once('value');
@@ -113,9 +114,16 @@ async function cleanupOldSessions() {
     if (sessions) {
       Object.keys(sessions).forEach(async (sessionId) => {
         const session = sessions[sessionId];
-        if (session.createdAt < oneHourAgo) {
+
+        // רק מוחקים סשנים סגורים (sessionActive = false) שעברו 24 שעות
+        // סשנים פעילים לעולם לא יימחקו אוטומטית!
+        const isClosed = session.sessionActive === false;
+        const closedTime = session.closedAt || session.createdAt;
+        const isOld = closedTime < oneDayAgo;
+
+        if (isClosed && isOld) {
           await database.ref(`sessions/${sessionId}`).remove();
-          console.log('🗑️ Cleaned up old session:', sessionId);
+          console.log('🗑️ Cleaned up old closed session:', sessionId);
         }
       });
     }
