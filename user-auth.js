@@ -93,8 +93,8 @@ const userAuthManager = {
             <div class="auth-modal-overlay"></div>
             <div class="auth-modal-content">
                 <div class="auth-modal-header">
-                    <h2>🎰 התחבר למערכת</h2>
-                    <p>נדרשת התחברות לביצוע פעולה זו</p>
+                    <h2>התחבר למערכת</h2>
+                    <p>נדרשת התחברות לשמירת הגדרות</p>
                 </div>
 
                 <div class="auth-modal-body">
@@ -107,16 +107,6 @@ const userAuthManager = {
                         </svg>
                         <span>התחבר עם Google</span>
                     </button>
-
-                    <div class="auth-info">
-                        <p>💡 ההתחברות מאפשרת לך:</p>
-                        <ul>
-                            <li>ניהול פרסים ומלאי</li>
-                            <li>יצירת אירועים מרובים</li>
-                            <li>צפייה בלוח זוכים</li>
-                            <li>שמירת הגדרות ענן</li>
-                        </ul>
-                    </div>
                 </div>
 
                 <div class="auth-modal-footer">
