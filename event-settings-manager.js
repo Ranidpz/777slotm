@@ -6,9 +6,6 @@ const eventSettingsManager = {
 
     // אתחול - טען eventId אם קיים ובדוק בעלות
     async init() {
-        // נסה לטעון eventId מ-localStorage
-        this.currentEventId = localStorage.getItem('currentEventId');
-
         // נסה לטעון מ-URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const eventIdFromUrl = urlParams.get('event');
@@ -35,9 +32,18 @@ const eventSettingsManager = {
                 }
                 return;
             }
+        } else {
+            // ❌ אין eventId ב-URL - נקה localStorage והצג משחק ברירת מחדל (תבנית)
+            this.currentEventId = null;
+            localStorage.removeItem('currentEventId');
+
+            // נקה את כל ההגדרות מ-localStorage - יחזור לברירת מחדל
+            this.clearAllSettings();
+
+            console.log('🎮 מצב תבנית - משחק ברירת מחדל ללא אירוע');
         }
 
-        console.log('🎯 Event Settings Manager initialized. Current Event ID:', this.currentEventId || 'None');
+        console.log('🎯 Event Settings Manager initialized. Current Event ID:', this.currentEventId || 'None (Template Mode)');
     },
 
     // בדוק אם המשתמש הנוכחי הוא הבעלים של האירוע
@@ -79,6 +85,42 @@ const eventSettingsManager = {
     // בדוק אם יש אירוע מקושר
     hasEvent() {
         return this.currentEventId !== null;
+    },
+
+    // נקה את כל ההגדרות מ-localStorage - לחזרה לברירות מחדל
+    clearAllSettings() {
+        // רשימת כל ההגדרות שיש לנקות
+        const settingsKeys = [
+            'winFrequency',
+            'randomBonusPercent',
+            'gameMode',
+            'whatsappNumber',
+            'simpleWinScreen',
+            'qrCustomText',
+            'simpleWinText',
+            'backgroundColor',
+            'scrollingBannerText',
+            'scrollingBannerFontSize',
+            'soundEnabled',
+            'customSpin',
+            'customWin',
+            'customLose',
+            'sessionId',
+            'mobileWarningDismissed'
+        ];
+
+        // נקה כל הגדרה
+        settingsKeys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+
+        // נקה תמונות מותאמות (customSymbol_0 עד customSymbol_8)
+        for (let i = 0; i < 9; i++) {
+            localStorage.removeItem(`customSymbol_${i}`);
+            localStorage.removeItem(`prize_inventory_${i}`);
+        }
+
+        console.log('🧹 כל ההגדרות נוקו מ-localStorage - יחזור לברירות מחדל');
     },
 
     // עדכון תצוגת שם האירוע בפוטר

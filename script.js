@@ -2523,15 +2523,24 @@ function setupDashboardButton() {
     }
 }
 
-// אתחול
-loadSettings(); // טען הגדרות שמורות
-initSounds();
+// אתחול - חייב לחכות ל-eventSettingsManager לפני טעינת הגדרות
+(async function initializeGame() {
+    // אתחל event settings manager (בודק URL ומנקה localStorage אם צריך)
+    if (window.eventSettingsManager) {
+        await eventSettingsManager.init();
+        console.log('✅ Event Settings Manager אותחל');
+    }
 
-// אתחל מערכת תמונות דינמית חדשה
-if (window.dynamicImagesManager) {
-    dynamicImagesManager.init();
-    console.log('✅ מערכת תמונות דינמית אותחלה');
-}
+    // עכשיו טען הגדרות (אחרי ש-localStorage נוקה אם אין event)
+    loadSettings();
+    initSounds();
+
+    // אתחל מערכת תמונות דינמית חדשה
+    if (window.dynamicImagesManager) {
+        dynamicImagesManager.init();
+        console.log('✅ מערכת תמונות דינמית אותחלה');
+    }
+})();
 
 loadImagesFromStorage(); // טען תמונות שמורות (מערכת ישנה - לתאימות)
 // ✅ הוסר: loadInventory() - המלאי נטען אוטומטית ב-dynamicImagesManager
