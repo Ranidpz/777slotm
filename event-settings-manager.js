@@ -98,7 +98,7 @@ const eventSettingsManager = {
                 const eventData = eventSnapshot.val();
                 const eventName = eventData.name || 'אירוע ללא שם';
 
-                eventNameDisplay.innerHTML = `אירוע: <span class="event-name">${eventName}</span>`;
+                eventNameDisplay.textContent = eventName;
                 eventNameDisplay.style.display = 'flex';
                 console.log('🎪 שם אירוע נטען:', eventName);
             } else {
