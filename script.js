@@ -1424,6 +1424,11 @@ function openSettings() {
             console.log('🎨 רינדור מערכת פרסים במסך הגדרות');
         }, 100); // המתן קצר שהמסך יופיע
     }
+
+    // ✅ עדכן שם אירוע בפוטר
+    if (window.eventSettingsManager) {
+        eventSettingsManager.updateEventNameDisplay();
+    }
 }
 
 // כפתור הגדרות חדש

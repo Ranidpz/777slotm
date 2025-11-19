@@ -81,6 +81,35 @@ const eventSettingsManager = {
         return this.currentEventId !== null;
     },
 
+    // עדכון תצוגת שם האירוע בפוטר
+    async updateEventNameDisplay() {
+        const eventNameDisplay = document.getElementById('event-name-display');
+        if (!eventNameDisplay) return;
+
+        if (!this.currentEventId) {
+            eventNameDisplay.style.display = 'none';
+            return;
+        }
+
+        try {
+            const eventSnapshot = await firebase.database().ref(`events/${this.currentEventId}`).once('value');
+
+            if (eventSnapshot.exists()) {
+                const eventData = eventSnapshot.val();
+                const eventName = eventData.name || 'אירוע ללא שם';
+
+                eventNameDisplay.innerHTML = `אירוע: <span class="event-name">${eventName}</span>`;
+                eventNameDisplay.style.display = 'flex';
+                console.log('🎪 שם אירוע נטען:', eventName);
+            } else {
+                eventNameDisplay.style.display = 'none';
+            }
+        } catch (error) {
+            console.warn('⚠️ לא ניתן לטעון שם אירוע:', error);
+            eventNameDisplay.style.display = 'none';
+        }
+    },
+
     // שמור הגדרות (דורש התחברות!)
     async saveSettings() {
         console.log('💾 מתחיל שמירת הגדרות...');
