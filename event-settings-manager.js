@@ -106,7 +106,10 @@ const eventSettingsManager = {
             'customWin',
             'customLose',
             'sessionId',
-            'mobileWarningDismissed'
+            'mobileWarningDismissed',
+            'customImages',
+            'remoteControlEnabled',
+            'slotMachineSessionId'
         ];
 
         // נקה כל הגדרה
@@ -119,6 +122,10 @@ const eventSettingsManager = {
             localStorage.removeItem(`customSymbol_${i}`);
             localStorage.removeItem(`prize_inventory_${i}`);
         }
+
+        // הגדר ברירות מחדל חדשות
+        localStorage.setItem('scrollingBannerText', 'ברוכים הבאים למשחק 777.playzones.app לסיבוב הגלגל לחצו על המסך או על מקש Enter במקלדת. למסך ההגדרות לחצו S. תהנו!');
+        localStorage.setItem('remoteControlEnabled', 'false');
 
         console.log('🧹 כל ההגדרות נוקו מ-localStorage - יחזור לברירות מחדל');
     },
