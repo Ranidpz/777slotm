@@ -85,12 +85,15 @@ const userAuthManager = {
 
     // הצג חלון התחברות
     showLoginModal(afterLoginCallback = null) {
+        // שמור callback בגלובל כדי שנוכל לגשת אליו מה-onclick
+        window._authCallback = afterLoginCallback;
+
         // יצירת מודל התחברות דינמי
         const modal = document.createElement('div');
         modal.id = 'auth-modal';
         modal.className = 'auth-modal';
         modal.innerHTML = `
-            <div class="auth-modal-overlay"></div>
+            <div class="auth-modal-overlay" onclick="userAuthManager.closeLoginModal()"></div>
             <div class="auth-modal-content">
                 <div class="auth-modal-header">
                     <h2>התחבר למערכת</h2>
@@ -98,7 +101,7 @@ const userAuthManager = {
                 </div>
 
                 <div class="auth-modal-body">
-                    <button class="google-signin-btn" id="modal-google-signin">
+                    <button class="google-signin-btn" onclick="userAuthManager.handleGoogleSignIn()">
                         <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -110,48 +113,21 @@ const userAuthManager = {
                 </div>
 
                 <div class="auth-modal-footer">
-                    <button class="cancel-btn" id="modal-cancel-btn">ביטול</button>
+                    <button class="cancel-btn" onclick="userAuthManager.closeLoginModal()">ביטול</button>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
 
-        // הוסף אירועים
-        const googleSigninBtn = document.getElementById('modal-google-signin');
-        const cancelBtn = document.getElementById('modal-cancel-btn');
-        const overlay = modal.querySelector('.auth-modal-overlay');
-
-        if (googleSigninBtn) {
-            googleSigninBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🔵 נלחץ כפתור התחברות עם Google');
-                await this.signInWithGoogle(afterLoginCallback);
-            });
-        }
-
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🔴 נלחץ כפתור ביטול');
-                this.closeLoginModal();
-            });
-        }
-
-        // סגור בלחיצה על הרקע
-        if (overlay) {
-            overlay.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('⚫ נלחץ על הרקע');
-                this.closeLoginModal();
-            });
-        }
-
         // הצג את המודל
         setTimeout(() => modal.classList.add('show'), 10);
+    },
+
+    // פונקציה שנקראת מה-onclick
+    async handleGoogleSignIn() {
+        console.log('🔵 נלחץ כפתור התחברות עם Google');
+        await this.signInWithGoogle(window._authCallback);
     },
 
     // סגור חלון התחברות
