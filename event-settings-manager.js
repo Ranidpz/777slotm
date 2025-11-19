@@ -389,9 +389,50 @@ const eventSettingsManager = {
 
         console.log('✅ אירוע חדש נוצר:', eventId);
 
-        // עבור לדשבורד
-        alert(`✅ אירוע "${eventName}" נוצר בהצלחה!\n\nמעביר אותך לדשבורד לניהול האירועים שלך.`);
-        window.location.href = 'dashboard.html';
+        // הצג מודל הצלחה ועבור לדשבורד
+        this.showSuccessModal(eventName);
+    },
+
+    // הצג מודל הצלחה לאחר יצירת אירוע
+    showSuccessModal(eventName) {
+        const modal = document.createElement('div');
+        modal.id = 'success-modal';
+        modal.className = 'auth-modal show';
+        modal.innerHTML = `
+            <div class="auth-modal-overlay"></div>
+            <div class="auth-modal-content">
+                <div class="auth-modal-header">
+                    <h2 style="color: #4CAF50;">אירוע נוצר בהצלחה!</h2>
+                    <p>האירוע "${eventName}" נשמר במערכת</p>
+                </div>
+
+                <div class="auth-modal-body">
+                    <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">
+                        מעביר אותך לדשבורד לניהול האירועים שלך...
+                    </p>
+
+                    <button class="google-signin-btn" id="go-dashboard-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span>עבור לדשבורד</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        setTimeout(() => {
+            const dashboardBtn = document.getElementById('go-dashboard-btn');
+            if (dashboardBtn) {
+                dashboardBtn.onclick = () => {
+                    window.location.href = 'dashboard.html';
+                };
+            }
+
+            // מעבר אוטומטי אחרי 2 שניות
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 2000);
+        }, 50);
     },
 
     // שמור ב-localStorage
