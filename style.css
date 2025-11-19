@@ -3637,6 +3637,9 @@ input:checked + .toggle-slider:before {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
 }
 
 .google-signin-btn:hover {
@@ -3705,6 +3708,9 @@ input:checked + .toggle-slider:before {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
 }
 
 .cancel-btn:hover {
