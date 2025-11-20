@@ -397,7 +397,12 @@ const eventSettingsManager = {
                 soundEnabled: gameState.soundEnabled,
                 gameMode: gameState.mode,
                 backgroundColor: gameState.backgroundColor || '#000000',
-                whatsappNumber: gameState.whatsappNumber || ''
+                whatsappNumber: gameState.whatsappNumber || '',
+                scrollingBannerText: gameState.scrollingBannerText || '',
+                scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,
+                simpleWinScreen: gameState.simpleWinScreen || false,
+                qrCustomText: gameState.qrCustomText || '',
+                simpleWinText: gameState.simpleWinText || ''
             },
             stats: {
                 totalPlayers: 0,
@@ -522,6 +527,7 @@ const eventSettingsManager = {
             whatsappNumber: gameState.whatsappNumber || '',
             simpleWinScreen: gameState.simpleWinScreen || false,
             qrCustomText: gameState.qrCustomText || '',
+            simpleWinText: gameState.simpleWinText || '',
             scrollingBannerText: gameState.scrollingBannerText || '',
             scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,
             lastUpdated: firebase.database.ServerValue.TIMESTAMP
@@ -614,7 +620,12 @@ const eventSettingsManager = {
                 soundEnabled: gameState.soundEnabled,
                 gameMode: gameState.mode,
                 backgroundColor: gameState.backgroundColor || '#000000',
-                whatsappNumber: gameState.whatsappNumber || ''
+                whatsappNumber: gameState.whatsappNumber || '',
+                scrollingBannerText: gameState.scrollingBannerText || '',
+                scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,
+                simpleWinScreen: gameState.simpleWinScreen || false,
+                qrCustomText: gameState.qrCustomText || '',
+                simpleWinText: gameState.simpleWinText || ''
             },
             inventory: inventory
         };
