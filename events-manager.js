@@ -244,6 +244,11 @@ const eventsManager = {
                                     closedReason: 'manual_disconnect'
                                 });
 
+                                // ✅ עצור את ה-heartbeat של ה-session
+                                if (typeof stopSessionHeartbeat === 'function') {
+                                    stopSessionHeartbeat(sessionId);
+                                }
+
                                 console.log('✅ Session נותק בהצלחה:', sessionId);
                                 alert('✅ Session נותק בהצלחה!');
                             } catch (error) {

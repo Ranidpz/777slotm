@@ -820,6 +820,11 @@ const eventSettingsManager = {
                 closedReason: 'new_session_opened' // סיבה: session חדש נפתח
             });
 
+            // ✅ עצור את ה-heartbeat של ה-session הישן
+            if (typeof stopSessionHeartbeat === 'function') {
+                stopSessionHeartbeat(oldSessionId);
+            }
+
             console.log('✅ Session ישן נסגר בהצלחה');
         } catch (error) {
             console.error('❌ שגיאה בסגירת session ישן:', error);

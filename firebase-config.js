@@ -84,18 +84,40 @@ async function createSession(sessionId, maxPlayers = 3, maxAttempts = 3) {
       openedAt: firebase.database.ServerValue.TIMESTAMP
     });
 
-    // ✅ הגדר onDisconnect - כשהחלון נסגר, סמן session כלא פעיל
-    sessionRef.child('sessionActive').onDisconnect().set(false);
-    sessionRef.child('closedAt').onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+    // ✅ הסרנו את onDisconnect - Session יישאר פעיל 24 שעות!
+    // רק המנהל יכול לסגור את ה-session מהדשבורד
+
+    // ✅ הוסף heartbeat - עדכן lastActiveAt כל 30 שניות כדי לשמור על ה-connection
+    const heartbeatInterval = setInterval(() => {
+      sessionRef.child('lastActiveAt').set(firebase.database.ServerValue.TIMESTAMP)
+        .catch(err => {
+          console.warn('⚠️ Heartbeat נכשל:', err);
+          // אל תעצור את ה-interval - נסה שוב בפעם הבאה
+        });
+    }, 30000); // 30 שניות
+
+    // שמור את ה-interval ב-window כדי שנוכל לעצור אותו אם צריך
+    if (!window.sessionHeartbeats) window.sessionHeartbeats = {};
+    window.sessionHeartbeats[sessionId] = heartbeatInterval;
 
     console.log('✅ Session created/updated:', sessionId);
     console.log('📱 WhatsApp number saved to session:', whatsappNumber);
     console.log('🏆 Winners preserved:', Object.keys(existingWinners).length);
-    console.log('🔴 onDisconnect handler set - session will auto-close on window close');
+    console.log('💚 Session יישאר פעיל 24 שעות - רק המנהל יכול לסגור');
+    console.log('💓 Heartbeat מופעל - מעדכן כל 30 שניות');
     return true;
   } catch (error) {
     console.error('❌ Error creating session:', error);
     return false;
+  }
+}
+
+// עצור heartbeat של session (קוראים לזה כשסוגרים session ידנית)
+function stopSessionHeartbeat(sessionId) {
+  if (window.sessionHeartbeats && window.sessionHeartbeats[sessionId]) {
+    clearInterval(window.sessionHeartbeats[sessionId]);
+    delete window.sessionHeartbeats[sessionId];
+    console.log('💔 Heartbeat נעצר עבור session:', sessionId);
   }
 }
 
@@ -325,11 +347,25 @@ async function resetPlayerAction(sessionId, playerId) {
 }
 
 // Export functions for use in other files
+// ✅ נקה את כל ה-heartbeats כשסוגרים את הדף
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    if (window.sessionHeartbeats) {
+      Object.keys(window.sessionHeartbeats).forEach(sessionId => {
+        clearInterval(window.sessionHeartbeats[sessionId]);
+        console.log('💔 Heartbeat נעצר עבור session (beforeunload):', sessionId);
+      });
+      window.sessionHeartbeats = {};
+    }
+  });
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     initFirebase,
     getSessionId,
     createSession,
+    stopSessionHeartbeat,
     cleanupOldSessions,
     addPlayer,
     removePlayer,
