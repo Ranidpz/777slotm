@@ -11,48 +11,14 @@ const eventSettingsManager = {
         const eventIdFromUrl = urlParams.get('event');
 
         if (eventIdFromUrl) {
-            // ✅ יש eventId ב-URL - הצג spinner ובדוק בעלות!
-            this.showLoadingSpinner();
+            // ✅ יש eventId ב-URL - טען את האירוע (ללא בדיקת בעלות!)
+            // המשחק פתוח לכולם לצפייה ומשחק - בעלות נבדקת רק בשמירה
+            this.currentEventId = eventIdFromUrl;
+            localStorage.setItem('currentEventId', eventIdFromUrl);
+            console.log('✅ אירוע נטען:', eventIdFromUrl);
 
-            // המתן קצת כדי לוודא שהספינר מתרנדר
-            await new Promise(resolve => {
-                requestAnimationFrame(() => {
-                    setTimeout(resolve, 50);
-                });
-            });
-
-            const ownershipResult = await this.checkOwnership(eventIdFromUrl);
-
-            this.hideLoadingSpinner();
-
-            if (ownershipResult.isOwner) {
-                // ✅ המשתמש הוא הבעלים - טען את האירוע
-                this.currentEventId = eventIdFromUrl;
-                localStorage.setItem('currentEventId', eventIdFromUrl);
-                console.log('✅ אירוע נטען - המשתמש הוא הבעלים:', eventIdFromUrl);
-
-                // ✅ טען הגדרות מה-Firebase לפני יצירת session חדש
-                await this.loadEventSettingsFromFirebase(eventIdFromUrl);
-            } else {
-                // ❌ המשתמש לא הבעלים - נקה URL והעבר לדשבורד
-                console.warn('⚠️ אין הרשאה לאירוע זה');
-                window.history.replaceState({}, '', window.location.pathname);
-
-                if (ownershipResult.userLoggedIn) {
-                    this.showAccessDeniedModal(
-                        'אין לך הרשאה',
-                        'אין לך הרשאה לצפות באירוע זה.',
-                        'dashboard.html'
-                    );
-                } else {
-                    this.showAccessDeniedModal(
-                        'נדרשת התחברות',
-                        'אירוע זה דורש התחברות. אנא התחבר כדי לגשת לאירוע.',
-                        'dashboard.html'
-                    );
-                }
-                return;
-            }
+            // ✅ טען הגדרות מה-Firebase
+            await this.loadEventSettingsFromFirebase(eventIdFromUrl);
         } else {
             // ❌ אין eventId ב-URL - נקה localStorage והצג משחק ברירת מחדל (תבנית)
             this.currentEventId = null;
