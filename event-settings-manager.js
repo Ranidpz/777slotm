@@ -38,6 +38,18 @@ const eventSettingsManager = {
         try {
             console.log('☁️ טוען הגדרות אירוע מ-Firebase:', eventId);
 
+            // ✅ בדוק ש-Firebase נטען
+            if (typeof firebase === 'undefined' || !firebase.database) {
+                console.error('❌ Firebase לא נטען עדיין - ממתין...');
+                // נסה לחכות עד 5 שניות ל-Firebase להיטען
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                if (typeof firebase === 'undefined' || !firebase.database) {
+                    console.error('❌ Firebase לא נטען אחרי המתנה');
+                    return;
+                }
+            }
+
             // טען את האירוע מ-Firebase
             const eventSnapshot = await firebase.database().ref(`events/${eventId}`).once('value');
             const eventData = eventSnapshot.val();
@@ -51,6 +63,14 @@ const eventSettingsManager = {
             if (eventData.settings && typeof window.gameState !== 'undefined') {
                 const settings = eventData.settings;
 
+                console.log('📦 הגדרות שנמצאו ב-Firebase:', {
+                    winFrequency: settings.winFrequency,
+                    backgroundColor: settings.backgroundColor,
+                    scrollingBannerText: settings.scrollingBannerText,
+                    simpleWinScreen: settings.simpleWinScreen,
+                    inventoryCount: eventData.inventory ? eventData.inventory.length : 0
+                });
+
                 if (settings.winFrequency !== undefined) gameState.winFrequency = settings.winFrequency;
                 if (settings.randomBonusPercent !== undefined) gameState.randomBonusPercent = settings.randomBonusPercent;
                 if (settings.soundEnabled !== undefined) gameState.soundEnabled = settings.soundEnabled;
@@ -63,7 +83,11 @@ const eventSettingsManager = {
                 if (settings.scrollingBannerText !== undefined) gameState.scrollingBannerText = settings.scrollingBannerText;
                 if (settings.scrollingBannerFontSize) gameState.scrollingBannerFontSize = settings.scrollingBannerFontSize;
 
-                console.log('✅ הגדרות אירוע נטענו ל-gameState');
+                console.log('✅ הגדרות אירוע נטענו ל-gameState:', {
+                    winFrequency: gameState.winFrequency,
+                    backgroundColor: gameState.backgroundColor,
+                    scrollingBannerText: gameState.scrollingBannerText
+                });
             }
 
             // טען מלאי פרסים ל-localStorage
@@ -767,8 +791,13 @@ if (typeof window !== 'undefined') {
 
     // אתחל כש-DOM מוכן (async!)
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', async () => await eventSettingsManager.init());
+        document.addEventListener('DOMContentLoaded', async () => {
+            await eventSettingsManager.init();
+        });
     } else {
-        eventSettingsManager.init(); // אתחול async
+        // ✅ גם כאן צריך async wrapper!
+        (async () => {
+            await eventSettingsManager.init();
+        })();
     }
 }
