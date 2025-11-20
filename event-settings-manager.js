@@ -128,30 +128,30 @@ const eventSettingsManager = {
     // בדוק אם המשתמש הנוכחי הוא הבעלים של האירוע
     async checkOwnership(eventId) {
         try {
+            console.log('🔍 בודק בעלות על האירוע:', eventId);
+
+            // ✅ בדוק אם המשתמש כבר מחובר
+            const currentUserId = userAuthManager.getUserId();
+
+            if (!currentUserId) {
+                console.warn('⚠️ משתמש לא מחובר');
+                return { isOwner: false, userLoggedIn: false };
+            }
+
+            console.log('👤 משתמש מחובר:', currentUserId);
+
             // ✅ טען נתוני אירוע מ-Firebase
             const eventSnapshot = await firebase.database().ref(`events/${eventId}`).once('value');
 
             if (!eventSnapshot.exists()) {
                 console.warn('⚠️ האירוע לא קיים:', eventId);
-                return { isOwner: false, userLoggedIn: false };
+                return { isOwner: false, userLoggedIn: true };
             }
 
             const eventData = eventSnapshot.val();
             const eventOwnerId = eventData.ownerId;
 
-            // ✅ חכה למצב האימות לפני הבדיקה (עם timeout של 5 שניות)
-            console.log('⏳ ממתין למצב אימות...');
-            const user = await Promise.race([
-                userAuthManager.waitForAuthState(),
-                new Promise(resolve => setTimeout(() => resolve(null), 5000))
-            ]);
-
-            if (!user) {
-                console.log('⚠️ משתמש לא מחובר - לא יכול לגשת לאירוע');
-                return { isOwner: false, userLoggedIn: false };
-            }
-
-            const currentUserId = user.uid;
+            console.log('🔑 בעלים של האירוע:', eventOwnerId);
 
             // ✅ בדוק אם המשתמש הנוכחי הוא הבעלים
             if (currentUserId === eventOwnerId) {
@@ -262,24 +262,39 @@ const eventSettingsManager = {
 
         // ✅ המשתמש מחובר
         const userId = userAuthManager.getUserId();
+        console.log('👤 User ID:', userId);
 
         // ✅ בדיקה 2: האם יש אירוע ב-URL?
         if (this.hasEvent()) {
-            // יש אירוע - בדוק בעלות
-            const isOwner = await this.checkOwnership(this.currentEventId);
+            console.log('📝 יש אירוע - בודק בעלות...');
 
-            if (!isOwner) {
+            // יש אירוע - בדוק בעלות
+            const ownershipCheck = await this.checkOwnership(this.currentEventId);
+            console.log('✅ בדיקת בעלות הושלמה:', ownershipCheck);
+
+            if (!ownershipCheck.isOwner) {
                 // לא בעלים - הצג מודל "אין הרשאה"
+                console.warn('⚠️ משתמש אינו בעלים - מציג מודל הרשאה');
                 this.showNoPermissionModal();
                 return false;
             }
 
             // בעלים - עדכן את האירוע
+            console.log('💾 משתמש הוא בעלים - מתחיל שמירה...');
             try {
+                console.log('1️⃣ שומר ב-localStorage...');
                 await this.saveToLocalStorage();
+                console.log('✅ localStorage הושלם');
+
+                console.log('2️⃣ שומר ב-Firebase Session...');
                 await this.saveToFirebaseSession();
+                console.log('✅ Firebase Session הושלם');
+
+                console.log('3️⃣ מעדכן אירוע ב-Firebase...');
                 await this.updateEvent(userId);
-                console.log('✅ אירוע עודכן בהצלחה!');
+                console.log('✅ Firebase Event עודכן');
+
+                console.log('✅✅✅ אירוע עודכן בהצלחה!');
                 return true;
             } catch (error) {
                 console.error('❌ שגיאה בעדכון אירוע:', error);
@@ -288,6 +303,7 @@ const eventSettingsManager = {
             }
         } else {
             // אין אירוע - הצג מודל יצירת אירוע חדש
+            console.log('🆕 אין אירוע - מציג מודל יצירה');
             this.showCreateEventModal(userId);
             return false; // השמירה תמשיך אחרי יצירת האירוע
         }
