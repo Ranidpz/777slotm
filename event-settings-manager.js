@@ -40,14 +40,23 @@ const eventSettingsManager = {
 
             // ✅ בדוק ש-Firebase נטען
             if (typeof firebase === 'undefined' || !firebase.database) {
-                console.error('❌ Firebase לא נטען עדיין - ממתין...');
-                // נסה לחכות עד 5 שניות ל-Firebase להיטען
+                console.error('❌ Firebase לא נטען עדיין - מנסה לאתחל...');
+
+                // נסה לאתחל Firebase
+                if (typeof initFirebase === 'function') {
+                    initFirebase();
+                }
+
+                // המתן שנייה אחת
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
+                // בדוק שוב
                 if (typeof firebase === 'undefined' || !firebase.database) {
-                    console.error('❌ Firebase לא נטען אחרי המתנה');
+                    console.error('❌ Firebase לא נטען אחרי אתחול');
                     return;
                 }
+
+                console.log('✅ Firebase אותחל בהצלחה');
             }
 
             // טען את האירוע מ-Firebase
@@ -581,37 +590,49 @@ const eventSettingsManager = {
 
     // שמור ב-Firebase Session
     async saveToFirebaseSession() {
-        if (!window.sessionManager || !sessionManager.sessionId) {
-            console.log('⚠️ אין session פעיל - מדלג על שמירה ב-Firebase Session');
-            return;
+        try {
+            if (!window.sessionManager || !sessionManager.sessionId) {
+                console.log('⚠️ אין session פעיל - מדלג על שמירה ב-Firebase Session');
+                return;
+            }
+
+            // ✅ בדוק ש-Firebase נטען
+            if (typeof firebase === 'undefined' || !firebase.database) {
+                console.warn('⚠️ Firebase לא נטען - מדלג על שמירה ב-Session');
+                return;
+            }
+
+            console.log('☁️ שומר ב-Firebase Session...');
+
+            // שמור פרסים
+            if (window.dynamicImagesManager) {
+                await dynamicImagesManager.saveToFirebase(sessionManager.sessionId);
+                console.log('✅ פרסים נשמרו ב-Firebase');
+            }
+
+            // שמור הגדרות משחק
+            const gameSettings = {
+                winFrequency: gameState.winFrequency,
+                randomBonusPercent: gameState.randomBonusPercent,
+                soundEnabled: gameState.soundEnabled,
+                gameMode: gameState.mode,
+                backgroundColor: gameState.backgroundColor || '#000000',
+                whatsappNumber: gameState.whatsappNumber || '',
+                simpleWinScreen: gameState.simpleWinScreen || false,
+                qrCustomText: gameState.qrCustomText || '',
+                simpleWinText: gameState.simpleWinText || '',
+                scrollingBannerText: gameState.scrollingBannerText || '',
+                scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            await firebase.database().ref(`sessions/${sessionManager.sessionId}/gameSettings`).set(gameSettings);
+            console.log('✅ הגדרות משחק נשמרו ב-Firebase Session');
+        } catch (error) {
+            console.error('❌ שגיאה בשמירה ב-Firebase Session:', error);
+            console.warn('⚠️ ממשיך בלי שמירת Session - אירוע עדיין יישמר');
+            // לא זורקים שגיאה - נמשיך לשמור את האירוע ב-updateEvent
         }
-
-        console.log('☁️ שומר ב-Firebase Session...');
-
-        // שמור פרסים
-        if (window.dynamicImagesManager) {
-            await dynamicImagesManager.saveToFirebase(sessionManager.sessionId);
-            console.log('✅ פרסים נשמרו ב-Firebase');
-        }
-
-        // שמור הגדרות משחק
-        const gameSettings = {
-            winFrequency: gameState.winFrequency,
-            randomBonusPercent: gameState.randomBonusPercent,
-            soundEnabled: gameState.soundEnabled,
-            gameMode: gameState.mode,
-            backgroundColor: gameState.backgroundColor || '#000000',
-            whatsappNumber: gameState.whatsappNumber || '',
-            simpleWinScreen: gameState.simpleWinScreen || false,
-            qrCustomText: gameState.qrCustomText || '',
-            simpleWinText: gameState.simpleWinText || '',
-            scrollingBannerText: gameState.scrollingBannerText || '',
-            scrollingBannerFontSize: gameState.scrollingBannerFontSize || 42,
-            lastUpdated: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        await firebase.database().ref(`sessions/${sessionManager.sessionId}/gameSettings`).set(gameSettings);
-        console.log('✅ הגדרות משחק נשמרו ב-Firebase Session');
     },
 
     // סגור session ישן של אירוע (אם קיים)
