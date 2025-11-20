@@ -273,6 +273,16 @@ const eventSettingsManager = {
         }
     },
 
+    // Helper: הוסף timeout לפעולה async
+    withTimeout(promise, timeoutMs, operationName) {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error(`${operationName} - timeout after ${timeoutMs}ms`)), timeoutMs)
+            )
+        ]);
+    },
+
     // שמור הגדרות (דורש התחברות!)
     async saveSettings() {
         console.log('💾 מתחיל שמירת הגדרות...');
@@ -297,9 +307,20 @@ const eventSettingsManager = {
         if (this.hasEvent()) {
             console.log('📝 יש אירוע - בודק בעלות...');
 
-            // יש אירוע - בדוק בעלות
-            const ownershipCheck = await this.checkOwnership(this.currentEventId);
-            console.log('✅ בדיקת בעלות הושלמה:', ownershipCheck);
+            // יש אירוע - בדוק בעלות (עם timeout של 10 שניות)
+            let ownershipCheck;
+            try {
+                ownershipCheck = await this.withTimeout(
+                    this.checkOwnership(this.currentEventId),
+                    10000,
+                    'בדיקת בעלות'
+                );
+                console.log('✅ בדיקת בעלות הושלמה:', ownershipCheck);
+            } catch (error) {
+                console.error('❌ שגיאה או timeout בבדיקת בעלות:', error);
+                alert('❌ שגיאה בחיבור ל-Firebase. בדוק את החיבור לאינטרנט ונסה שוב.');
+                return false;
+            }
 
             if (!ownershipCheck.isOwner) {
                 // לא בעלים - הצג מודל "אין הרשאה"
@@ -311,23 +332,49 @@ const eventSettingsManager = {
             // בעלים - עדכן את האירוע
             console.log('💾 משתמש הוא בעלים - מתחיל שמירה...');
             try {
+                // שלב 1: localStorage (מהיר, ללא timeout)
                 console.log('1️⃣ שומר ב-localStorage...');
                 await this.saveToLocalStorage();
                 console.log('✅ localStorage הושלם');
 
+                // שלב 2: Firebase Session (עם timeout של 20 שניות)
                 console.log('2️⃣ שומר ב-Firebase Session...');
-                await this.saveToFirebaseSession();
-                console.log('✅ Firebase Session הושלם');
+                try {
+                    await this.withTimeout(
+                        this.saveToFirebaseSession(),
+                        20000,
+                        'שמירת Firebase Session'
+                    );
+                    console.log('✅ Firebase Session הושלם');
+                } catch (sessionError) {
+                    console.warn('⚠️ שמירת Session נכשלה או timeout:', sessionError.message);
+                    console.log('⏩ ממשיך לשמירת אירוע (Session לא קריטי)');
+                    // לא זורקים שגיאה - ממשיכים לשמור את האירוע
+                }
 
+                // שלב 3: עדכון אירוע (עם timeout של 15 שניות)
                 console.log('3️⃣ מעדכן אירוע ב-Firebase...');
-                await this.updateEvent(userId);
+                await this.withTimeout(
+                    this.updateEvent(userId),
+                    15000,
+                    'עדכון אירוע'
+                );
                 console.log('✅ Firebase Event עודכן');
 
                 console.log('✅✅✅ אירוע עודכן בהצלחה!');
                 return true;
             } catch (error) {
                 console.error('❌ שגיאה בעדכון אירוע:', error);
-                alert('❌ שגיאה בשמירת הגדרות. נסה שוב.');
+
+                // הצג הודעה מפורטת יותר
+                let errorMsg = 'שגיאה בשמירת הגדרות';
+                if (error.message.includes('timeout')) {
+                    errorMsg = 'החיבור ל-Firebase איטי מדי או נכשל. בדוק את החיבור לאינטרנט ונסה שוב.';
+                } else if (error.message.includes('permission')) {
+                    errorMsg = 'אין הרשאה לשמור. נסה להתנתק ולהתחבר שוב.';
+                }
+
+                alert(`❌ ${errorMsg}\n\nפרטי שגיאה: ${error.message}`);
                 return false;
             }
         } else {
@@ -635,13 +682,38 @@ const eventSettingsManager = {
 
             console.log('☁️ שומר ב-Firebase Session...');
 
-            // שמור פרסים
+            // שמור פרסים (עם timeout מוגבל ל-15 שניות)
             if (window.dynamicImagesManager) {
-                await dynamicImagesManager.saveToFirebase(sessionManager.sessionId);
-                console.log('✅ פרסים נשמרו ב-Firebase');
+                try {
+                    console.log('📦 שומר פרסים ל-Session...');
+
+                    // בדוק גודל המלאי
+                    const inventory = localStorage.getItem('customImages');
+                    if (inventory) {
+                        const sizeKB = new Blob([inventory]).size / 1024;
+                        console.log(`📊 גודל מלאי: ${sizeKB.toFixed(2)} KB`);
+
+                        if (sizeKB > 5000) { // יותר מ-5MB
+                            console.warn('⚠️ מלאי גדול מדי - מדלג על שמירת פרסים ב-Session');
+                            console.log('ℹ️ הפרסים יישמרו רק ב-Event (לא ב-Session)');
+                        } else {
+                            await this.withTimeout(
+                                dynamicImagesManager.saveToFirebase(sessionManager.sessionId),
+                                15000,
+                                'שמירת פרסים'
+                            );
+                            console.log('✅ פרסים נשמרו ב-Firebase Session');
+                        }
+                    }
+                } catch (imageError) {
+                    console.warn('⚠️ שמירת פרסים נכשלה:', imageError.message);
+                    console.log('ℹ️ הפרסים יישמרו ב-Event במקום');
+                    // ממשיכים - לא קריטי
+                }
             }
 
-            // שמור הגדרות משחק
+            // שמור הגדרות משחק (מהיר)
+            console.log('⚙️ שומר הגדרות משחק...');
             const gameSettings = {
                 winFrequency: gameState.winFrequency,
                 randomBonusPercent: gameState.randomBonusPercent,
@@ -657,12 +729,17 @@ const eventSettingsManager = {
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             };
 
-            await firebase.database().ref(`sessions/${sessionManager.sessionId}/gameSettings`).set(gameSettings);
+            await this.withTimeout(
+                firebase.database().ref(`sessions/${sessionManager.sessionId}/gameSettings`).set(gameSettings),
+                10000,
+                'שמירת הגדרות משחק'
+            );
             console.log('✅ הגדרות משחק נשמרו ב-Firebase Session');
         } catch (error) {
             console.error('❌ שגיאה בשמירה ב-Firebase Session:', error);
             console.warn('⚠️ ממשיך בלי שמירת Session - אירוע עדיין יישמר');
-            // לא זורקים שגיאה - נמשיך לשמור את האירוע ב-updateEvent
+            // זורקים את השגיאה כדי שה-catch ב-saveSettings יתפוס
+            throw error;
         }
     },
 
@@ -716,15 +793,30 @@ const eventSettingsManager = {
         // ✅ בדוק אם יש session חדש שצריך לעדכן
         const currentSessionId = sessionManager.sessionId || sessionStorage.getItem('slotMachineSessionId');
 
-        // טען את האירוע הנוכחי כדי לבדוק את ה-sessionId שלו
-        const eventSnapshot = await firebase.database().ref(`events/${this.currentEventId}`).once('value');
+        // טען את האירוע הנוכחי כדי לבדוק את ה-sessionId שלו (עם timeout)
+        console.log('📖 קורא נתוני אירוע נוכחיים...');
+        const eventSnapshot = await this.withTimeout(
+            firebase.database().ref(`events/${this.currentEventId}`).once('value'),
+            8000,
+            'קריאת נתוני אירוע'
+        );
         const eventData = eventSnapshot.val();
         const oldSessionId = eventData?.sessionId;
 
-        // אם יש session חדש והוא שונה מהישן - סגור את הישן
+        // אם יש session חדש והוא שונה מהישן - סגור את הישן (עם timeout)
         if (currentSessionId && oldSessionId && currentSessionId !== oldSessionId) {
             console.log('🔄 מזהה session חדש - סוגר את הישן');
-            await this.closeOldEventSession(this.currentEventId);
+            try {
+                await this.withTimeout(
+                    this.closeOldEventSession(this.currentEventId),
+                    5000,
+                    'סגירת session ישן'
+                );
+            } catch (closeError) {
+                console.warn('⚠️ לא הצלחתי לסגור session ישן:', closeError.message);
+                console.log('⏩ ממשיך בכל מקרה');
+                // ממשיכים - לא קריטי
+            }
         }
 
         // קרא מלאי נוכחי
@@ -733,6 +825,7 @@ const eventSettingsManager = {
         if (savedInventory) {
             try {
                 inventory = JSON.parse(savedInventory);
+                console.log(`📦 נמצאו ${inventory.length} פרסים במלאי`);
             } catch (e) {
                 console.warn('⚠️ לא ניתן לקרוא מלאי');
             }
@@ -764,9 +857,14 @@ const eventSettingsManager = {
             updateData.sessionId = currentSessionId;
         }
 
-        await eventRef.update(updateData);
+        console.log('💾 כותב עדכון ל-Firebase...');
+        await this.withTimeout(
+            eventRef.update(updateData),
+            10000,
+            'כתיבת עדכון אירוע'
+        );
 
-        console.log('✅ אירוע עודכן בהצלחה');
+        console.log('✅ אירוע עודכן בהצלחה ב-Firebase');
     },
 
     // הצג מודאל גישה נדחתה
