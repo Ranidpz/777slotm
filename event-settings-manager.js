@@ -96,6 +96,9 @@ const eventSettingsManager = {
             }
 
             // טען הגדרות ל-gameState
+            console.log('🔍 DEBUG: eventData.settings קיים?', !!eventData.settings);
+            console.log('🔍 DEBUG: window.gameState קיים?', typeof window.gameState !== 'undefined');
+
             if (eventData.settings && typeof window.gameState !== 'undefined') {
                 const settings = eventData.settings;
 
@@ -997,19 +1000,8 @@ const eventSettingsManager = {
     }
 };
 
-// אתחול אוטומטי
+// ייצוא גלובלי (אתחול מתבצע מ-script.js אחרי יצירת gameState)
 if (typeof window !== 'undefined') {
     window.eventSettingsManager = eventSettingsManager;
-
-    // אתחל כש-DOM מוכן (async!)
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', async () => {
-            await eventSettingsManager.init();
-        });
-    } else {
-        // ✅ גם כאן צריך async wrapper!
-        (async () => {
-            await eventSettingsManager.init();
-        })();
-    }
+    console.log('✅ Event Settings Manager מוכן - ממתין לאתחול מ-script.js');
 }
