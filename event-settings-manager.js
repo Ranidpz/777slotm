@@ -3,6 +3,7 @@
 
 const eventSettingsManager = {
     currentEventId: null,
+    cachedOwnerId: null, // ✅ שמור את ownerId בזיכרון כדי לא לקרוא שוב מ-Firebase
 
     // אתחול - טען eventId אם קיים ובדוק בעלות
     async init() {
@@ -86,6 +87,12 @@ const eventSettingsManager = {
             if (!eventData) {
                 console.warn('⚠️ אין נתוני אירוע ב-Firebase');
                 return;
+            }
+
+            // ✅ שמור את ownerId בזיכרון לשימוש ב-checkOwnership()
+            if (eventData.ownerId) {
+                this.cachedOwnerId = eventData.ownerId;
+                console.log('🔑 שמרתי ownerId בזיכרון:', this.cachedOwnerId);
             }
 
             // טען הגדרות ל-gameState
@@ -185,19 +192,28 @@ const eventSettingsManager = {
 
             console.log('👤 משתמש מחובר:', currentUserId);
 
-            // ✅ טען נתוני אירוע מ-Firebase
-            console.log('📖 קורא נתוני אירוע מ-Firebase...');
-            const eventSnapshot = await firebase.database().ref(`events/${eventId}`).once('value');
+            // ✅ בדוק אם יש ownerId שמור בזיכרון (מטעינה קודמת)
+            let eventOwnerId = this.cachedOwnerId;
 
-            if (!eventSnapshot.exists()) {
-                console.warn('⚠️ האירוע לא קיים:', eventId);
-                return { isOwner: false, userLoggedIn: true };
+            if (eventOwnerId) {
+                console.log('🔑 משתמש ב-ownerId שמור בזיכרון:', eventOwnerId);
+            } else {
+                // אין בזיכרון - צריך לקרוא מ-Firebase
+                console.log('📖 קורא נתוני אירוע מ-Firebase...');
+                const eventSnapshot = await firebase.database().ref(`events/${eventId}`).once('value');
+
+                if (!eventSnapshot.exists()) {
+                    console.warn('⚠️ האירוע לא קיים:', eventId);
+                    return { isOwner: false, userLoggedIn: true };
+                }
+
+                const eventData = eventSnapshot.val();
+                eventOwnerId = eventData.ownerId;
+
+                // שמור בזיכרון לפעם הבאה
+                this.cachedOwnerId = eventOwnerId;
+                console.log('🔑 בעלים של האירוע (נקרא מ-Firebase):', eventOwnerId);
             }
-
-            const eventData = eventSnapshot.val();
-            const eventOwnerId = eventData.ownerId;
-
-            console.log('🔑 בעלים של האירוע:', eventOwnerId);
 
             // ✅ בדוק אם המשתמש הנוכחי הוא הבעלים
             if (currentUserId === eventOwnerId) {
