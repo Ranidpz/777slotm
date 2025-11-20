@@ -38,8 +38,19 @@ const eventSettingsManager = {
         try {
             console.log('☁️ טוען הגדרות אירוע מ-Firebase:', eventId);
 
-            // ✅ בדוק ש-Firebase נטען
-            if (typeof firebase === 'undefined' || !firebase.database) {
+            // ✅ בדוק ש-Firebase נטען (בדיקה בטוחה!)
+            let firebaseReady = false;
+
+            try {
+                firebaseReady = typeof firebase !== 'undefined' &&
+                               firebase.apps &&
+                               firebase.apps.length > 0 &&
+                               typeof firebase.database === 'function';
+            } catch (e) {
+                firebaseReady = false;
+            }
+
+            if (!firebaseReady) {
                 console.error('❌ Firebase לא נטען עדיין - מנסה לאתחל...');
 
                 // נסה לאתחל Firebase
@@ -51,7 +62,16 @@ const eventSettingsManager = {
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 // בדוק שוב
-                if (typeof firebase === 'undefined' || !firebase.database) {
+                try {
+                    firebaseReady = typeof firebase !== 'undefined' &&
+                                   firebase.apps &&
+                                   firebase.apps.length > 0 &&
+                                   typeof firebase.database === 'function';
+                } catch (e) {
+                    firebaseReady = false;
+                }
+
+                if (!firebaseReady) {
                     console.error('❌ Firebase לא נטען אחרי אתחול');
                     return;
                 }
@@ -596,8 +616,19 @@ const eventSettingsManager = {
                 return;
             }
 
-            // ✅ בדוק ש-Firebase נטען
-            if (typeof firebase === 'undefined' || !firebase.database) {
+            // ✅ בדוק ש-Firebase נטען (בדיקה בטוחה!)
+            let firebaseReady = false;
+
+            try {
+                firebaseReady = typeof firebase !== 'undefined' &&
+                               firebase.apps &&
+                               firebase.apps.length > 0 &&
+                               typeof firebase.database === 'function';
+            } catch (e) {
+                firebaseReady = false;
+            }
+
+            if (!firebaseReady) {
                 console.warn('⚠️ Firebase לא נטען - מדלג על שמירה ב-Session');
                 return;
             }
