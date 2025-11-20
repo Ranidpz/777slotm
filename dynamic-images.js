@@ -715,6 +715,33 @@ const dynamicImagesManager = {
             console.error('❌ שגיאה בטעינת פרסים מ-Firebase:', error);
             return false;
         }
+    },
+
+    // ✅ שמור ב-localStorage
+    saveToStorage() {
+        try {
+            const dataToSave = JSON.stringify(this.images);
+            localStorage.setItem('customImages', dataToSave);
+            console.log(`💾 ${this.images.length} תמונות נשמרו ב-localStorage`);
+        } catch (error) {
+            console.error('❌ שגיאה בשמירה ב-localStorage:', error);
+        }
+    },
+
+    // ✅ טען מ-localStorage
+    loadFromStorage() {
+        try {
+            const savedData = localStorage.getItem('customImages');
+            if (savedData) {
+                this.images = JSON.parse(savedData);
+                console.log(`📂 נטענו ${this.images.length} תמונות מ-localStorage`);
+            } else {
+                console.log('📭 אין תמונות שמורות ב-localStorage');
+            }
+        } catch (error) {
+            console.error('❌ שגיאה בטעינה מ-localStorage:', error);
+            this.images = [];
+        }
     }
 };
 
