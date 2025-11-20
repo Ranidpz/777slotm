@@ -127,14 +127,18 @@ const eventSettingsManager = {
             }
 
             // טען מלאי פרסים ל-localStorage
-            if (eventData.inventory) {
+            if (eventData.inventory && Array.isArray(eventData.inventory) && eventData.inventory.length > 0) {
                 localStorage.setItem('customImages', JSON.stringify(eventData.inventory));
-                console.log('✅ מלאי פרסים נטען:', eventData.inventory.length, 'פריטים');
+                console.log('✅ מלאי פרסים נטען מ-Firebase Event:', eventData.inventory.length, 'פריטים');
 
                 // עדכן את התמונות בממשק
                 if (window.dynamicImagesManager) {
-                    dynamicImagesManager.loadFromLocalStorage();
+                    dynamicImagesManager.loadFromStorage(); // ✅ תיקון שם הפונקציה!
+                    dynamicImagesManager.render(); // ✅ הצג את התמונות
+                    console.log('✅ תמונות עודכנו בממשק');
                 }
+            } else {
+                console.log('📭 אין מלאי פרסים ב-Firebase Event');
             }
 
             // שמור הגדרות ב-localStorage
