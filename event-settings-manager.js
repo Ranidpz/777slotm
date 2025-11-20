@@ -159,6 +159,22 @@ const eventSettingsManager = {
         try {
             console.log('🔍 בודק בעלות על האירוע:', eventId);
 
+            // ✅ בדוק ש-Firebase נטען (בדיקה בטוחה!)
+            let firebaseReady = false;
+            try {
+                firebaseReady = typeof firebase !== 'undefined' &&
+                               firebase.apps &&
+                               firebase.apps.length > 0 &&
+                               typeof firebase.database === 'function';
+            } catch (e) {
+                firebaseReady = false;
+            }
+
+            if (!firebaseReady) {
+                console.error('❌ Firebase לא נטען - לא ניתן לבדוק בעלות');
+                throw new Error('Firebase לא נטען');
+            }
+
             // ✅ בדוק אם המשתמש כבר מחובר
             const currentUserId = userAuthManager.getUserId();
 
@@ -170,6 +186,7 @@ const eventSettingsManager = {
             console.log('👤 משתמש מחובר:', currentUserId);
 
             // ✅ טען נתוני אירוע מ-Firebase
+            console.log('📖 קורא נתוני אירוע מ-Firebase...');
             const eventSnapshot = await firebase.database().ref(`events/${eventId}`).once('value');
 
             if (!eventSnapshot.exists()) {
@@ -191,8 +208,8 @@ const eventSettingsManager = {
                 return { isOwner: false, userLoggedIn: true };
             }
         } catch (error) {
-            console.error('❌ שגיאה בבדיקת בעלות:', error);
-            return { isOwner: false, userLoggedIn: false };
+            console.error('❌ שגיאה בבדיקת בעלות:', error.message || error);
+            throw error; // זרוק את השגיאה כדי שה-timeout יתפוס
         }
     },
 
@@ -317,8 +334,16 @@ const eventSettingsManager = {
                 );
                 console.log('✅ בדיקת בעלות הושלמה:', ownershipCheck);
             } catch (error) {
-                console.error('❌ שגיאה או timeout בבדיקת בעלות:', error);
-                alert('❌ שגיאה בחיבור ל-Firebase. בדוק את החיבור לאינטרנט ונסה שוב.');
+                console.error('❌ שגיאה או timeout בבדיקת בעלות:', error.message || error);
+
+                let errorMsg = 'שגיאה בחיבור ל-Firebase';
+                if (error.message && error.message.includes('timeout')) {
+                    errorMsg = 'בדיקת בעלות לקחה יותר מדי זמן';
+                } else if (error.message && error.message.includes('Firebase לא נטען')) {
+                    errorMsg = 'Firebase לא נטען. רענן את הדף ונסה שוב';
+                }
+
+                alert(`❌ ${errorMsg}\n\nבדוק את החיבור לאינטרנט ונסה שוב.`);
                 return false;
             }
 
