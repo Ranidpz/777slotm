@@ -843,7 +843,16 @@ const eventSettingsManager = {
         if (savedInventory) {
             try {
                 inventory = JSON.parse(savedInventory);
-                console.log(`📦 נמצאו ${inventory.length} פרסים במלאי`);
+                const inventorySizeKB = new Blob([savedInventory]).size / 1024;
+                console.log(`📦 נמצאו ${inventory.length} פרסים במלאי (${inventorySizeKB.toFixed(2)} KB)`);
+
+                // ⚠️ אם המלאי גדול מדי (>2MB), אל תשמור אותו ב-Event
+                // המלאי כבר נשמר ב-Session, ו-Event צריך להיות קל ומהיר
+                if (inventorySizeKB > 2000) { // יותר מ-2MB
+                    console.warn('⚠️ מלאי גדול מדי (>2MB) - לא שומר תמונות ב-Event');
+                    console.log('ℹ️ המלאי יישאר ב-Session בלבד, Event ישמר ללא תמונות');
+                    inventory = []; // שמור event ללא inventory
+                }
             } catch (e) {
                 console.warn('⚠️ לא ניתן לקרוא מלאי');
             }
@@ -876,13 +885,21 @@ const eventSettingsManager = {
         }
 
         console.log('💾 כותב עדכון ל-Firebase...');
-        await this.withTimeout(
-            eventRef.update(updateData),
-            10000,
-            'כתיבת עדכון אירוע'
-        );
-
-        console.log('✅ אירוע עודכן בהצלחה ב-Firebase');
+        try {
+            await this.withTimeout(
+                eventRef.update(updateData),
+                20000, // 20 שניות - זמן מספיק גם לחיבור איטי
+                'כתיבת עדכון אירוע'
+            );
+            console.log('✅ אירוע עודכן בהצלחה ב-Firebase');
+        } catch (updateError) {
+            console.error('❌ שגיאה מפורטת בכתיבה:', {
+                message: updateError.message,
+                code: updateError.code,
+                stack: updateError.stack
+            });
+            throw updateError; // זרוק מחדש כדי שה-catch החיצוני יטפל
+        }
     },
 
     // הצג מודאל גישה נדחתה
