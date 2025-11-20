@@ -14,8 +14,18 @@ const authManager = {
             initFirebase();
         }
 
+        // ✅ הוסף timeout של 10 שניות - אם Firebase לא נטען, הצג שגיאה
+        const loadingTimeout = setTimeout(() => {
+            console.warn('⚠️ טעינת Firebase לוקחת יותר מדי זמן');
+            this.hideLoadingSpinner();
+            this.showLoginScreen();
+        }, 10000); // 10 שניות
+
         // האזן לשינויי מצב התחברות
         firebase.auth().onAuthStateChanged(async (user) => {
+            // בטל timeout כי Firebase טעון
+            clearTimeout(loadingTimeout);
+
             if (user) {
                 console.log('✅ משתמש מחובר:', user.email);
                 await this.handleUserLogin(user);
@@ -113,26 +123,33 @@ const authManager = {
 
     // טיפול בהתחברות משתמש
     async handleUserLogin(user) {
-        this.currentUser = user;
+        try {
+            this.currentUser = user;
 
-        // קרא פרטי משתמש מ-Firebase
-        const userRef = firebase.database().ref(`users/${user.uid}`);
-        const snapshot = await userRef.once('value');
-        const userData = snapshot.val();
+            // קרא פרטי משתמש מ-Firebase
+            const userRef = firebase.database().ref(`users/${user.uid}`);
+            const snapshot = await userRef.once('value');
+            const userData = snapshot.val();
 
-        if (userData) {
-            this.userProfile = userData;
-            this.currentUser.role = userData.role;
-            this.currentUser.permissions = userData.permissions;
+            if (userData) {
+                this.userProfile = userData;
+                this.currentUser.role = userData.role;
+                this.currentUser.permissions = userData.permissions;
 
-            console.log(`👤 תפקיד: ${userData.role}`);
+                console.log(`👤 תפקיד: ${userData.role}`);
 
-            // הסתר spinner והצג דשבורד
+                // הסתר spinner והצג דשבורד
+                this.hideLoadingSpinner();
+                this.showDashboard();
+            } else {
+                console.error('❌ לא נמצא פרופיל משתמש');
+                this.hideLoadingSpinner();
+                await this.signOut();
+            }
+        } catch (error) {
+            console.error('❌ שגיאה בטעינת פרטי משתמש:', error);
             this.hideLoadingSpinner();
-            this.showDashboard();
-        } else {
-            console.error('❌ לא נמצא פרופיל משתמש');
-            await this.signOut();
+            this.showLoginScreen();
         }
     },
 
