@@ -11,10 +11,21 @@ const eventSettingsManager = {
         const eventIdFromUrl = urlParams.get('event');
 
         if (eventIdFromUrl) {
-            // ✅ יש eventId ב-URL - בדוק בעלות!
-            const isOwner = await this.checkOwnership(eventIdFromUrl);
+            // ✅ יש eventId ב-URL - הצג spinner ובדוק בעלות!
+            this.showLoadingSpinner();
 
-            if (isOwner) {
+            // המתן קצת כדי לוודא שהספינר מתרנדר
+            await new Promise(resolve => {
+                requestAnimationFrame(() => {
+                    setTimeout(resolve, 50);
+                });
+            });
+
+            const ownershipResult = await this.checkOwnership(eventIdFromUrl);
+
+            this.hideLoadingSpinner();
+
+            if (ownershipResult.isOwner) {
                 // ✅ המשתמש הוא הבעלים - טען את האירוע
                 this.currentEventId = eventIdFromUrl;
                 localStorage.setItem('currentEventId', eventIdFromUrl);
@@ -24,11 +35,18 @@ const eventSettingsManager = {
                 console.warn('⚠️ אין הרשאה לאירוע זה');
                 window.history.replaceState({}, '', window.location.pathname);
 
-                if (userAuthManager.isLoggedIn()) {
-                    alert('⚠️ אין לך הרשאה לצפות באירוע זה.\n\nמעביר אותך לדשבורד שלך...');
-                    window.location.href = 'dashboard.html';
+                if (ownershipResult.userLoggedIn) {
+                    this.showAccessDeniedModal(
+                        'אין לך הרשאה',
+                        'אין לך הרשאה לצפות באירוע זה.',
+                        'dashboard.html'
+                    );
                 } else {
-                    alert('⚠️ אירוע זה דורש התחברות.\n\nאנא התחבר כדי לגשת לאירוע.');
+                    this.showAccessDeniedModal(
+                        'נדרשת התחברות',
+                        'אירוע זה דורש התחברות. אנא התחבר כדי לגשת לאירוע.',
+                        'dashboard.html'
+                    );
                 }
                 return;
             }
@@ -54,31 +72,37 @@ const eventSettingsManager = {
 
             if (!eventSnapshot.exists()) {
                 console.warn('⚠️ האירוע לא קיים:', eventId);
-                return false;
+                return { isOwner: false, userLoggedIn: false };
             }
 
             const eventData = eventSnapshot.val();
             const eventOwnerId = eventData.ownerId;
 
-            // ✅ בדוק אם המשתמש מחובר
-            if (!userAuthManager.isLoggedIn()) {
+            // ✅ חכה למצב האימות לפני הבדיקה (עם timeout של 5 שניות)
+            console.log('⏳ ממתין למצב אימות...');
+            const user = await Promise.race([
+                userAuthManager.waitForAuthState(),
+                new Promise(resolve => setTimeout(() => resolve(null), 5000))
+            ]);
+
+            if (!user) {
                 console.log('⚠️ משתמש לא מחובר - לא יכול לגשת לאירוע');
-                return false;
+                return { isOwner: false, userLoggedIn: false };
             }
 
-            const currentUserId = userAuthManager.getUserId();
+            const currentUserId = user.uid;
 
             // ✅ בדוק אם המשתמש הנוכחי הוא הבעלים
             if (currentUserId === eventOwnerId) {
                 console.log('✅ משתמש הוא בעלים של האירוע');
-                return true;
+                return { isOwner: true, userLoggedIn: true };
             } else {
                 console.warn('⚠️ משתמש אינו בעלים של האירוע');
-                return false;
+                return { isOwner: false, userLoggedIn: true };
             }
         } catch (error) {
             console.error('❌ שגיאה בבדיקת בעלות:', error);
-            return false;
+            return { isOwner: false, userLoggedIn: false };
         }
     },
 
@@ -603,6 +627,89 @@ const eventSettingsManager = {
         await eventRef.update(updateData);
 
         console.log('✅ אירוע עודכן בהצלחה');
+    },
+
+    // הצג מודאל גישה נדחתה
+    showAccessDeniedModal(title, message, redirectUrl) {
+        // בדוק אם כבר יש מודל פתוח
+        if (document.getElementById('access-denied-modal')) {
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'access-denied-modal';
+        modal.className = 'auth-modal show';
+        modal.innerHTML = `
+            <div class="auth-modal-overlay"></div>
+            <div class="auth-modal-content">
+                <div class="auth-modal-header">
+                    <h2 style="color: #F59E0B;">⚠️ ${title}</h2>
+                </div>
+
+                <div class="auth-modal-body">
+                    <p style="font-size: 1.1em; margin-bottom: 24px; text-align: center; color: rgba(255,255,255,0.9);">
+                        ${message}
+                    </p>
+
+                    <button class="google-signin-btn" onclick="window.location.href='${redirectUrl}'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span>חזור לדשבורד</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // הוסף סגירה בלחיצה על overlay
+        const overlay = modal.querySelector('.auth-modal-overlay');
+        overlay.addEventListener('click', () => {
+            window.location.href = redirectUrl;
+        });
+    },
+
+    // הצג spinner טעינה
+    showLoadingSpinner() {
+        // בדוק אם כבר יש spinner
+        if (document.getElementById('loading-spinner')) {
+            return;
+        }
+
+        const spinner = document.createElement('div');
+        spinner.id = 'loading-spinner';
+        spinner.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+        spinner.innerHTML = `
+            <div style="text-align: center;">
+                <div style="width: 50px; height: 50px; border: 5px solid rgba(255,215,0,0.2); border-top: 5px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+                <p style="color: #FFD700; font-size: 18px; font-weight: 500;">טוען אירוע...</p>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
+
+        document.body.appendChild(spinner);
+    },
+
+    // הסתר spinner טעינה
+    hideLoadingSpinner() {
+        const spinner = document.getElementById('loading-spinner');
+        if (spinner) {
+            spinner.remove();
+        }
     }
 };
 

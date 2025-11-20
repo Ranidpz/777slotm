@@ -41,6 +41,29 @@ const userAuthManager = {
         return this.currentUser !== null;
     },
 
+    // המתן למצב אימות (Promise-based)
+    waitForAuthState() {
+        return new Promise((resolve) => {
+            // אם כבר יש משתמש - החזר מיד
+            if (this.currentUser) {
+                resolve(this.currentUser);
+                return;
+            }
+
+            // אם Firebase לא טעון - החזר null
+            if (typeof firebase === 'undefined' || !firebase.auth) {
+                resolve(null);
+                return;
+            }
+
+            // האזן לשינוי מצב אימות (רק פעם אחת)
+            const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                unsubscribe(); // הסר מאזין אחרי שמתקבל התשובה
+                resolve(user);
+            });
+        });
+    },
+
     // קבל UID של המשתמש
     getUserId() {
         return this.currentUser ? this.currentUser.uid : null;

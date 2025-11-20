@@ -835,25 +835,37 @@ function showSimpleWinScreen() {
             console.log(`🏆 מציג שם פרס במסך פשוט: ${prizeDetails.prizeName}`);
         }
 
-        // הצג תמונת פרס
+        // הצג תמונת פרס או אימוג'י
         const symbolDisplay = prizeDetails.symbolDisplay;
         const isValidImage = symbolDisplay &&
                             (symbolDisplay.startsWith('http') ||
                              symbolDisplay.startsWith('data:image') ||
                              symbolDisplay.startsWith('blob:'));
 
-        if (simplePrizeImage && simplePrizeImageContainer && isValidImage) {
-            simplePrizeImage.src = symbolDisplay;
-            simplePrizeImageContainer.style.display = 'block';
+        // בדוק אם זה אימוג'י (לא URL)
+        const isEmoji = symbolDisplay && !isValidImage && symbolDisplay.length <= 4;
 
-            // הגדר את רקע התמונה לצבע הרקע שנבחר במערכת
-            const backgroundColor = gameState.backgroundColor || '#242424';
-            simplePrizeImageContainer.style.backgroundColor = backgroundColor;
+        if (simplePrizeImageContainer) {
+            if (isValidImage && simplePrizeImage) {
+                // תמונה רגילה
+                simplePrizeImage.src = symbolDisplay;
+                simplePrizeImage.style.display = 'block';
+                simplePrizeImageContainer.style.display = 'block';
 
-            console.log('🖼️ תמונת פרס הוצגה במסך פשוט:', symbolDisplay);
-            console.log('🎨 רקע תמונת פרס הוגדר ל:', backgroundColor);
-        } else if (simplePrizeImageContainer) {
-            simplePrizeImageContainer.style.display = 'none';
+                // הגדר את רקע התמונה לצבע הרקע שנבחר במערכת
+                const backgroundColor = gameState.backgroundColor || '#242424';
+                simplePrizeImageContainer.style.backgroundColor = backgroundColor;
+
+                console.log('🖼️ תמונת פרס הוצגה במסך פשוט:', symbolDisplay);
+            } else if (isEmoji) {
+                // אימוג'י - הצג במקום התמונה
+                simplePrizeImageContainer.innerHTML = `<span style="font-size: 80px; display: block; text-align: center;">${symbolDisplay}</span>`;
+                simplePrizeImageContainer.style.display = 'block';
+                simplePrizeImageContainer.style.backgroundColor = 'transparent';
+                console.log('🎯 אימוג\'י פרס הוצג במסך פשוט:', symbolDisplay);
+            } else {
+                simplePrizeImageContainer.style.display = 'none';
+            }
         }
     }
 
@@ -2476,30 +2488,10 @@ function setupDashboardButton() {
                 e.stopPropagation();
                 e.stopImmediatePropagation();
 
-                console.log('🔄 מנסה לפתוח dashboard.html בטאב חדש...');
+                console.log('🔄 מנווט לדשבורד באותו טאב...');
 
-                // פתח בטאב חדש
-                const newWindow = window.open('dashboard.html', '_blank');
-
-                // בדוק אם החלון נפתח בהצלחה
-                setTimeout(() => {
-                    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                        console.error('❌ לא ניתן לפתוח טאב חדש - חסום על ידי popup blocker');
-
-                        // הצע אופציה חלופית
-                        const useRedirect = confirm('⚠️ הדפדפן חסם פתיחה בטאב חדש.\n\nהאם לנווט לדשבורד בחלון זה?\n(לחץ Cancel כדי להישאר בעמוד הנוכחי)');
-
-                        if (useRedirect) {
-                            console.log('🔄 מנווט לדשבורד בחלון הנוכחי...');
-                            window.location.href = 'dashboard.html';
-                        } else {
-                            console.log('ℹ️ המשתמש בחר להישאר בעמוד הנוכחי');
-                            alert('💡 טיפ: אפשר פתיחת חלונות קופצים (pop-ups) לאתר זה בהגדרות הדפדפן כדי לפתוח בטאב חדש.');
-                        }
-                    } else {
-                        console.log('✅ דשבורד נפתח בהצלחה בטאב חדש');
-                    }
-                }, 100); // המתן 100ms כדי לתת לדפדפן לבדוק
+                // פתח באותו טאב
+                window.location.href = 'dashboard.html';
             };
 
             // הוסף event listener

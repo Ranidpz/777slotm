@@ -589,8 +589,8 @@ const eventsManager = {
         localStorage.setItem('currentEventId', eventId);
         localStorage.setItem('currentSessionId', event.sessionId);
 
-        // פתח את המשחק
-        window.open(`index.html?event=${eventId}`, '_blank');
+        // פתח את המשחק - באותו טאב
+        window.location.href = `index.html?event=${eventId}`;
     },
 
     // הצג לוח זוכים
