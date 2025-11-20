@@ -144,9 +144,10 @@ const eventSettingsManager = {
             // שמור הגדרות ב-localStorage
             await this.saveToLocalStorage();
 
-            // עדכן את הממשק עם ההגדרות החדשות
-            if (typeof applyDynamicImages === 'function') {
-                applyDynamicImages();
+            // עדכן את הממשק עם ההגדרות החדשות (אתחל מחדש את הגלגלים עם התמונות החדשות)
+            if (typeof initReels === 'function') {
+                initReels();
+                console.log('🔄 גלגלים אותחלו מחדש עם התמונות מ-Firebase');
             }
 
             // עדכן רקע

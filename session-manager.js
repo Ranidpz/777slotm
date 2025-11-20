@@ -60,9 +60,10 @@ class SessionManager {
         const loaded = await dynamicImagesManager.loadFromFirebase(this.sessionId);
         if (loaded) {
           console.log('☁️ פרסים נטענו מ-Firebase בהצלחה');
-          // עדכן את הגלגלים אם צריך
-          if (typeof applyDynamicImages === 'function') {
-            applyDynamicImages();
+          // עדכן את הגלגלים עם התמונות החדשות
+          if (typeof initReels === 'function') {
+            initReels();
+            console.log('🔄 גלגלים אותחלו מחדש עם פרסים מ-Firebase');
           }
         }
       }
