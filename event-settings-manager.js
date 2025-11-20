@@ -114,7 +114,22 @@ const eventSettingsManager = {
             // שמור הגדרות ב-localStorage
             await this.saveToLocalStorage();
 
-            console.log('✅ כל הגדרות האירוע נטענו מ-Firebase');
+            // עדכן את הממשק עם ההגדרות החדשות
+            if (typeof applyDynamicImages === 'function') {
+                applyDynamicImages();
+            }
+
+            // עדכן רקע
+            if (gameState.backgroundColor && document.body) {
+                document.body.style.backgroundColor = gameState.backgroundColor;
+            }
+
+            // עדכן פס נגלל
+            if (typeof updateScrollingBanner === 'function') {
+                updateScrollingBanner();
+            }
+
+            console.log('✅ כל הגדרות האירוע נטענו מ-Firebase ועודכנו בממשק');
         } catch (error) {
             console.error('❌ שגיאה בטעינת הגדרות אירוע:', error);
         }
