@@ -2517,14 +2517,15 @@ function setupDashboardButton() {
 
 // אתחול - חייב לחכות ל-eventSettingsManager לפני טעינת הגדרות
 (async function initializeGame() {
-    // אתחל event settings manager (בודק URL ומנקה localStorage אם צריך)
+    // אתחל event settings manager (בודק URL, טוען מ-Firebase, ושומר ב-localStorage)
     if (window.eventSettingsManager) {
         await eventSettingsManager.init();
-        console.log('✅ Event Settings Manager אותחל');
+        console.log('✅ Event Settings Manager אותחל - הגדרות נטענו מ-Firebase');
+    } else {
+        // אם אין event settings manager - טען מ-localStorage (fallback)
+        loadSettings();
     }
 
-    // עכשיו טען הגדרות (אחרי ש-localStorage נוקה אם אין event)
-    loadSettings();
     initSounds();
 
     // אתחל מערכת תמונות דינמית חדשה (אחרי ניקוי localStorage!)
@@ -2539,7 +2540,11 @@ function setupDashboardButton() {
     // המשך אתחולים
     initColorPicker();
     initReels();
-    loadBackgroundColor();
+    // ✅ אל תטען רקע מ-localStorage - eventSettingsManager.init() כבר עשה את זה מ-Firebase!
+    if (!window.eventSettingsManager) {
+        // רק אם אין event manager - טען מ-localStorage (fallback)
+        loadBackgroundColor();
+    }
     manageTutorial();
     setupCustomSoundUpload();
     setupSimpleWinScreenToggle();

@@ -121,8 +121,10 @@ const eventSettingsManager = {
 
                 console.log('✅ הגדרות אירוע נטענו ל-gameState:', {
                     winFrequency: gameState.winFrequency,
+                    randomBonusPercent: gameState.randomBonusPercent,
                     backgroundColor: gameState.backgroundColor,
-                    scrollingBannerText: gameState.scrollingBannerText
+                    scrollingBannerText: gameState.scrollingBannerText,
+                    simpleWinScreen: gameState.simpleWinScreen
                 });
             }
 
@@ -141,8 +143,10 @@ const eventSettingsManager = {
                 console.log('📭 אין מלאי פרסים ב-Firebase Event');
             }
 
-            // שמור הגדרות ב-localStorage
+            // שמור הגדרות ב-localStorage (כדי שיישמרו לפעמים הבאות)
+            console.log('📝 מתחיל שמירה ב-localStorage...');
             await this.saveToLocalStorage();
+            console.log('✅ localStorage עודכן עם הגדרות מ-Firebase');
 
             // עדכן את הממשק עם ההגדרות החדשות (אתחל מחדש את הגלגלים עם התמונות החדשות)
             if (typeof initReels === 'function') {
