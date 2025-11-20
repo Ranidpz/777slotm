@@ -831,34 +831,11 @@ const eventSettingsManager = {
     async updateEvent(userId) {
         console.log('🔄 מעדכן אירוע קיים:', this.currentEventId);
 
-        // ✅ בדוק אם יש session חדש שצריך לעדכן
+        // ✅ קבל sessionId נוכחי
         const currentSessionId = sessionManager.sessionId || sessionStorage.getItem('slotMachineSessionId');
 
-        // טען את האירוע הנוכחי כדי לבדוק את ה-sessionId שלו (עם timeout)
-        console.log('📖 קורא נתוני אירוע נוכחיים...');
-        const eventSnapshot = await this.withTimeout(
-            firebase.database().ref(`events/${this.currentEventId}`).once('value'),
-            8000,
-            'קריאת נתוני אירוע'
-        );
-        const eventData = eventSnapshot.val();
-        const oldSessionId = eventData?.sessionId;
-
-        // אם יש session חדש והוא שונה מהישן - סגור את הישן (עם timeout)
-        if (currentSessionId && oldSessionId && currentSessionId !== oldSessionId) {
-            console.log('🔄 מזהה session חדש - סוגר את הישן');
-            try {
-                await this.withTimeout(
-                    this.closeOldEventSession(this.currentEventId),
-                    5000,
-                    'סגירת session ישן'
-                );
-            } catch (closeError) {
-                console.warn('⚠️ לא הצלחתי לסגור session ישן:', closeError.message);
-                console.log('⏩ ממשיך בכל מקרה');
-                // ממשיכים - לא קריטי
-            }
-        }
+        // ⚠️ דילגנו על בדיקת sessionId ישן - לא קריטי ולוקח יותר מדי זמן
+        console.log('⏩ מדלג על בדיקת session ישן - עובר ישירות לעדכון');
 
         // קרא מלאי נוכחי
         let inventory = [];
