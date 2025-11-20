@@ -216,16 +216,21 @@ class SessionManager {
     if (this.currentSession.sessionActive === false) {
       console.warn('🚨 Session נסגר מרחוק! מעביר למשחק דיפולטי...');
 
+      // קבל את eventId הנוכחי
+      const currentEventId = localStorage.getItem('currentEventId');
+
       // הצג הודעה למשתמש
       alert('⚠️ Session זה נסגר מרחוק.\n\nמעביר אותך למשחק...');
 
-      // נקה את ה-URL ונקה localStorage
-      window.history.replaceState({}, '', window.location.pathname);
-      localStorage.removeItem('currentEventId');
-
-      // ✅ במקום reload - פשוט נקה את ה-URL ונשאר בדף
-      // זה ימנע יצירת session חדש כי אין eventId ב-URL
-      window.location.href = window.location.pathname;
+      // ✅ אל תמחק את currentEventId! המשתמש רוצה לחזור לאירוע שלו!
+      // נקה רק את ה-session מה-URL
+      if (currentEventId) {
+        // ✅ שמור את eventId ב-URL כדי שהאירוע יישאר
+        window.location.href = `${window.location.pathname}?event=${currentEventId}`;
+      } else {
+        // אין event - חזור לדף הבית
+        window.location.href = window.location.pathname;
+      }
       return;
     }
 
