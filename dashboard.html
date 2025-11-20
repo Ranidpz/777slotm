@@ -25,8 +25,16 @@
     <script src="firebase-config.js"></script>
 </head>
 <body>
+    <!-- Loading Spinner -->
+    <div id="auth-loading-spinner" class="auth-loading-container">
+        <div class="auth-loading-content">
+            <div class="spinner"></div>
+            <p class="loading-text">טוען מערכת...</p>
+        </div>
+    </div>
+
     <!-- Login Screen -->
-    <div id="login-screen" class="login-container">
+    <div id="login-screen" class="login-container hidden">
         <div class="login-card">
             <div class="login-header">
                 <h1>🎰 מערכת ניהול אירועים 777</h1>

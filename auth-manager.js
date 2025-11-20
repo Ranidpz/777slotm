@@ -127,7 +127,8 @@ const authManager = {
 
             console.log(`👤 תפקיד: ${userData.role}`);
 
-            // הצג דשבורד
+            // הסתר spinner והצג דשבורד
+            this.hideLoadingSpinner();
             this.showDashboard();
         } else {
             console.error('❌ לא נמצא פרופיל משתמש');
@@ -139,7 +140,18 @@ const authManager = {
     handleUserLogout() {
         this.currentUser = null;
         this.userProfile = null;
+
+        // הסתר spinner והצג מסך התחברות
+        this.hideLoadingSpinner();
         this.showLoginScreen();
+    },
+
+    // הסתר spinner טעינה
+    hideLoadingSpinner() {
+        const spinner = document.getElementById('auth-loading-spinner');
+        if (spinner) {
+            spinner.classList.add('hidden');
+        }
     },
 
     // הצג מסך התחברות
