@@ -30,6 +30,9 @@ const eventSettingsManager = {
                 this.currentEventId = eventIdFromUrl;
                 localStorage.setItem('currentEventId', eventIdFromUrl);
                 console.log('✅ אירוע נטען - המשתמש הוא הבעלים:', eventIdFromUrl);
+
+                // ✅ טען הגדרות מה-Firebase לפני יצירת session חדש
+                await this.loadEventSettingsFromFirebase(eventIdFromUrl);
             } else {
                 // ❌ המשתמש לא הבעלים - נקה URL והעבר לדשבורד
                 console.warn('⚠️ אין הרשאה לאירוע זה');
@@ -62,6 +65,59 @@ const eventSettingsManager = {
         }
 
         console.log('🎯 Event Settings Manager initialized. Current Event ID:', this.currentEventId || 'None (Template Mode)');
+    },
+
+    // טען הגדרות אירוע מ-Firebase
+    async loadEventSettingsFromFirebase(eventId) {
+        try {
+            console.log('☁️ טוען הגדרות אירוע מ-Firebase:', eventId);
+
+            // טען את האירוע מ-Firebase
+            const eventSnapshot = await firebase.database().ref(`events/${eventId}`).once('value');
+            const eventData = eventSnapshot.val();
+
+            if (!eventData) {
+                console.warn('⚠️ אין נתוני אירוע ב-Firebase');
+                return;
+            }
+
+            // טען הגדרות ל-gameState
+            if (eventData.settings && typeof window.gameState !== 'undefined') {
+                const settings = eventData.settings;
+
+                if (settings.winFrequency !== undefined) gameState.winFrequency = settings.winFrequency;
+                if (settings.randomBonusPercent !== undefined) gameState.randomBonusPercent = settings.randomBonusPercent;
+                if (settings.soundEnabled !== undefined) gameState.soundEnabled = settings.soundEnabled;
+                if (settings.gameMode !== undefined) gameState.mode = settings.gameMode;
+                if (settings.backgroundColor) gameState.backgroundColor = settings.backgroundColor;
+                if (settings.whatsappNumber !== undefined) gameState.whatsappNumber = settings.whatsappNumber;
+                if (settings.simpleWinScreen !== undefined) gameState.simpleWinScreen = settings.simpleWinScreen;
+                if (settings.qrCustomText !== undefined) gameState.qrCustomText = settings.qrCustomText;
+                if (settings.simpleWinText !== undefined) gameState.simpleWinText = settings.simpleWinText;
+                if (settings.scrollingBannerText !== undefined) gameState.scrollingBannerText = settings.scrollingBannerText;
+                if (settings.scrollingBannerFontSize) gameState.scrollingBannerFontSize = settings.scrollingBannerFontSize;
+
+                console.log('✅ הגדרות אירוע נטענו ל-gameState');
+            }
+
+            // טען מלאי פרסים ל-localStorage
+            if (eventData.inventory) {
+                localStorage.setItem('customImages', JSON.stringify(eventData.inventory));
+                console.log('✅ מלאי פרסים נטען:', eventData.inventory.length, 'פריטים');
+
+                // עדכן את התמונות בממשק
+                if (window.dynamicImagesManager) {
+                    dynamicImagesManager.loadFromLocalStorage();
+                }
+            }
+
+            // שמור הגדרות ב-localStorage
+            await this.saveToLocalStorage();
+
+            console.log('✅ כל הגדרות האירוע נטענו מ-Firebase');
+        } catch (error) {
+            console.error('❌ שגיאה בטעינת הגדרות אירוע:', error);
+        }
     },
 
     // בדוק אם המשתמש הנוכחי הוא הבעלים של האירוע
