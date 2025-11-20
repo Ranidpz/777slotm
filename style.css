@@ -2663,6 +2663,8 @@ input:checked + .toggle-slider:before {
     width: 100%;
     padding: 30px;
     border-radius: 25px;
+    display: inline-block; /* Ensure background is visible */
+    box-sizing: border-box;
     /* Background will be set dynamically via JavaScript */
 }
 
@@ -2670,8 +2672,9 @@ input:checked + .toggle-slider:before {
     width: 100%;
     height: auto;
     border-radius: 20px;
-    box-shadow: 0 0 60px rgba(255, 215, 0, 0.7);
-    border: 4px solid #ffd700;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: block;
+    /* Removed heavy gold border to let background color show through */
 }
 
 /* Text column (left side) */
