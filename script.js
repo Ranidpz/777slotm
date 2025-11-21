@@ -31,6 +31,9 @@ const gameState = {
     simpleWinText: 'Please collect your prize at the counter' // טקסט במסך זכייה פשוט
 };
 
+// ✅ ייצא gameState לחלון גלובלי כדי ש-event-settings-manager יוכל לגשת אליו
+window.gameState = gameState;
+
 // אלמנטים
 const reels = [
     document.getElementById('reel1'),
