@@ -156,9 +156,10 @@ const dynamicImagesManager = {
         div.setAttribute('data-image-id', image.id);
 
         const hasImage = image.imageData !== null;
-        const inventoryValue = image.inventory === null ? '' : image.inventory;
-        const inventoryDisplay = image.inventory === null ? '∞' : image.inventory;
-        const isUnlimited = image.inventory === null;
+        // ✅ תיקון: בדוק גם undefined וגם null
+        const inventoryValue = (image.inventory == null) ? '' : image.inventory;
+        const inventoryDisplay = (image.inventory == null) ? '∞' : image.inventory;
+        const isUnlimited = (image.inventory == null);
         const distributedCount = image.distributedCount || 0; // ✅ NEW: Track total distributed
 
         div.innerHTML = `
@@ -578,6 +579,14 @@ const dynamicImagesManager = {
                     if (img.distributedCount === undefined) {
                         img.distributedCount = 0; // ✅ NEW: Initialize for old data
                     }
+                    // ✅ תקן inventory אם הוא undefined - הפוך לבלתי מוגבל (null)
+                    if (img.inventory === undefined) {
+                        img.inventory = null; // ברירת מחדל: בלתי מוגבל
+                        console.log(`🔧 אותחל inventory לבלתי מוגבל (∞) עבור ${img.prizeName || img.label}`);
+                    }
+                    if (img.initialInventory === undefined) {
+                        img.initialInventory = null; // ברירת מחדל: בלתי מוגבל
+                    }
                     // ✅ תקן prizeName אם הוא חסר או ריק
                     if (!img.prizeName || img.prizeName === '') {
                         img.prizeName = img.label || `פרס ${index + 1}`;
@@ -734,6 +743,18 @@ const dynamicImagesManager = {
             const savedData = localStorage.getItem('customImages');
             if (savedData) {
                 this.images = JSON.parse(savedData);
+                // ✅ תקן inventory אם הוא undefined - הפוך לבלתי מוגבל (null)
+                this.images.forEach((img, index) => {
+                    if (img.inventory === undefined) {
+                        img.inventory = null; // ברירת מחדל: בלתי מוגבל
+                    }
+                    if (img.initialInventory === undefined) {
+                        img.initialInventory = null;
+                    }
+                    if (img.distributedCount === undefined) {
+                        img.distributedCount = 0;
+                    }
+                });
                 console.log(`📂 נטענו ${this.images.length} תמונות מ-localStorage`);
             } else {
                 console.log('📭 אין תמונות שמורות ב-localStorage');
