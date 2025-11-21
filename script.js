@@ -1226,9 +1226,18 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         console.log('✅ קיצור מקלדת ללוח זוכים זוהה!');
 
-        // קבל sessionId מהמנהל
+        // ✅ קבל sessionId ו-eventId
         if (window.sessionManager && sessionManager.sessionId) {
-            const scoreboardURL = `scoreboard.html?session=${sessionManager.sessionId}`;
+            const params = [`session=${sessionManager.sessionId}`];
+
+            // ✅ הוסף eventId אם קיים
+            const currentEventId = window.eventSettingsManager?.currentEventId ||
+                                   localStorage.getItem('currentEventId');
+            if (currentEventId) {
+                params.push(`event=${currentEventId}`);
+            }
+
+            const scoreboardURL = `scoreboard.html?${params.join('&')}`;
             console.log('🔗 Navigating to:', scoreboardURL);
             window.location.href = scoreboardURL;
         } else {
@@ -1324,9 +1333,18 @@ let tempSettings = {
 
 // לוח זוכים
 document.getElementById('scoreboard-btn').addEventListener('click', () => {
-    // פתח את לוח הזוכים עם ה-sessionId הנוכחי
+    // ✅ פתח את לוח הזוכים עם sessionId ו-eventId
     if (window.sessionManager && sessionManager.sessionId) {
-        window.open(`scoreboard.html?session=${sessionManager.sessionId}`, '_blank');
+        const params = [`session=${sessionManager.sessionId}`];
+
+        // ✅ הוסף eventId אם קיים
+        const currentEventId = window.eventSettingsManager?.currentEventId ||
+                               localStorage.getItem('currentEventId');
+        if (currentEventId) {
+            params.push(`event=${currentEventId}`);
+        }
+
+        window.open(`scoreboard.html?${params.join('&')}`, '_blank');
     } else {
         window.open('scoreboard.html', '_blank');
     }

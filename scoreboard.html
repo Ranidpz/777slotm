@@ -1127,12 +1127,26 @@
                 e.preventDefault();
                 console.log('🎰 חוזר למסך משחק מלוח הזוכים');
 
-                // Get sessionId to preserve it in URL
-                const currentSessionId = getSessionId();
+                // ✅ Get both sessionId and eventId to preserve them in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentSessionId = urlParams.get('session');
+                const currentEventId = urlParams.get('event');
+
+                // Build URL with all relevant parameters
+                const params = [];
                 if (currentSessionId) {
-                    window.location.href = `index.html?session=${currentSessionId}`;
+                    params.push(`session=${currentSessionId}`);
+                }
+                if (currentEventId) {
+                    params.push(`event=${currentEventId}`);
+                }
+
+                if (params.length > 0) {
+                    window.location.href = `index.html?${params.join('&')}`;
+                    console.log(`🔙 חוזר עם: ${params.join('&')}`);
                 } else {
                     window.location.href = 'index.html';
+                    console.log('🔙 חוזר למשחק דיפולטי');
                 }
             }
         });
