@@ -2540,8 +2540,13 @@ function setupDashboardButton() {
     // המשך אתחולים
     initColorPicker();
     initReels();
-    // ✅ אל תטען רקע מ-localStorage - eventSettingsManager.init() כבר עשה את זה מ-Firebase!
-    if (!window.eventSettingsManager) {
+
+    // ✅ החל הגדרות מ-Firebase אחרי יצירת הגלגלים
+    if (window.eventSettingsManager && gameState.backgroundColor) {
+        applyBackgroundColor(gameState.backgroundColor);
+        updateColorPicker(gameState.backgroundColor);
+        console.log('🎨 צבע רקע הוחל מ-Firebase:', gameState.backgroundColor);
+    } else if (!window.eventSettingsManager) {
         // רק אם אין event manager - טען מ-localStorage (fallback)
         loadBackgroundColor();
     }
