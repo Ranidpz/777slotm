@@ -2539,16 +2539,16 @@ function setupDashboardButton() {
 
     // המשך אתחולים
     initColorPicker();
-    initReels();
 
-    // ✅ החל הגדרות מ-Firebase אחרי יצירת הגלגלים
-    if (window.eventSettingsManager && gameState.backgroundColor) {
-        applyBackgroundColor(gameState.backgroundColor);
-        updateColorPicker(gameState.backgroundColor);
-        console.log('🎨 צבע רקע הוחל מ-Firebase:', gameState.backgroundColor);
-    } else if (!window.eventSettingsManager) {
-        // רק אם אין event manager - טען מ-localStorage (fallback)
-        loadBackgroundColor();
+    // ✅ אל תקרא ל-initReels() אם יש event manager עם אירוע - הוא כבר קרא לזה!
+    if (!window.eventSettingsManager || !window.eventSettingsManager.currentEventId) {
+        // אין אירוע - אתחל גלגלים רגילים
+        initReels();
+        loadBackgroundColor(); // טען מ-localStorage (fallback)
+        console.log('🎮 מצב standalone - אתחול רגיל');
+    } else {
+        // יש אירוע - initReels() כבר נקרא מתוך loadEventSettingsFromFirebase()
+        console.log('🎪 מצב אירוע - דילוג על initReels() (כבר אותחל מ-Firebase)');
     }
     manageTutorial();
     setupCustomSoundUpload();

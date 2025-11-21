@@ -160,10 +160,16 @@ const eventSettingsManager = {
                 console.log('🔄 גלגלים אותחלו מחדש עם התמונות מ-Firebase');
             }
 
-            // ✅ עדכן רקע - רק אחרי שהגלגלים נוצרו!
-            // applyBackgroundColor() יקרא מ-script.js אחרי initReels()
-            // כאן אנחנו רק שומרים ב-gameState ו-localStorage
-            console.log('💾 צבע רקע נשמר ל-gameState:', gameState.backgroundColor);
+            // ✅ החל צבע רקע ישירות כאן - אחרי שהגלגלים נוצרו!
+            if (gameState.backgroundColor && typeof applyBackgroundColor === 'function') {
+                applyBackgroundColor(gameState.backgroundColor);
+                console.log('🎨 צבע רקע הוחל:', gameState.backgroundColor);
+            }
+
+            // עדכן color picker
+            if (typeof updateColorPicker === 'function') {
+                updateColorPicker(gameState.backgroundColor);
+            }
 
             // עדכן פס נגלל
             if (typeof updateScrollingBanner === 'function') {
