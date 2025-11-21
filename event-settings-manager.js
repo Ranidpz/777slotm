@@ -113,8 +113,14 @@ const eventSettingsManager = {
                     inventoryCount: eventData.inventory ? eventData.inventory.length : 0
                 });
 
-                if (settings.winFrequency !== undefined) gameState.winFrequency = settings.winFrequency;
-                if (settings.randomBonusPercent !== undefined) gameState.randomBonusPercent = settings.randomBonusPercent;
+                if (settings.winFrequency !== undefined) {
+                    console.log('🔥 מעדכן winFrequency מ-Firebase:', settings.winFrequency, '(היה:', gameState.winFrequency, ')');
+                    gameState.winFrequency = settings.winFrequency;
+                }
+                if (settings.randomBonusPercent !== undefined) {
+                    console.log('🔥 מעדכן randomBonusPercent מ-Firebase:', settings.randomBonusPercent, '(היה:', gameState.randomBonusPercent, ')');
+                    gameState.randomBonusPercent = settings.randomBonusPercent;
+                }
                 if (settings.soundEnabled !== undefined) gameState.soundEnabled = settings.soundEnabled;
                 if (settings.gameMode !== undefined) gameState.mode = settings.gameMode;
                 if (settings.backgroundColor) gameState.backgroundColor = settings.backgroundColor;
@@ -151,13 +157,17 @@ const eventSettingsManager = {
 
             // שמור הגדרות ב-localStorage (כדי שיישמרו לפעמים הבאות)
             console.log('📝 מתחיל שמירה ב-localStorage...');
+            console.log('🔍 לפני שמירה - gameState.winFrequency:', gameState.winFrequency, 'randomBonusPercent:', gameState.randomBonusPercent);
             await this.saveToLocalStorage();
             console.log('✅ localStorage עודכן עם הגדרות מ-Firebase');
+            console.log('🔍 אחרי שמירה - gameState.winFrequency:', gameState.winFrequency, 'randomBonusPercent:', gameState.randomBonusPercent);
 
             // עדכן את הממשק עם ההגדרות החדשות (אתחל מחדש את הגלגלים עם התמונות החדשות)
             if (typeof initReels === 'function') {
+                console.log('🔍 לפני initReels() - gameState.winFrequency:', gameState.winFrequency, 'randomBonusPercent:', gameState.randomBonusPercent);
                 initReels();
                 console.log('🔄 גלגלים אותחלו מחדש עם התמונות מ-Firebase');
+                console.log('🔍 אחרי initReels() - gameState.winFrequency:', gameState.winFrequency, 'randomBonusPercent:', gameState.randomBonusPercent);
             }
 
             // ✅ החל צבע רקע ישירות כאן - אחרי שהגלגלים נוצרו!
@@ -176,6 +186,9 @@ const eventSettingsManager = {
                 updateScrollingBanner();
                 console.log('📜 פס גלילה עודכן');
             }
+
+            // ✅ עדכן את כל הסליידרים והאלמנטים בממשק המשתמש
+            this.updateUIElements();
 
             console.log('✅ כל הגדרות האירוע נטענו מ-Firebase ועודכנו בממשק');
 
@@ -1014,6 +1027,72 @@ const eventSettingsManager = {
         if (spinner) {
             spinner.remove();
         }
+    },
+
+    // ✅ עדכן את כל הסליידרים והאלמנטים בממשק המשתמש
+    updateUIElements() {
+        console.log('🎨 מעדכן אלמנטים בממשק המשתמש...');
+
+        // עדכן סליידר תדירות זכיות
+        const winFreqSlider = document.getElementById('win-frequency');
+        const winFreqValue = document.getElementById('win-frequency-value');
+        const winFreqText = document.getElementById('win-frequency-text');
+        const settingNote = document.querySelector('.setting-note');
+
+        if (winFreqSlider && gameState.winFrequency !== undefined) {
+            winFreqSlider.value = gameState.winFrequency;
+            if (winFreqValue) winFreqValue.textContent = gameState.winFrequency;
+
+            // עדכן טקסט בהתאם לערך
+            if (gameState.winFrequency === 0) {
+                if (winFreqText) winFreqText.textContent = 'רנדומלי לגמרי';
+                if (settingNote) {
+                    settingNote.innerHTML = 'ערך נוכחי: רנדומלי לגמרי (ללא זכיות מובטחות)';
+                    settingNote.style.color = '';
+                }
+            } else if (gameState.winFrequency === 1) {
+                if (winFreqText) winFreqText.textContent = gameState.winFrequency;
+                if (settingNote) {
+                    settingNote.innerHTML = '<span style="color: #44ff44; font-weight: bold;">⭐ זכייה מובטחת בכל סיבוב!</span>';
+                    settingNote.style.color = '#44ff44';
+                }
+            } else {
+                if (winFreqText) winFreqText.textContent = gameState.winFrequency;
+                if (settingNote) {
+                    settingNote.innerHTML = `ערך נוכחי: זכייה כל ${gameState.winFrequency} נסיונות`;
+                    settingNote.style.color = '';
+                }
+            }
+            console.log('✅ עדכנתי סליידר תדירות זכיות:', gameState.winFrequency);
+        }
+
+        // עדכן סליידר בונוס רנדומלי
+        const randomBonusSlider = document.getElementById('random-bonus-percent');
+        const randomBonusValue = document.getElementById('random-bonus-value');
+        const randomBonusText = document.getElementById('random-bonus-text');
+
+        if (randomBonusSlider && gameState.randomBonusPercent !== undefined) {
+            randomBonusSlider.value = gameState.randomBonusPercent;
+            if (randomBonusValue) randomBonusValue.textContent = gameState.randomBonusPercent;
+            if (randomBonusText) randomBonusText.textContent = gameState.randomBonusPercent;
+            console.log('✅ עדכנתי סליידר בונוס רנדומלי:', gameState.randomBonusPercent);
+        }
+
+        // עדכן סליידר צלילים אם קיים
+        const soundToggle = document.getElementById('sound-mode');
+        if (soundToggle && gameState.soundEnabled !== undefined) {
+            soundToggle.value = gameState.soundEnabled ? 'on' : 'off';
+            console.log('✅ עדכנתי מצב צלילים:', gameState.soundEnabled);
+        }
+
+        // עדכן מצב משחק
+        const gameModeSelect = document.getElementById('game-mode');
+        if (gameModeSelect && gameState.mode !== undefined) {
+            gameModeSelect.value = gameState.mode;
+            console.log('✅ עדכנתי מצב משחק:', gameState.mode);
+        }
+
+        console.log('✅ כל האלמנטים בממשק עודכנו');
     }
 };
 

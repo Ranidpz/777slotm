@@ -2526,8 +2526,10 @@ function setupDashboardButton() {
 (async function initializeGame() {
     // אתחל event settings manager (בודק URL, טוען מ-Firebase, ושומר ב-localStorage)
     if (window.eventSettingsManager) {
+        console.log('🔍 לפני eventSettingsManager.init() - gameState.winFrequency:', gameState.winFrequency, 'randomBonusPercent:', gameState.randomBonusPercent);
         await eventSettingsManager.init();
         console.log('✅ Event Settings Manager אותחל - הגדרות נטענו מ-Firebase');
+        console.log('🔍 אחרי eventSettingsManager.init() - gameState.winFrequency:', gameState.winFrequency, 'randomBonusPercent:', gameState.randomBonusPercent);
     } else {
         // אם אין event settings manager - טען מ-localStorage (fallback)
         loadSettings();
