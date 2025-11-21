@@ -36,6 +36,9 @@ const eventSettingsManager = {
 
     // טען הגדרות אירוע מ-Firebase
     async loadEventSettingsFromFirebase(eventId) {
+        // ✅ הצג spinner טעינה
+        this.showLoadingSpinner();
+
         try {
             console.log('☁️ טוען הגדרות אירוע מ-Firebase:', eventId);
 
@@ -169,8 +172,14 @@ const eventSettingsManager = {
             }
 
             console.log('✅ כל הגדרות האירוע נטענו מ-Firebase ועודכנו בממשק');
+
+            // ✅ הסתר spinner
+            this.hideLoadingSpinner();
         } catch (error) {
             console.error('❌ שגיאה בטעינת הגדרות אירוע:', error);
+
+            // ✅ הסתר spinner גם במקרה של שגיאה
+            this.hideLoadingSpinner();
         }
     },
 
@@ -978,8 +987,9 @@ const eventSettingsManager = {
         `;
         spinner.innerHTML = `
             <div style="text-align: center;">
-                <div style="width: 50px; height: 50px; border: 5px solid rgba(255,215,0,0.2); border-top: 5px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
-                <p style="color: #FFD700; font-size: 18px; font-weight: 500;">טוען אירוע...</p>
+                <div style="width: 60px; height: 60px; border: 6px solid rgba(255,215,0,0.2); border-top: 6px solid #FFD700; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p style="color: #FFD700; font-size: 20px; font-weight: 600; margin-bottom: 8px;">טוען הגדרות מהשרת...</p>
+                <p style="color: rgba(255,215,0,0.7); font-size: 14px; font-weight: 400;">אנא המתן</p>
             </div>
             <style>
                 @keyframes spin {
