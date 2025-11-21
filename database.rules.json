@@ -7,10 +7,9 @@
       }
     },
     "events": {
-      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'super_admin'",
+      ".read": "auth != null",
       ".indexOn": ["ownerId"],
       "$eventId": {
-        ".read": "auth != null && (data.child('ownerId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'super_admin')",
         ".write": "auth != null && (
           !data.exists() ||
           data.child('ownerId').val() === auth.uid ||
