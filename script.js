@@ -1620,10 +1620,14 @@ function applyBackgroundColor(color) {
 function updateColorPicker(color) {
     const colorPicker = document.getElementById('background-color-picker');
     const colorInput = document.getElementById('background-color-input');
-    
+
     if (colorPicker) colorPicker.value = color;
     if (colorInput) colorInput.value = color;
 }
+
+// ✅ ייצא פונקציות לחלון גלובלי כדי ש-event-settings-manager יוכל לגשת אליהן
+window.applyBackgroundColor = applyBackgroundColor;
+window.updateColorPicker = updateColorPicker;
 
 // פונקציה להבהרת צבע
 function lightenColor(color, percent) {
