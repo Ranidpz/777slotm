@@ -157,14 +157,15 @@ const eventSettingsManager = {
                 console.log('🔄 גלגלים אותחלו מחדש עם התמונות מ-Firebase');
             }
 
-            // עדכן רקע
-            if (gameState.backgroundColor && document.body) {
-                document.body.style.backgroundColor = gameState.backgroundColor;
-            }
+            // ✅ עדכן רקע - רק אחרי שהגלגלים נוצרו!
+            // applyBackgroundColor() יקרא מ-script.js אחרי initReels()
+            // כאן אנחנו רק שומרים ב-gameState ו-localStorage
+            console.log('💾 צבע רקע נשמר ל-gameState:', gameState.backgroundColor);
 
             // עדכן פס נגלל
             if (typeof updateScrollingBanner === 'function') {
                 updateScrollingBanner();
+                console.log('📜 פס גלילה עודכן');
             }
 
             console.log('✅ כל הגדרות האירוע נטענו מ-Firebase ועודכנו בממשק');
