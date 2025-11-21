@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || root.child('users').child(auth.uid).child('role').val() === 'super_admin')",
+        ".write": "auth != null && (auth.uid === $userId || root.child('users').child(auth.uid).child('role').val() === 'super_admin')"
+      }
+    },
+    "events": {
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'super_admin'",
+      ".indexOn": ["ownerId"],
+      "$eventId": {
+        ".read": "auth != null && (data.child('ownerId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'super_admin')",
+        ".write": "auth != null && (
+          !data.exists() ||
+          data.child('ownerId').val() === auth.uid ||
+          root.child('users').child(auth.uid).child('role').val() === 'super_admin'
+        )"
+      }
+    },
+    "sessions": {
+      ".read": "auth != null",
+      "$sessionId": {
+        ".write": "auth != null"
+      }
+    }
+  }
+}
