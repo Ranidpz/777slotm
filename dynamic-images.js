@@ -763,6 +763,65 @@ const dynamicImagesManager = {
             console.error('❌ שגיאה בטעינה מ-localStorage:', error);
             this.images = [];
         }
+    },
+
+    // ✅ התחל להקשיב לעדכוני מלאי בזמן אמת מ-Firebase
+    setupFirebaseInventoryListener(sessionId) {
+        if (!sessionId) {
+            console.warn('⚠️ אין sessionId - לא ניתן להפעיל listener למלאי');
+            return;
+        }
+
+        // בדוק ש-Firebase נטען
+        if (typeof firebase === 'undefined' || !firebase.database) {
+            console.warn('⚠️ Firebase לא זמין - לא ניתן להפעיל listener למלאי');
+            return;
+        }
+
+        try {
+            const prizesRef = firebase.database().ref(`sessions/${sessionId}/prizes`);
+
+            prizesRef.on('value', (snapshot) => {
+                const prizesData = snapshot.val();
+
+                if (!prizesData) {
+                    console.log('📭 אין נתוני מלאי ב-Firebase');
+                    return;
+                }
+
+                console.log('🔄 עדכון מלאי בזמן אמת התקבל מ-Firebase');
+
+                // עדכן את המלאי המקומי בהתאם לנתונים מ-Firebase
+                let updated = false;
+                Object.entries(prizesData).forEach(([prizeCode, prizeData]) => {
+                    const localPrize = this.images.find(img => img.code === prizeCode);
+
+                    if (localPrize) {
+                        // עדכן רק אם יש שינוי
+                        if (localPrize.inventory !== prizeData.inventory ||
+                            localPrize.distributedCount !== prizeData.distributedCount) {
+
+                            console.log(`📦 עדכון מלאי: ${prizeCode} - מלאי: ${prizeData.inventory}, חולק: ${prizeData.distributedCount}`);
+
+                            localPrize.inventory = prizeData.inventory !== undefined ? prizeData.inventory : null;
+                            localPrize.distributedCount = prizeData.distributedCount || 0;
+                            updated = true;
+                        }
+                    }
+                });
+
+                // אם היה עדכון, שמור ורענן תצוגה
+                if (updated) {
+                    this.saveToStorage();
+                    this.render();
+                    console.log('✅ מלאי עודכן בממשק');
+                }
+            });
+
+            console.log('✅ Firebase inventory listener הופעל עבור session:', sessionId);
+        } catch (error) {
+            console.error('❌ שגיאה בהפעלת Firebase listener:', error);
+        }
     }
 };
 

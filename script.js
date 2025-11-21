@@ -2541,6 +2541,14 @@ function setupDashboardButton() {
     if (window.dynamicImagesManager) {
         dynamicImagesManager.init();
         console.log('✅ מערכת תמונות דינמית אותחלה');
+
+        // ✅ הפעל listener לעדכוני מלאי בזמן אמת
+        if (window.sessionManager && sessionManager.sessionId) {
+            dynamicImagesManager.setupFirebaseInventoryListener(sessionManager.sessionId);
+            console.log('✅ Firebase inventory listener הופעל');
+        } else {
+            console.log('⚠️ אין sessionId זמין עדיין - listener ייווצר מאוחר יותר');
+        }
     }
 
     // טען תמונות שמורות (מערכת ישנה - לתאימות)

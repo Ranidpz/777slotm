@@ -613,45 +613,49 @@
             }
 
             try {
-                // טען מ-Firebase (עדכני)
+                // ✅ טען מ-Firebase עם listener בזמן אמת (שינוי מ-once ל-on)
                 const prizesRef = firebase.database().ref(`sessions/${currentSessionId}/prizes`);
-                const snapshot = await prizesRef.once('value');
-                const prizesData = snapshot.val();
 
-                console.log('🔍 Raw Firebase data:', prizesData);
+                prizesRef.on('value', (snapshot) => {
+                    const prizesData = snapshot.val();
 
-                if (prizesData) {
-                    // המר מאובייקט למערך
-                    prizeInventoryData = Object.values(prizesData).map((prize, idx) => {
-                        console.log(`📦 Processing prize #${idx}:`, prize);
+                    console.log('🔄 עדכון מלאי בזמן אמת:', prizesData);
 
-                        // נסה למצוא את שם הפרס ממקומות שונים
-                        const prizeName = prize.prizeName || prize.name || prize.label || `פרס ${idx + 1}`;
+                    if (prizesData) {
+                        // המר מאובייקט למערך
+                        prizeInventoryData = Object.values(prizesData).map((prize, idx) => {
+                            // נסה למצוא את שם הפרס ממקומות שונים
+                            const prizeName = prize.prizeName || prize.name || prize.label || `פרס ${idx + 1}`;
 
-                        const prizeData = {
-                            id: Date.now() + Math.random(),
-                            code: prize.code,
-                            imageData: prize.imageUrl || prize.imageData,
-                            inventory: prize.inventory !== undefined ? prize.inventory : null,
-                            initialInventory: prize.initialInventory !== undefined ? prize.initialInventory : null,
-                            distributedCount: prize.distributedCount || 0,
-                            label: prizeName,
-                            name: prizeName,
-                            prizeName: prizeName,
-                            symbolIndex: prize.symbolIndex
-                        };
+                            const prizeData = {
+                                id: Date.now() + Math.random(),
+                                code: prize.code,
+                                imageData: prize.imageUrl || prize.imageData,
+                                inventory: prize.inventory !== undefined ? prize.inventory : null,
+                                initialInventory: prize.initialInventory !== undefined ? prize.initialInventory : null,
+                                distributedCount: prize.distributedCount || 0,
+                                label: prizeName,
+                                name: prizeName,
+                                prizeName: prizeName,
+                                symbolIndex: prize.symbolIndex
+                            };
 
-                        console.log(`✅ Mapped prize #${idx}:`, prizeData);
-                        return prizeData;
-                    });
+                            return prizeData;
+                        });
 
-                    console.log('☁️ נטענו נתוני מלאי מ-Firebase:', prizeInventoryData.length, 'פרסים');
-                    console.log('📊 Prize inventory data:', prizeInventoryData);
-                    return true;
-                } else {
-                    console.log('📭 אין נתוני פרסים ב-Firebase');
-                    return false;
-                }
+                        console.log('☁️ מלאי עודכן בזמן אמת:', prizeInventoryData.length, 'פרסים');
+
+                        // ✅ עדכן את התצוגה אוטומטית
+                        displayPrizeStats();
+                    } else {
+                        console.log('📭 אין נתוני פרסים ב-Firebase');
+                        prizeInventoryData = [];
+                        displayPrizeStats();
+                    }
+                });
+
+                console.log('✅ Realtime listener נוסף למלאי פרסים');
+                return true;
             } catch (e) {
                 console.error('❌ שגיאה בטעינת נתוני מלאי:', e);
                 return false;

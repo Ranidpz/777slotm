@@ -207,6 +207,12 @@ class SessionManager {
     this.unsubscribeActions = listenToPlayerActions(this.sessionId, (playerId, player) => {
       this.handlePlayerAction(playerId, player);
     });
+
+    // ✅ Listen to inventory changes in real-time
+    if (window.dynamicImagesManager) {
+      dynamicImagesManager.setupFirebaseInventoryListener(this.sessionId);
+      console.log('✅ Firebase inventory listener started from session manager');
+    }
   }
 
   // Update UI based on session state
