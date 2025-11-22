@@ -554,7 +554,12 @@ class SessionManager {
 
       // אם זכייה - שמור ברשימת זוכים (גם אם אין שחקן מרחוק!)
       if (isWin) {
+        console.log('🏆 זכייה זוהתה! מתחיל שמירת זוכה ללוח הזוכים...');
+        console.log('📊 Prize Details:', prizeDetails);
         await this.saveWinnerToScoreboard(prizeDetails);
+        console.log('✅ שמירת זוכה הושלמה');
+      } else {
+        console.log('❌ לא זכייה - לא שומר ללוח זוכים');
       }
 
     } catch (error) {
@@ -565,6 +570,9 @@ class SessionManager {
   // Save winner to global scoreboard
   async saveWinnerToScoreboard(prizeDetails) {
     try {
+      console.log('💾 saveWinnerToScoreboard נקרא עם:', prizeDetails);
+      console.log('🆔 SessionId:', this.sessionId);
+
       // קבל את פרטי השחקן (אם יש)
       let playerName = 'לחץ בבאזר';
       let playerId = null;
@@ -620,7 +628,11 @@ class SessionManager {
 
       // שמור ברשימת זוכים של הסשן הספציפי
       const winnersRef = firebase.database().ref(`sessions/${this.sessionId}/winners`);
-      await winnersRef.push(winnerEntry);
+      console.log('📤 שומר זוכה ב-Firebase path:', `sessions/${this.sessionId}/winners`);
+      console.log('📦 Winner Entry:', winnerEntry);
+
+      const newWinnerRef = await winnersRef.push(winnerEntry);
+      console.log('✅ Winner saved successfully! Key:', newWinnerRef.key);
 
       console.log('🏆 Winner saved to session scoreboard:', winnerEntry);
 
