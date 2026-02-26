@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>הגרלה - 777 Playzone</title>
+
+    <!-- Google Fonts - Assistant -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <!-- Raffle Styles -->
+    <link rel="stylesheet" href="raffle.css">
+</head>
+<body>
+
+    <!-- Background Layers -->
+    <video id="bg-video" autoplay muted loop playsinline></video>
+    <img id="bg-image" alt="">
+    <div id="bg-overlay"></div>
+
+    <!-- Main Roulette Display -->
+    <div id="raffle-stage">
+
+        <!-- Roulette Viewport -->
+        <div id="roulette-viewport">
+            <div id="roulette-strip"></div>
+        </div>
+
+        <!-- Winner Announcement -->
+        <div id="winner-announcement" class="hidden">
+            <div id="winner-name-display"></div>
+            <div id="winner-subtitle">זוכה!</div>
+        </div>
+
+        <!-- One-time tooltip (first visit only) -->
+        <div id="first-visit-tooltip" class="hidden">
+            <i data-lucide="settings" class="tooltip-icon"></i>
+            <span>לחצו Ctrl לפתיחת הגדרות</span>
+        </div>
+
+    </div>
+
+    <!-- Settings Side Panel -->
+    <div id="settings-panel" class="panel-closed">
+        <div class="panel-content">
+
+            <!-- Panel Header -->
+            <div class="panel-header">
+                <h2>הגדרות הגרלה</h2>
+                <button id="panel-close-btn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="panel-scrollable">
+
+                <!-- File Upload -->
+                <div class="panel-section">
+                    <div class="section-header">
+                        <i data-lucide="file-spreadsheet"></i>
+                        <h3>טעינת משתתפים</h3>
+                    </div>
+                    <label class="file-upload-area" id="file-upload-area">
+                        <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" hidden>
+                        <i data-lucide="upload" class="upload-lucide-icon"></i>
+                        <span class="upload-text">לחץ לבחירת קובץ Excel</span>
+                        <span class="upload-hint">עמודות: שם, טלפון, כמות</span>
+                    </label>
+                    <div id="file-status" class="hidden"></div>
+                    <div class="file-actions-row">
+                        <a href="raffle-template.xlsx" download class="template-download-link">
+                            <i data-lucide="download"></i>
+                            <span>הורד תבנית</span>
+                        </a>
+                        <button id="load-demo-btn" class="template-download-link" type="button">
+                            <i data-lucide="users"></i>
+                            <span>טען דמו (1000)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Background Type -->
+                <div class="panel-section">
+                    <div class="section-header">
+                        <i data-lucide="paintbrush"></i>
+                        <h3>רקע</h3>
+                    </div>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="bg-type" value="color" checked>
+                            <span>צבע</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="bg-type" value="video">
+                            <span>וידאו</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="bg-type" value="image">
+                            <span>תמונה</span>
+                        </label>
+                    </div>
+
+                    <!-- Color Picker -->
+                    <div id="bg-color-section" class="sub-section">
+                        <label class="color-picker-row">
+                            <span>צבע רקע</span>
+                            <input type="color" id="bg-color-picker" value="#0a0a0f">
+                        </label>
+                    </div>
+
+                    <!-- Video Upload -->
+                    <div id="bg-video-section" class="sub-section hidden">
+                        <label class="file-upload-area small">
+                            <input type="file" id="video-file-input" accept="video/*" hidden>
+                            <i data-lucide="video" class="upload-lucide-icon"></i>
+                            <span class="upload-text">בחר סרטון רקע</span>
+                        </label>
+                        <button id="clear-video-btn" class="small-btn hidden">הסר סרטון</button>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div id="bg-image-section" class="sub-section hidden">
+                        <label class="file-upload-area small">
+                            <input type="file" id="image-file-input" accept="image/*" hidden>
+                            <i data-lucide="image" class="upload-lucide-icon"></i>
+                            <span class="upload-text">בחר תמונת רקע</span>
+                        </label>
+                        <button id="clear-image-btn" class="small-btn hidden">הסר תמונה</button>
+                    </div>
+                </div>
+
+                <!-- Font Color -->
+                <div class="panel-section">
+                    <div class="section-header">
+                        <i data-lucide="type"></i>
+                        <h3>צבע פונט</h3>
+                    </div>
+                    <label class="color-picker-row">
+                        <span>צבע טקסט</span>
+                        <input type="color" id="font-color-picker" value="#ffffff">
+                    </label>
+                </div>
+
+                <!-- Display Mode -->
+                <div class="panel-section">
+                    <div class="section-header">
+                        <i data-lucide="eye"></i>
+                        <h3>מצב תצוגה</h3>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label-text">שמות</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="display-mode-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label-text">טלפונים</span>
+                    </div>
+                </div>
+
+                <!-- Re-selection -->
+                <div class="panel-section">
+                    <div class="section-header">
+                        <i data-lucide="repeat"></i>
+                        <h3>בחירה חוזרת</h3>
+                    </div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="allow-reselect" checked>
+                        <span class="checkmark"></span>
+                        <span>אפשר בחירה חוזרת</span>
+                    </label>
+                    <p class="setting-description">
+                        כשמבוטל - זוכה מוסר מהמאגר. עמודת "כמות" קובעת כמה פעמים ניתן לזכות.
+                    </p>
+                </div>
+
+                <!-- Sound -->
+                <div class="panel-section">
+                    <div class="section-header">
+                        <i data-lucide="volume-2"></i>
+                        <h3>צלילים</h3>
+                    </div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="sound-enabled-toggle" checked>
+                        <span class="checkmark"></span>
+                        <span>הפעל צלילים</span>
+                    </label>
+                </div>
+
+                <!-- Actions -->
+                <div class="panel-section panel-actions">
+                    <button id="export-winners-btn" class="action-btn">
+                        <i data-lucide="download"></i>
+                        <span>ייצוא זוכים ל-CSV</span>
+                    </button>
+                    <button id="reset-winners-btn" class="action-btn danger">
+                        <i data-lucide="trash-2"></i>
+                        <span>אפס רשימת זוכים</span>
+                    </button>
+                    <button id="reset-all-btn" class="action-btn danger">
+                        <i data-lucide="rotate-ccw"></i>
+                        <span>אפס הכל</span>
+                    </button>
+                </div>
+
+                <!-- Winners List -->
+                <div class="panel-section">
+                    <div class="section-header">
+                        <i data-lucide="trophy"></i>
+                        <h3>רשימת זוכים (<span id="winners-count">0</span>)</h3>
+                    </div>
+                    <div id="winners-list">
+                        <div class="no-winners-msg">עדיין אין זוכים</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="raffle.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
