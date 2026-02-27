@@ -799,3 +799,87 @@ body {
     font-size: 13px;
     padding: 20px 0;
 }
+
+/* ===== Mobile / Desktop tooltip toggle ===== */
+
+.mobile-only-icon,
+.mobile-only-text {
+    display: none;
+}
+
+.desktop-only-icon,
+.desktop-only-text {
+    display: inline;
+}
+
+/* ===== Touch cursor hint ===== */
+
+#raffle-stage {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== Mobile Responsive ===== */
+
+@media (max-width: 768px) {
+    :root {
+        --item-height: 120px;
+        --panel-width: 100vw;
+    }
+
+    .mobile-only-icon,
+    .mobile-only-text {
+        display: inline;
+    }
+
+    .desktop-only-icon,
+    .desktop-only-text {
+        display: none;
+    }
+
+    #roulette-viewport {
+        width: 92%;
+    }
+
+    .roulette-item {
+        font-size: clamp(32px, 9vw, 64px);
+        padding: 0 12px;
+    }
+
+    #winner-name-display {
+        font-size: clamp(40px, 10vw, 80px);
+        padding: 0 20px;
+    }
+
+    #winner-subtitle {
+        font-size: clamp(20px, 5vw, 36px);
+    }
+
+    #first-visit-tooltip {
+        font-size: 14px;
+        padding: 12px 20px;
+        bottom: 30px;
+    }
+
+    .panel-scrollable {
+        padding: 8px 16px 40px;
+    }
+
+    .panel-header {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    :root {
+        --item-height: 90px;
+    }
+
+    .roulette-item {
+        font-size: clamp(26px, 8vw, 48px);
+    }
+
+    #winner-name-display {
+        font-size: clamp(32px, 9vw, 60px);
+    }
+}

@@ -169,7 +169,7 @@ function applySettings() {
     updateBgSections();
 }
 
-// ───────── Keyboard ─────────
+// ───────── Keyboard & Touch ─────────
 function setupKeyboard() {
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
@@ -192,6 +192,19 @@ function setupKeyboard() {
         if (e.key === 'Escape') {
             closePanel();
         }
+    });
+
+    // Touch/click on stage to trigger raffle (like Enter)
+    dom.stage.addEventListener('click', (e) => {
+        // Ignore if settings panel is open
+        if (dom.settingsPanel.classList.contains('panel-open')) return;
+        handleEnter();
+    });
+
+    // Also allow tap on the winner announcement overlay
+    dom.winnerAnnouncement.addEventListener('click', (e) => {
+        if (dom.settingsPanel.classList.contains('panel-open')) return;
+        handleEnter();
     });
 }
 
