@@ -206,6 +206,45 @@ function setupKeyboard() {
         if (dom.settingsPanel.classList.contains('panel-open')) return;
         handleEnter();
     });
+
+    // Swipe right-to-left to open settings, left-to-right to close
+    setupSwipeGesture();
+}
+
+function setupSwipeGesture() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isSwiping = true;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        isSwiping = false;
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = Math.abs(touchEndY - touchStartY);
+
+        // Minimum swipe distance 60px, and horizontal > vertical
+        if (Math.abs(deltaX) < 60 || deltaY > Math.abs(deltaX)) return;
+
+        const panelOpen = dom.settingsPanel.classList.contains('panel-open');
+
+        // Swipe right-to-left (negative deltaX) → open panel
+        if (deltaX < 0 && !panelOpen) {
+            openPanel();
+        }
+        // Swipe left-to-right (positive deltaX) → close panel
+        if (deltaX > 0 && panelOpen) {
+            closePanel();
+        }
+    }, { passive: true });
 }
 
 function handleEnter() {
